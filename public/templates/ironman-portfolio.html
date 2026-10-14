@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IronMan Ubiquitous System — Case Study</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset ─────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Design tokens (same palette as the project itself) ─────────────── */
+    :root {
+      --bg:           #0a0a0a;
+      --surface:      #1a1a2e;
+      --surface-2:    #16213e;
+      --surface-3:    #0c111e;
+      --accent:       #f97316;
+      --accent-dim:   rgba(249,115,22,.11);
+      --accent-glow:  rgba(249,115,22,.22);
+      --ok:           #22c55e;
+      --ok-dim:       rgba(34,197,94,.11);
+      --warning:      #f59e0b;
+      --warn-dim:     rgba(245,158,11,.11);
+      --emergency:    #ef4444;
+      --emg-dim:      rgba(239,68,68,.11);
+      --text:         #f1f5f9;
+      --muted:        #94a3b8;
+      --border:       #334155;
+      --radius:       12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 400;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* ── Typography helpers ─────────────────────────────────────────────── */
+    h1,h2,h3,h4,.label { font-family: 'Rajdhani', sans-serif; letter-spacing:.03em; }
+    code, .mono        { font-family: 'IBM Plex Mono', monospace; }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .5rem;
+      display: block;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────────── */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      border-bottom: 1px solid rgba(249,115,22,.12);
+      background: rgba(10,10,10,.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+
+    .site-header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: .95rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    @media (min-width: 640px) {
+      .site-header-inner { padding: .95rem 3rem; }
+    }
+
+    .site-header-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(ellipse at right, rgba(249,115,22,.18), #000, #000);
+      opacity: .6;
+      pointer-events: none;
+    }
+
+    .site-header-left {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .site-brand {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      text-decoration: none;
+    }
+
+    .site-brand-j, .site-brand-c {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -.025em;
+    }
+
+    .site-brand-j { color: #ffffff; }
+
+    .site-brand-c {
+      background: linear-gradient(to right, #fb923c, #f97316);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .template-nav { display:flex; align-items:center; gap:.2rem; margin-left:1.5rem; }
+    .template-nav a { color:var(--muted); font-family:'Rajdhani',sans-serif; font-size:.75rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; text-decoration:none; padding:.4rem .55rem; border-radius:6px; transition:color .2s, background .2s; }
+    .template-nav a:hover, .template-nav a:focus-visible { color:var(--accent); background:var(--accent-dim); outline:none; }
+
+    .site-header-right {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-shrink: 0;
+    }
+
+    .github-btn {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(249,115,22,.28);
+      background: rgba(249,115,22,.1);
+      padding: .5rem 1rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      color: #fdba74;
+      box-shadow: 0 0 15px rgba(249,115,22,.16);
+      transition: all .3s;
+      text-decoration: none;
+    }
+
+    .github-btn:hover {
+      border-color: rgba(249,115,22,.5);
+      background: rgba(249,115,22,.18);
+      box-shadow: 0 0 30px rgba(249,115,22,.3);
+      transform: scale(1.03);
+    }
+
+    .linkedin-btn { border-color: rgba(14,165,233,.35); background: rgba(14,165,233,.1); color:#7dd3fc; box-shadow:0 0 15px rgba(14,165,233,.12); }
+    .linkedin-btn:hover { border-color:rgba(14,165,233,.6); background:rgba(14,165,233,.18); box-shadow:0 0 30px rgba(14,165,233,.25); }
+    .header-icon { width:1rem; height:1rem; flex-shrink:0; }
+
+    .github-btn svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .github-text { display: none; }
+    .linkedin-text { display: inline; }
+
+    @media (min-width: 640px) {
+      .github-text { display: inline; }
+    }
+    @media (max-width: 1080px) { .template-nav { display:none; } }
+    @media (max-width: 640px) {
+      .site-header-inner { padding:.75rem 1rem; }
+      .site-header-left { min-width:0; }
+      .site-brand-j, .site-brand-c { font-size:1.08rem; }
+      .site-header-right { gap:.35rem; }
+      .github-btn { padding:.48rem .62rem; }
+      .github-btn svg, .header-icon { width:1.05rem; height:1.05rem; }
+    }
+
+    /* ── Navigation ─────────────────────────────────────────────────────── */
+    .legacy-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .8rem 2rem;
+      background: rgba(10,10,10,.88);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav-logo {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: .9rem; letter-spacing: .18em; color: var(--accent);
+    }
+    .legacy-nav-links { display: flex; gap: .15rem; list-style: none; }
+    .legacy-nav-links a {
+      font-family: 'Rajdhani', sans-serif; font-weight: 600;
+      font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      padding: .32rem .65rem; border-radius: 6px;
+      transition: color .18s, background .18s;
+    }
+    .legacy-nav-links a:hover, .legacy-nav-links a.active {
+      color: var(--accent); background: var(--accent-dim);
+    }
+
+    /* ── Section base ───────────────────────────────────────────────────── */
+    section {
+      padding: 5.5rem 2rem;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .section-header { margin-bottom: 2.75rem; }
+    .section-header h2 {
+      font-size: clamp(1.9rem,3.8vw,2.8rem);
+      font-weight: 700; line-height: 1.1;
+    }
+    .section-header p {
+      font-size: 1.05rem; color: var(--muted);
+      margin-top: .7rem; max-width: 62ch;
+    }
+
+    /* ── Scroll-reveal ──────────────────────────────────────────────────── */
+    .fade-in {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════════════════════ */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 5rem;
+      max-width: none; margin: 0;
+      position: relative; overflow: hidden;
+      background: var(--bg);
+    }
+    /* fine grid */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(51,65,85,.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(51,65,85,.14) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+    /* centre glow */
+    #hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 75% 55% at 50% 40%,
+        rgba(249,115,22,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--accent);
+      padding: .32rem 1rem;
+      border: 1px solid rgba(249,115,22,.28);
+      border-radius: 20px;
+      background: rgba(249,115,22,.06);
+      margin-bottom: 1.6rem;
+    }
+    .hero-eyebrow-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--ok);
+      animation: blink-dot 1.8s ease-in-out infinite;
+    }
+    @keyframes blink-dot { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+
+    h1.hero-title {
+      font-size: clamp(2.6rem,7vw,5.5rem);
+      font-weight: 700; line-height: 1.0; letter-spacing: .06em;
+      margin-bottom: .5rem;
+      background: linear-gradient(140deg, #fff 0%, #f97316 48%, #ef4444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(.95rem,2.2vw,1.25rem);
+      color: var(--muted); font-weight: 300;
+      max-width: 58ch; margin: .9rem auto 2rem;
+      line-height: 1.7;
+    }
+    .hero-badges {
+      display: flex; flex-wrap: wrap; gap: .45rem;
+      justify-content: center; margin-bottom: 2.5rem;
+    }
+    .badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      padding: .28rem .7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--muted);
+      transition: border-color .2s, color .2s;
+    }
+    .badge:hover { border-color: var(--accent); color: var(--text); }
+    .badge.hi { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 1rem; letter-spacing: .1em; text-transform: uppercase;
+      color: #000;
+      background: var(--accent);
+      padding: .85rem 2.25rem;
+      border-radius: 8px; text-decoration: none;
+      transition: opacity .18s, transform .18s;
+    }
+    .hero-cta:hover { opacity: .9; transform: translateY(-2px); }
+
+    /* ── Mini UI screens ──────────────────────────────────────────────── */
+    .hero-screens {
+      display: flex; gap: 1.5rem;
+      justify-content: center; margin-top: 4.5rem;
+      flex-wrap: wrap;
+    }
+    .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: .65rem; }
+    .mini-screen {
+      width: 176px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .mini-screen:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(249,115,22,.15);
+    }
+    .ms-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .45rem .6rem;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .62rem; font-weight: 700; letter-spacing: .1em; color: var(--accent);
+    }
+    .ms-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ok); }
+    .ms-badge-ok  { font-family:'IBM Plex Mono',monospace; font-size:.52rem; background:var(--ok); color:#000; padding:.08rem .3rem; border-radius:3px; font-weight:600; }
+    .ms-badge-sos { font-family:'IBM Plex Mono',monospace; font-size:.52rem; background:var(--emergency); color:#fff; padding:.08rem .3rem; border-radius:3px; font-weight:600; animation:blink-dot .85s ease-in-out infinite; }
+    .ms-body { padding: .55rem .6rem; }
+
+    /* stages */
+    .ms-stages { display:flex; gap:.2rem; margin-bottom:.45rem; }
+    .ms-stage {
+      flex:1; font-family:'Rajdhani',sans-serif; font-size:.52rem; font-weight:600;
+      text-align:center; padding:.18rem 0; border-radius:3px;
+      background:var(--surface-2); color:var(--muted); letter-spacing:.04em;
+    }
+    .ms-stage.a { background:var(--accent); color:#fff; }
+
+    /* hr */
+    .ms-hr { text-align:center; margin:.45rem 0 .35rem; }
+    .ms-hr-v { font-family:'Rajdhani',sans-serif; font-size:2rem; font-weight:800; color:var(--ok); line-height:1; }
+    .ms-hr-u { font-family:'IBM Plex Mono',monospace; font-size:.52rem; color:var(--muted); }
+
+    /* buttons */
+    .ms-btns { display:grid; grid-template-columns:1fr 1fr; gap:.2rem; }
+    .ms-sos { padding:.38rem; background:var(--emergency); color:#fff; border-radius:4px; font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:800; letter-spacing:.1em; text-align:center; }
+    .ms-ok  { padding:.38rem; background:var(--ok); color:#000; border-radius:4px; font-family:'Rajdhani',sans-serif; font-size:.55rem; font-weight:700; text-align:center; }
+
+    /* camera */
+    .ms-camera {
+      height:68px;
+      background:linear-gradient(135deg,#080f1a,#162032);
+      border-radius:5px; margin-bottom:.45rem;
+      position:relative; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .ms-camera::after {
+      content:'';
+      position:absolute; inset:0;
+      background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(249,115,22,.04) 3px,rgba(249,115,22,.04) 4px);
+    }
+    .ms-pose { position:relative; z-index:1; }
+
+    /* metrics */
+    .ms-metric {
+      display:flex; justify-content:space-between; align-items:center;
+      font-family:'IBM Plex Mono',monospace; font-size:.52rem; color:var(--muted);
+      padding:.2rem 0; border-bottom:1px solid rgba(51,65,85,.4);
+    }
+    .ms-mv { color:var(--ok); font-weight:500; }
+    .ms-mv.sos { color:var(--emergency); }
+
+    /* log */
+    .ms-log { margin-top:.35rem; }
+    .ms-log-e {
+      font-family:'IBM Plex Mono',monospace; font-size:.48rem; color:var(--muted);
+      padding:.13rem .3rem; border-left:2px solid var(--ok);
+      margin-bottom:.13rem; line-height:1.4;
+    }
+    .ms-log-e.emg { border-left-color:var(--emergency); color:#fca5a5; }
+    .ms-log-e.inf { border-left-color:var(--accent); }
+
+    .screen-label {
+      font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:600;
+      letter-spacing:.15em; text-transform:uppercase; color:var(--muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       OVERVIEW
+    ═══════════════════════════════════════════════════════════════════════ */
+    .overview-grid {
+      display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: start;
+    }
+    .overview-text h2 {
+      font-size: clamp(1.75rem,3.2vw,2.5rem);
+      font-weight: 700; line-height: 1.15; margin-bottom: 1.1rem;
+    }
+    .overview-text p { color: var(--muted); font-size: 1.02rem; margin-bottom: .8rem; }
+    .hl { color: var(--accent); }
+
+    .overview-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .stat-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .stat-val {
+      font-family: 'Rajdhani', sans-serif; font-size: 2.6rem; font-weight: 800;
+      color: var(--accent); line-height: 1;
+    }
+    .stat-lbl {
+      font-family: 'IBM Plex Mono', monospace; font-size: .68rem;
+      color: var(--muted); margin-top: .35rem;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ARCHITECTURE
+    ═══════════════════════════════════════════════════════════════════════ */
+    .arch-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem; margin-top: 2.5rem;
+      overflow: hidden;
+    }
+    .arch-container svg { width: 100%; height: auto; }
+
+    @keyframes dash-flow { to { stroke-dashoffset: -24; } }
+    .fl  { animation: dash-flow 2s linear infinite; }
+    .flr { animation: dash-flow 2s linear infinite reverse; }
+
+    .arch-legend {
+      display: flex; flex-wrap: wrap; gap: 1.25rem;
+      margin-top: 1.5rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .arch-legend-item {
+      display: flex; align-items: center; gap: .5rem;
+      font-family: 'IBM Plex Mono', monospace; font-size: .72rem; color: var(--muted);
+    }
+    .arch-legend-line {
+      width: 28px; height: 2px;
+      background: repeating-linear-gradient(90deg, var(--accent) 0 5px, transparent 5px 9px);
+    }
+    .arch-legend-line.yellow {
+      background: repeating-linear-gradient(90deg, var(--warning) 0 5px, transparent 5px 9px);
+    }
+    .arch-legend-line.thin {
+      background: repeating-linear-gradient(90deg, rgba(249,115,22,.4) 0 4px, transparent 4px 8px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TECH STACK
+    ═══════════════════════════════════════════════════════════════════════ */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .stack-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      position: relative; overflow: hidden;
+      transition: border-color .2s, transform .2s;
+    }
+    .stack-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background: var(--accent); opacity:0; transition: opacity .2s;
+    }
+    .stack-card:hover { border-color:rgba(249,115,22,.4); transform:translateY(-4px); }
+    .stack-card:hover::before { opacity:1; }
+
+    .stack-cat { font-family:'IBM Plex Mono',monospace; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:.55rem; }
+    .stack-name { font-family:'Rajdhani',sans-serif; font-size:1.25rem; font-weight:700; color:var(--text); margin-bottom:.4rem; }
+    .stack-desc { font-size:.875rem; color:var(--muted); line-height:1.5; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════════════════════════════════════ */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.2rem;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .feature-card:hover { border-color:rgba(249,115,22,.35); transform:translateY(-4px); }
+    .feature-icon { font-size:1.85rem; margin-bottom:.9rem; display:block; }
+    .feature-name { font-family:'Rajdhani',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:.45rem; }
+    .feature-desc { font-size:.9rem; color:var(--muted); line-height:1.58; }
+    .feature-tags { display:flex; flex-wrap:wrap; gap:.32rem; margin-top:.9rem; }
+    .ftag {
+      font-family:'IBM Plex Mono',monospace; font-size:.63rem;
+      padding:.18rem .48rem; border-radius:4px;
+      background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+    }
+    .ftag.s { border-color:var(--emergency); color:var(--emergency); background:var(--emg-dim); }
+    .ftag.o { border-color:var(--ok);        color:var(--ok);        background:var(--ok-dim);  }
+    .ftag.w { border-color:var(--warning);   color:var(--warning);   background:var(--warn-dim);}
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       HOW IT WORKS (timeline)
+    ═══════════════════════════════════════════════════════════════════════ */
+    .flow-wrap { display:grid; grid-template-columns:1fr 1fr; gap:0 3rem; }
+    .flow-timeline {
+      position:relative; padding-left:1.9rem;
+    }
+    .flow-timeline::before {
+      content:''; position:absolute; left:0; top:8px; bottom:8px; width:2px;
+      background: linear-gradient(to bottom, var(--accent), var(--emergency));
+      border-radius:1px;
+    }
+    .flow-step { position:relative; margin-bottom:2rem; }
+    .flow-step::before {
+      content:''; position:absolute; left:-1.9rem; top:7px;
+      width:12px; height:12px; border-radius:50%;
+      border:2px solid var(--accent); background:var(--bg);
+    }
+    .flow-step.emg::before { border-color:var(--emergency); background:var(--emergency); }
+    .flow-step.ok::before  { border-color:var(--ok);        background:var(--ok); }
+
+    .fs-num  { font-family:'IBM Plex Mono',monospace; font-size:.68rem; color:var(--accent); letter-spacing:.1em; margin-bottom:.25rem; }
+    .fs-title{ font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:.3rem; }
+    .fs-desc { font-size:.88rem; color:var(--muted); line-height:1.55; }
+    .fs-event {
+      display:inline-block; margin-top:.4rem;
+      font-family:'IBM Plex Mono',monospace; font-size:.67rem;
+      color:var(--accent); background:var(--accent-dim);
+      border:1px solid rgba(249,115,22,.2);
+      border-radius:4px; padding:.1rem .4rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TECHNICAL CHALLENGES
+    ═══════════════════════════════════════════════════════════════════════ */
+    .challenges-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;
+    }
+    .ch-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      transition:border-color .2s;
+    }
+    .ch-card:hover { border-color:rgba(249,115,22,.35); }
+    .ch-header {
+      padding:1.1rem 1.25rem .8rem;
+      border-bottom:1px solid var(--border);
+    }
+    .ch-num   { font-family:'IBM Plex Mono',monospace; font-size:.63rem; color:var(--accent); letter-spacing:.1em; margin-bottom:.25rem; }
+    .ch-title { font-family:'Rajdhani',sans-serif; font-size:1.08rem; font-weight:700; color:var(--text); }
+    .ch-body  { padding:1rem 1.25rem; }
+    .ch-desc  { font-size:.875rem; color:var(--muted); margin-bottom:.8rem; line-height:1.55; }
+
+    .code-block {
+      background:var(--surface-3);
+      border:1px solid var(--border);
+      border-radius:6px;
+      padding:.85rem;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:.7rem; color:#cbd5e1;
+      overflow-x:auto; line-height:1.7;
+      white-space:pre;
+    }
+    .kw  { color:#f472b6; }
+    .fn  { color:#60a5fa; }
+    .nm  { color:#34d399; }
+    .cm  { color:#475569; font-style:italic; }
+    .st  { color:#fbbf24; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       CODE QUALITY
+    ═══════════════════════════════════════════════════════════════════════ */
+    .quality-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
+    }
+    .q-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.25rem;
+    }
+    .q-icon  { font-size:1.6rem; margin-bottom:.75rem; }
+    .q-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.4rem; }
+    .q-desc  { font-size:.85rem; color:var(--muted); line-height:1.5; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESULTS
+    ═══════════════════════════════════════════════════════════════════════ */
+    .results-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem;
+      margin-bottom:2.5rem;
+    }
+    .r-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-left:4px solid var(--accent);
+      border-radius:var(--radius);
+      padding:1.3rem;
+    }
+    .r-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.35rem; }
+    .r-desc  { font-size:.85rem; color:var(--muted); line-height:1.5; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       FUTURE
+    ═══════════════════════════════════════════════════════════════════════ */
+    .future-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .f-item {
+      display:flex; gap:.75rem; align-items:flex-start;
+      padding:1.2rem;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      transition:border-color .2s;
+    }
+    .f-item:hover { border-color:var(--accent); }
+    .f-dot { width:10px; height:10px; border-radius:50%; border:2px solid var(--accent); flex-shrink:0; margin-top:.3rem; }
+    .f-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.3rem; }
+    .f-desc  { font-size:.85rem; color:var(--muted); line-height:1.5; }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════════════════ */
+    footer {
+      border-top:1px solid var(--border);
+      padding:2.5rem 2rem;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:1rem;
+      max-width:1180px; margin:0 auto;
+    }
+    .footer-brand { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:.12em; color:var(--accent); }
+    .footer-stack { display:flex; gap:.5rem; flex-wrap:wrap; }
+    footer p { font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       DIVIDER
+    ═══════════════════════════════════════════════════════════════════════ */
+    .divider {
+      height:1px; background:linear-gradient(90deg, transparent, var(--border), transparent);
+      max-width:1180px; margin:0 auto;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════════════════════ */
+    @media (max-width:920px) {
+      .overview-grid     { grid-template-columns:1fr; }
+      .challenges-grid   { grid-template-columns:1fr; }
+      .quality-grid      { grid-template-columns:1fr 1fr; }
+      .future-grid       { grid-template-columns:1fr; }
+      .flow-wrap         { grid-template-columns:1fr; }
+      .legacy-nav-links { display:none; }
+    }
+    @media (max-width:600px) {
+      section            { padding:3.5rem 1.25rem; }
+      .overview-stats    { grid-template-columns:1fr 1fr; }
+      .hero-screens      { gap:1rem; }
+      .mini-screen       { width:150px; }
+      .quality-grid      { grid-template-columns:1fr; }
+      .stack-grid        { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-header-bg"></div>
+      <div class="site-header-left">
+        <a class="site-brand" href="/" aria-label="Ir a la página de inicio">
+          <span class="site-brand-j">Jorge</span>
+          <span class="site-brand-c">Condado</span>
+        </a>
+        <nav class="template-nav" aria-label="Navegación del proyecto">
+          <a href="#hero">Inicio</a><a href="#overview">Resumen</a><a href="#architecture">Arquitectura</a><a href="#stack">Stack</a><a href="#results">Resultados</a><a href="#challenges">Retos</a>
+        </nav>
+      </div>
+      <div class="site-header-right">
+        <a href="https://github.com/jorgee-cc" target="_blank" rel="noopener noreferrer" class="github-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          <span class="github-text">GitHub</span>
+        </a>
+        <a href="https://www.linkedin.com/in/jorge-condado-carballo-4065bb2b4/" target="_blank" rel="noopener noreferrer" class="github-btn" aria-label="Abrir perfil de LinkedIn">
+          <span class="linkedin-text">LinkedIn</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════ HERO ═══════════════════════════════════════════════════════ -->
+  <section id="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Computación Ubicua · UC3M · 2025
+      </div>
+
+      <h1 class="hero-title">IRONMAN<br>UBIQUITOUS SYSTEM</h1>
+
+      <p class="hero-sub">
+        Ecología de interacción en tiempo real para atletas de triatlón de larga distancia como el IronMan.
+        Tres interfaces especializadas — atleta, dron y equipo de apoyo — coordinadas mediante
+        WebSocket, visión artificial y sensores NUI.
+      </p>
+
+      <div class="hero-badges">
+        <span class="badge hi">Node.js + Express</span>
+        <span class="badge hi">Socket.IO</span>
+        <span class="badge hi">MediaPipe</span>
+        <span class="badge">Web Speech API</span>
+        <span class="badge">DeviceMotion API</span>
+        <span class="badge">WebRTC</span>
+        <span class="badge">ngrok HTTPS</span>
+      </div>
+
+      <a href="#overview" class="hero-cta">Explorar el proyecto ↓</a>
+    </div>
+
+    <!-- Mini UI screens -->
+    <div class="hero-screens">
+
+      <!-- Atleta screen -->
+      <div class="screen-wrap fade-in">
+        <div class="mini-screen">
+          <div class="ms-header">
+            <div class="ms-dot"></div>
+            ATLETA
+            <div class="ms-badge-ok">OK</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-stages">
+              <div class="ms-stage">Nat</div>
+              <div class="ms-stage a">Cic</div>
+              <div class="ms-stage">Car</div>
+            </div>
+            <div class="ms-hr">
+              <div class="ms-hr-v">152</div>
+              <div class="ms-hr-u">bpm · normal</div>
+            </div>
+            <div class="ms-btns">
+              <div class="ms-sos">SOS</div>
+              <div class="ms-ok">ESTOY BIEN</div>
+            </div>
+          </div>
+        </div>
+        <span class="screen-label">Vista Atleta</span>
+      </div>
+
+      <!-- Drone screen -->
+      <div class="screen-wrap fade-in" style="transition-delay:.12s">
+        <div class="mini-screen">
+          <div class="ms-header">
+            <div class="ms-dot"></div>
+            DRON
+            <div class="ms-badge-sos">SOS</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-camera">
+              <!-- simplified skeleton SVG -->
+              <svg class="ms-pose" width="28" height="52" viewBox="0 0 28 52" fill="none">
+                <circle cx="14" cy="5" r="4" stroke="#f97316" stroke-width="1.5"/>
+                <line x1="14" y1="9" x2="14" y2="28" stroke="#f97316" stroke-width="1.5"/>
+                <line x1="14" y1="14" x2="4" y2="8" stroke="#f97316" stroke-width="1.5"/><!-- raised arm -->
+                <line x1="14" y1="14" x2="24" y2="22" stroke="#f97316" stroke-width="1.5"/>
+                <line x1="14" y1="28" x2="8" y2="44" stroke="#f97316" stroke-width="1.5"/>
+                <line x1="14" y1="28" x2="20" y2="44" stroke="#f97316" stroke-width="1.5"/>
+                <circle cx="4" cy="7" r="2" fill="#ef4444"/><!-- raised wrist -->
+              </svg>
+            </div>
+            <div class="ms-metric">
+              <span>FC</span><span class="ms-mv sos">195 bpm</span>
+            </div>
+            <div class="ms-metric">
+              <span>ESTADO</span><span class="ms-mv sos">CRÍTICA</span>
+            </div>
+          </div>
+        </div>
+        <span class="screen-label">Vista Dron</span>
+      </div>
+
+      <!-- Support screen -->
+      <div class="screen-wrap fade-in" style="transition-delay:.24s">
+        <div class="mini-screen">
+          <div class="ms-header">
+            <div class="ms-dot"></div>
+            SOPORTE
+            <div class="ms-badge-ok">OK</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-metric">
+              <span>FC ATLETA</span><span class="ms-mv">152 bpm</span>
+            </div>
+            <div class="ms-metric">
+              <span>ETAPA</span><span class="ms-mv">Ciclismo</span>
+            </div>
+            <div class="ms-log">
+              <div class="ms-log-e inf">10:32 · Etapa: Ciclismo</div>
+              <div class="ms-log-e">10:28 · FC 152 bpm OK</div>
+              <div class="ms-log-e emg">10:15 · SOS por voz</div>
+            </div>
+          </div>
+        </div>
+        <span class="screen-label">Vista Equipo de Apoyo</span>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ OVERVIEW ═══════════════════════════════════════════════════ -->
+  <section id="overview">
+    <div class="overview-grid">
+      <div class="overview-text fade-in">
+        <span class="section-label">01 · Contexto del proyecto</span>
+        <h2>Asistencia inteligente<br>sin interrumpir el rendimiento</h2>
+        <p>
+          Un atleta de Ironman necesita <span class="hl">conexión constante</span> con su equipo de apoyo durante
+          hasta 17 horas de competición, pero cualquier interrupción física puede ser crítica.
+          El sistema resuelve esto combinando <span class="hl">interfaces naturales de usuario (NUI)</span>:
+          voz, gestos corporales, detección de movimiento y visión artificial.
+        </p>
+        <p>
+          El servidor Node.js actúa como cerebro central que sincroniza el contexto de todos los
+          módulos al cambiar de etapa (natación → ciclismo → carrera), adaptando automáticamente
+          los modelos de IA y los sensores activos sin intervención manual.
+        </p>
+        <p>
+          En caso de emergencia, el sistema puede activar el protocolo SOS mediante
+          <span class="hl">cinco mecanismos independientes</span>, garantizando redundancia completa
+          incluso si el atleta está inconsciente.
+        </p>
+      </div>
+
+      <div class="overview-stats fade-in" style="transition-delay:.15s">
+        <div class="stat-card">
+          <div class="stat-val">3</div>
+          <div class="stat-lbl">Interfaces especializadas<br>(Atleta · Dron · Soporte)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">5+</div>
+          <div class="stat-lbl">Triggers de SOS<br>independientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">2</div>
+          <div class="stat-lbl">Modelos de IA<br>(Pose + FaceMesh)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">RT</div>
+          <div class="stat-lbl">Sincronización<br>en tiempo real</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ ARCHITECTURE ════════════════════════════════════════════════ -->
+  <section id="architecture">
+    <div class="section-header fade-in">
+      <span class="section-label">02 · Arquitectura del sistema</span>
+      <h2>Tres clientes, un servidor, cero latencia</h2>
+      <p>Comunicación bidireccional vía Socket.IO. El servidor mantiene el estado global y propaga eventos a todos los clientes registrados en tiempo real.</p>
+    </div>
+
+    <div class="arch-container fade-in">
+      <svg viewBox="0 0 820 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrO" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#f97316" opacity=".85"/>
+          </marker>
+          <marker id="arrY" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#f59e0b" opacity=".85"/>
+          </marker>
+          <marker id="arrOr" markerWidth="7" markerHeight="7" refX="1.5" refY="3.5" orient="auto-start-reverse">
+            <path d="M7,0 L0,3.5 L7,7 Z" fill="rgba(249,115,22,.4)" opacity=".8"/>
+          </marker>
+        </defs>
+
+        <!-- ── Atleta → Server (uplink) -->
+        <line class="fl" x1="218" y1="65" x2="270" y2="190"
+          stroke="#f97316" stroke-width="1.8" stroke-dasharray="9,5"
+          marker-end="url(#arrO)" opacity=".8"/>
+
+        <!-- ── Server → Atleta (downlink) -->
+        <line class="flr" x1="258" y1="183" x2="206" y2="58"
+          stroke="rgba(249,115,22,.35)" stroke-width="1" stroke-dasharray="6,5"
+          marker-end="url(#arrOr)" opacity=".7"/>
+
+        <!-- ── Dron → Server (uplink) -->
+        <line class="fl" x1="598" y1="65" x2="547" y2="190"
+          stroke="#f97316" stroke-width="1.8" stroke-dasharray="9,5"
+          marker-end="url(#arrO)" opacity=".8"/>
+
+        <!-- ── Server → Dron (downlink) -->
+        <line class="flr" x1="558" y1="183" x2="610" y2="58"
+          stroke="rgba(249,115,22,.35)" stroke-width="1" stroke-dasharray="6,5"
+          marker-end="url(#arrOr)" opacity=".7"/>
+
+        <!-- ── Server → Soporte -->
+        <line class="fl" x1="410" y1="248" x2="410" y2="300"
+          stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="9,5"
+          marker-end="url(#arrY)" opacity=".8"/>
+
+        <!-- ── Soporte → Server (stage changes) -->
+        <line class="flr" x1="390" y1="300" x2="390" y2="248"
+          stroke="rgba(245,158,11,.35)" stroke-width="1" stroke-dasharray="6,5"
+          marker-end="url(#arrOr)" opacity=".7"/>
+
+        <!-- ═══ ATLETA node ══════════════════════════════════════ -->
+        <rect x="18" y="18" width="206" height="88" rx="10" fill="#16213e" stroke="#f97316" stroke-width="1.6"/>
+        <text x="121" y="46" fill="#f97316" font-size="15" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="2">ATLETA</text>
+        <text x="121" y="63" fill="#94a3b8" font-size="9.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">/athlete</text>
+        <text x="121" y="79" fill="#64748b" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Voz · Sensores · FC · Gestos</text>
+        <text x="121" y="95" fill="#475569" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">DeviceMotion · Web Speech</text>
+
+        <!-- ═══ DRON node ════════════════════════════════════════ -->
+        <rect x="594" y="18" width="208" height="88" rx="10" fill="#16213e" stroke="#f97316" stroke-width="1.6"/>
+        <text x="698" y="46" fill="#f97316" font-size="15" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="2">DRON</text>
+        <text x="698" y="63" fill="#94a3b8" font-size="9.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">/drone</text>
+        <text x="698" y="79" fill="#64748b" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Pose · FaceMesh · Torch</text>
+        <text x="698" y="95" fill="#475569" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">WebRTC · RAF loops · Canvas</text>
+
+        <!-- ═══ SERVER node ══════════════════════════════════════ -->
+        <rect x="266" y="158" width="288" height="88" rx="10" fill="#16213e" stroke="#22c55e" stroke-width="2"/>
+        <text x="410" y="188" fill="#22c55e" font-size="14" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="2">SERVIDOR CENTRAL</text>
+        <text x="410" y="207" fill="#94a3b8" font-size="9.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Node.js · Express · Socket.IO</text>
+        <text x="410" y="224" fill="#64748b" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Estado global · Rooms · Event log</text>
+        <text x="410" y="238" fill="#475569" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">state_sync on connect · ngrok HTTPS</text>
+
+        <!-- ═══ SOPORTE node ═════════════════════════════════════ -->
+        <rect x="278" y="302" width="264" height="80" rx="10" fill="#16213e" stroke="#f59e0b" stroke-width="1.6"/>
+        <text x="410" y="330" fill="#f59e0b" font-size="15" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">EQUIPO DE APOYO</text>
+        <text x="410" y="349" fill="#94a3b8" font-size="9.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">/support</text>
+        <text x="410" y="366" fill="#64748b" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Dashboard · Log · Biometría · Etapas</text>
+
+        <!-- ═══ Event labels ═════════════════════════════════════ -->
+        <!-- Atleta uplink labels -->
+        <text x="167" y="112" fill="#f97316" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace" opacity=".9">trigger_sos</text>
+        <text x="167" y="123" fill="#f97316" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace" opacity=".9">update_heart_rate</text>
+        <text x="167" y="134" fill="#f97316" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace" opacity=".9">detect_fall · change_stage</text>
+
+        <!-- Dron uplink labels -->
+        <text x="645" y="112" fill="#f97316" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace" opacity=".9">raised_arm_detected</text>
+        <text x="645" y="123" fill="#f97316" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace" opacity=".9">request_supply</text>
+
+        <!-- Server → Soporte labels -->
+        <text x="450" y="278" fill="#f59e0b" font-size="7.5" font-family="'IBM Plex Mono',monospace" opacity=".9">sos_activated · state_sync</text>
+        <text x="450" y="290" fill="#f59e0b" font-size="7.5" font-family="'IBM Plex Mono',monospace" opacity=".9">heart_rate_updated · stage_changed</text>
+
+        <!-- Socket.IO label -->
+        <text x="410" y="148" fill="#334155" font-size="9" text-anchor="middle" font-family="'IBM Plex Mono',monospace" letter-spacing="2">SOCKET.IO</text>
+      </svg>
+
+      <div class="arch-legend">
+        <div class="arch-legend-item">
+          <div class="arch-legend-line"></div>
+          Eventos cliente → servidor
+        </div>
+        <div class="arch-legend-item">
+          <div class="arch-legend-line thin"></div>
+          Confirmaciones servidor → cliente
+        </div>
+        <div class="arch-legend-item">
+          <div class="arch-legend-line yellow"></div>
+          Broadcasts servidor → soporte
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ TECH STACK ══════════════════════════════════════════════════ -->
+  <section id="stack">
+    <div class="section-header fade-in">
+      <span class="section-label">03 · Stack tecnológico</span>
+      <h2>Herramientas reales para<br>un sistema crítico</h2>
+    </div>
+
+    <div class="stack-grid">
+      <div class="stack-card fade-in">
+        <div class="stack-cat">Backend · Core</div>
+        <div class="stack-name">Node.js + Express</div>
+        <div class="stack-desc">Servidor de aplicaciones. Gestiona rutas HTTP y sirve los tres clientes estáticos. Maneja el estado global del atleta.</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.07s">
+        <div class="stack-cat">Tiempo Real</div>
+        <div class="stack-name">Socket.IO</div>
+        <div class="stack-desc">Comunicación bidireccional vía WebSocket. Rooms por rol (athlete / drone / support). Fallback automático a long-polling.</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.14s">
+        <div class="stack-cat">Visión Artificial</div>
+        <div class="stack-name">MediaPipe Pose</div>
+        <div class="stack-desc">Estimación de pose corporal en tiempo real (33 landmarks). Detecta brazo levantado comparando posición de muñeca vs hombro en coordenadas normalizadas.</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.21s">
+        <div class="stack-cat">Visión Artificial</div>
+        <div class="stack-name">MediaPipe FaceMesh</div>
+        <div class="stack-desc">468 landmarks faciales. Calcula MAR (Mouth Aspect Ratio) usando landmarks 13, 14, 78 y 308 para detectar apertura de boca durante ciclismo.</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.28s">
+        <div class="stack-cat">NUI · Sensores</div>
+        <div class="stack-name">Web Speech API</div>
+        <div class="stack-desc">Reconocimiento de voz en español (es-ES). Modo continuo con resultados finales. Comandos: <code>agua</code>, <code>ayuda</code>, <code>ok</code>, <code>cancelar</code>.</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.35s">
+        <div class="stack-cat">NUI · Sensores</div>
+        <div class="stack-name">DeviceMotion API</div>
+        <div class="stack-desc">Acelerómetro del dispositivo. Detección de caídas en dos fases: impacto (≥ 80 m/s²) e inmovilidad prolongada (&lt; 0.8 m/s² durante 5 s).</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.42s">
+        <div class="stack-cat">NUI · Sensores</div>
+        <div class="stack-name">DeviceOrientation API</div>
+        <div class="stack-desc">Giroscopio del dispositivo. Lee el ángulo gamma (rotación lateral). Detecta sacudidas de cabeza como trigger SOS en modo ciclismo.</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.49s">
+        <div class="stack-cat">Infraestructura</div>
+        <div class="stack-name">ngrok + HTTPS</div>
+        <div class="stack-desc">Túnel HTTPS obligatorio para habilitar permisos de cámara, micrófono y sensores de movimiento en dispositivos móviles (iOS/Android).</div>
+      </div>
+      <div class="stack-card fade-in" style="transition-delay:.56s">
+        <div class="stack-cat">Frontend · Pattern</div>
+        <div class="stack-name">Vanilla JS (IIFE)</div>
+        <div class="stack-desc">Módulos auto-ejecutados sin dependencias externas. Cada vista separa: SocketClient, UI, Biometrics, VoiceControl, MotionControl, App.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ FEATURES ════════════════════════════════════════════════════ -->
+  <section id="features">
+    <div class="section-header fade-in">
+      <span class="section-label">04 · Funcionalidades</span>
+      <h2>Un sistema que piensa<br>por el atleta</h2>
+      <p>Cada funcionalidad está diseñada para operar sin requerir atención consciente del atleta, adaptándose al contexto de la etapa activa.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card fade-in">
+        
+        <div class="feature-name">Sincronización de Etapas</div>
+        <div class="feature-desc">Al cambiar entre Natación, Ciclismo y Carrera, el servidor actualiza automáticamente el contexto de todos los módulos: idioma de reconocimiento de voz, sensores activos y modelos de IA en el dron.</div>
+        <div class="feature-tags">
+          <span class="ftag">change_stage</span>
+          <span class="ftag o">Socket.IO broadcast</span>
+          <span class="ftag">3 etapas</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.08s">
+        
+        <div class="feature-name">Protocolo SOS Multi-trigger</div>
+        <div class="feature-desc">Cinco formas independientes de activar la emergencia: botón manual, comando de voz "ayuda", detección de caída por acelerómetro, gesto de cabeza (ciclismo) y brazo levantado 3 s (dron). FC ≥ 190 bpm también dispara el protocolo.</div>
+        <div class="feature-tags">
+          <span class="ftag s">trigger_sos</span>
+          <span class="ftag s">6 triggers</span>
+          <span class="ftag">redundancia total</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.16s">
+       
+        <div class="feature-name">Monitorización Biométrica</div>
+        <div class="feature-desc">Frecuencia cardíaca simulada en rango 40–220 bpm, propagada en tiempo real a los tres clientes. Thresholds: normal &lt; 170, elevada 170–190, crítica ≥ 190. El equipo de apoyo visualiza una barra de progreso proporcional al rango.</div>
+        <div class="feature-tags">
+          <span class="ftag o">update_heart_rate</span>
+          <span class="ftag w">warning @ 170</span>
+          <span class="ftag s">emergency @ 190</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.24s">
+        
+        <div class="feature-name">Control por Voz</div>
+        <div class="feature-desc">Web Speech API en modo continuo (es-ES). Detecta palabras clave dentro del transcript: "agua" solicita avituallamiento, "ayuda" activa SOS, "ok"/"bien" confirman estado, "cancelar" anula alertas. Sin activación por palabra de activación.</div>
+        <div class="feature-tags">
+          <span class="ftag">Web Speech API</span>
+          <span class="ftag">es-ES</span>
+          <span class="ftag">continuous mode</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.32s">
+        
+        <div class="feature-name">Detección de Caídas</div>
+        <div class="feature-desc">Dos fases: impacto brusco (magnitud vectorial &gt; 80 m/s² via DeviceMotion) activa alerta inmediata. Inmovilidad prolongada (&lt; 0.8 m/s² durante 5 ticks de 1 s) activa alerta secundaria para detectar pérdida de consciencia.</div>
+        <div class="feature-tags">
+          <span class="ftag">detect_fall</span>
+          <span class="ftag">80 m/s² threshold</span>
+          <span class="ftag">2-phase detection</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.4s">
+        
+        <div class="feature-name">Gesto de Cabeza (Ciclismo)</div>
+        <div class="feature-desc">Giroscopio (DeviceOrientation, eje gamma). Se detectan 2 sacudidas laterales de ≥ 25° en una ventana de 1.500 ms. Activa el SOS sin soltar el manillar, con feedback visual de progreso ("Gesto detectado 1/2").</div>
+        <div class="feature-tags">
+          <span class="ftag s">trigger_sos</span>
+          <span class="ftag">Δgamma ≥ 25°</span>
+          <span class="ftag">1500 ms window</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.48s">
+        
+        <div class="feature-name">Visión Artificial — Dron</div>
+        <div class="feature-desc"><strong>Brazo levantado (natación/carrera):</strong> MediaPipe Pose detecta muñeca.y &lt; hombro.y − 0.15 durante ≥ 3 s. <strong>Boca abierta (ciclismo):</strong> FaceMesh calcula MAR ≥ 0.35 durante ≥ 2 s para solicitar agua sin manos. Ambos modelos corren en loops RAF independientes.</div>
+        <div class="feature-tags">
+          <span class="ftag">MediaPipe Pose</span>
+          <span class="ftag o">FaceMesh MAR</span>
+          <span class="ftag">RAF loops</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.56s">
+        
+        <div class="feature-name">Avituallamiento Inteligente</div>
+        <div class="feature-desc">Solicitud de agua mediante voz ("agua") o boca abierta 2 s detectada por FaceMesh en ciclismo. El servidor notifica al equipo de apoyo con cooldown de 10 s para evitar envíos repetidos. El dron confirma visualmente la solicitud.</div>
+        <div class="feature-tags">
+          <span class="ftag o">request_supply</span>
+          <span class="ftag">10 s cooldown</span>
+          <span class="ftag">dual trigger</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.64s">
+        
+        <div class="feature-name">Señalización Visual — Torch</div>
+        <div class="feature-desc">En cualquier evento SOS, el dron activa el parpadeo de la linterna del dispositivo (1 Hz) via <code>MediaTrackConstraints.advanced[{torch}]</code>. El canvas muestra un tinte rojo parpadeante al 60 fps. Se desactiva al resolver la emergencia.</div>
+        <div class="feature-tags">
+          <span class="ftag s">SOS feedback</span>
+          <span class="ftag">MediaTrackConstraints</span>
+          <span class="ftag">Canvas overlay</span>
+        </div>
+      </div>
+
+      <div class="feature-card fade-in" style="transition-delay:.72s">
+        
+        <div class="feature-name">Dashboard y Event Log</div>
+        <div class="feature-desc">Panel en tiempo real con estado global, biometría con barra de progreso (40–220 bpm), último evento destacado y log cronológico completo. Los clientes que se conectan tarde reciben <code>state_sync</code> con el historial íntegro.</div>
+        <div class="feature-tags">
+          <span class="ftag o">state_sync</span>
+          <span class="ftag">event history</span>
+          <span class="ftag">late-join support</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ HOW IT WORKS ════════════════════════════════════════════════ -->
+  <section id="flow">
+    <div class="section-header fade-in">
+      <span class="section-label">05 · Flujo de operación</span>
+      <h2>Del sensor al protocolo<br>de emergencia</h2>
+    </div>
+
+    <div class="flow-wrap fade-in">
+      <div>
+        <div class="flow-timeline">
+
+          <div class="flow-step">
+            <div class="fs-num">PASO 01</div>
+            <div class="fs-title">Conexión y registro</div>
+            <div class="fs-desc">Cada cliente se conecta al servidor y emite <code>register</code> con su rol. El servidor incluye inmediatamente al cliente en la room correspondiente y envía el estado actual.</div>
+            <span class="fs-event">register('athlete' | 'drone' | 'support')</span>
+          </div>
+
+          <div class="flow-step">
+            <div class="fs-num">PASO 02</div>
+            <div class="fs-title">Sincronización inicial</div>
+            <div class="fs-desc">El servidor responde con <code>state_sync</code> que contiene FC, etapa activa, estado del sistema y el historial de eventos. El atleta actualiza su FC simulada; el equipo de apoyo restaura el log completo.</div>
+            <span class="fs-event">state_sync → { heartRate, stage, status, eventLog }</span>
+          </div>
+
+          <div class="flow-step">
+            <div class="fs-num">PASO 03</div>
+            <div class="fs-title">Operación normal</div>
+            <div class="fs-desc">El atleta envía actualizaciones biométricas. El dron procesa frames de cámara a 60 fps con MediaPipe. El equipo monitoriza el dashboard. Cualquier cambio de etapa sincroniza todos los módulos.</div>
+            <span class="fs-event">update_heart_rate → heart_rate_updated (broadcast)</span>
+          </div>
+
+          <div class="flow-step emg">
+            <div class="fs-num">PASO 04</div>
+            <div class="fs-title">Evento de emergencia</div>
+            <div class="fs-desc">Un trigger activa el SOS. El servidor bloquea actualizaciones biométricas normales, registra el trigger y la hora, y emite <code>sos_activated</code> a todos los clientes. El dron enciende la linterna y muestra la alerta.</div>
+            <span class="fs-event">trigger_sos → sos_activated (todos los clientes)</span>
+          </div>
+
+          <div class="flow-step ok">
+            <div class="fs-num">PASO 05</div>
+            <div class="fs-title">Resolución</div>
+            <div class="fs-desc">El atleta confirma "Estoy bien" o el equipo de apoyo cancela el SOS. El servidor restaura el estado normal, desbloquea las actualizaciones biométricas y apaga las alarmas en todos los clientes.</div>
+            <span class="fs-event">confirm_ok → status_ok (broadcast)</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div>
+        <div class="flow-timeline">
+
+          <div class="flow-step">
+            <div class="fs-num">SOS VÍA VOZ</div>
+            <div class="fs-title">Reconocimiento de voz</div>
+            <div class="fs-desc">Web Speech API detecta "ayuda" en el transcript continuo. VoiceControl emite directamente el evento SOS con trigger 'voz'. La UI muestra el transcript en tiempo real.</div>
+            <span class="fs-event">trigger_sos { trigger: 'voz', stage }</span>
+          </div>
+
+          <div class="flow-step">
+            <div class="fs-num">SOS VÍA SENSOR</div>
+            <div class="fs-title">Detección de caída</div>
+            <div class="fs-desc">La magnitud vectorial del acelerómetro supera 80 m/s². MotionControl emite <code>detect_fall</code>. El servidor lo procesa como emergencia equivalente a SOS, con causa registrada en el log.</div>
+            <span class="fs-event">detect_fall { force, reason: 'impacto' }</span>
+          </div>
+
+          <div class="flow-step">
+            <div class="fs-num">SOS VÍA DRON</div>
+            <div class="fs-title">Brazo levantado (MediaPipe)</div>
+            <div class="fs-desc">PoseDetection detecta muñeca.y &lt; hombro.y − 0.15 durante 3 s. El countdown visual inicia en el panel del dron. Al cumplirse, emite <code>raised_arm_detected</code> con el trigger y etapa.</div>
+            <span class="fs-event">raised_arm_detected { trigger: 'mediapipe-pose' }</span>
+          </div>
+
+          <div class="flow-step">
+            <div class="fs-num">AGUA VÍA DRON</div>
+            <div class="fs-title">Boca abierta — FaceMesh</div>
+            <div class="fs-desc">Solo en ciclismo. FaceMesh calcula MAR = dist(13,14) / dist(78,308). Si MAR ≥ 0.35 durante 2 s continuos, emite solicitud de agua. Cooldown de 10 s para evitar falsos repetidos.</div>
+            <span class="fs-event">request_supply { trigger: 'abrir-boca-camara' }</span>
+          </div>
+
+          <div class="flow-step ok">
+            <div class="fs-num">ESTADO</div>
+            <div class="fs-title">Feedback en el dron</div>
+            <div class="fs-desc">Todos los eventos SOS activan: linterna parpadeante (1 Hz via torch API), tinte rojo pulsante en canvas (CSS @keyframes), panel de alerta central y badge "SOS" en el header. Se desactiva con <code>status_ok</code>.</div>
+            <span class="fs-event">Camera.startTorch() + Overlay.showAlert()</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ CHALLENGES ══════════════════════════════════════════════════ -->
+  <section id="challenges">
+    <div class="section-header fade-in">
+      <span class="section-label">06 · Retos técnicos</span>
+      <h2>Las decisiones difíciles<br>de ingeniería</h2>
+      <p>Problemas reales encontrados durante el desarrollo y las soluciones aplicadas.</p>
+    </div>
+
+    <div class="challenges-grid">
+
+      <div class="ch-card fade-in">
+        <div class="ch-header">
+          <div class="ch-num">RETO 01</div>
+          <div class="ch-title">Permisos de sensores en iOS 13+</div>
+        </div>
+        <div class="ch-body">
+          <div class="ch-desc">En iOS, <code>DeviceMotionEvent</code> y <code>DeviceOrientationEvent</code> requieren permiso explícito del usuario invocado desde un gesto y bajo HTTPS. La solución encadena ambas solicitudes y solo activa los sensores si ambas son 'granted'.</div>
+          <div class="code-block"><span class="kw">if</span> (<span class="kw">typeof</span> DeviceMotionEvent<span class="nm">.requestPermission</span> === <span class="st">'function'</span>) {
+  DeviceMotionEvent<span class="nm">.requestPermission</span>()
+    <span class="nm">.then</span>(motionRes =>
+      DeviceOrientationEvent<span class="nm">.requestPermission</span>()
+        <span class="nm">.then</span>(orientRes =>
+          callback(motionRes === <span class="st">'granted'</span>
+                && orientRes === <span class="st">'granted'</span>)
+        )
+    )
+    <span class="nm">.catch</span>(() => callback(<span class="nm">false</span>));
+} <span class="kw">else</span> callback(<span class="nm">true</span>); <span class="cm">// Android: permisos implícitos</span></div>
+        </div>
+      </div>
+
+      <div class="ch-card fade-in" style="transition-delay:.1s">
+        <div class="ch-header">
+          <div class="ch-num">RETO 02</div>
+          <div class="ch-title">Detección de caída en dos fases</div>
+        </div>
+        <div class="ch-body">
+          <div class="ch-desc">Una sola fase de impacto genera falsos positivos. La solución combina detección de impacto inmediato (threshold alto) con monitorización de inmovilidad posterior mediante <code>setInterval</code> para cubrir pérdidas de consciencia.</div>
+          <div class="code-block"><span class="kw">var</span> FALL_THRESHOLD      = <span class="nm">80</span>;   <span class="cm">// m/s²</span>
+<span class="kw">var</span> STILLNESS_THRESHOLD = <span class="nm">0.8</span>;  <span class="cm">// m/s²</span>
+<span class="kw">var</span> STILLNESS_SECONDS   = <span class="nm">5</span>;    <span class="cm">// ticks de 1 s</span>
+
+<span class="cm">// Fase 1: impacto</span>
+<span class="kw">if</span> (magnitude > FALL_THRESHOLD)
+  triggerFall(magnitude, <span class="st">'impacto'</span>);
+
+<span class="cm">// Fase 2: inmovilidad (setInterval cada 1s)</span>
+<span class="kw">if</span> (lastMagnitude < STILLNESS_THRESHOLD) {
+  <span class="kw">if</span> (++stillnessCount >= STILLNESS_SECONDS)
+    triggerFall(lastMagnitude, <span class="st">'inmovilidad'</span>);
+} <span class="kw">else</span> stillnessCount = <span class="nm">0</span>;</div>
+        </div>
+      </div>
+
+      <div class="ch-card fade-in" style="transition-delay:.2s">
+        <div class="ch-header">
+          <div class="ch-num">RETO 03</div>
+          <div class="ch-title">Gesto de cabeza — delta gamma</div>
+        </div>
+        <div class="ch-body">
+          <div class="ch-desc">El giroscopio emite eventos continuamente. La solución calcula el delta entre lecturas consecutivas del ángulo gamma, exige un mínimo de 25° y requiere 2 sacudidas dentro de una ventana de 1.5 s para evitar activaciones accidentales.</div>
+          <div class="code-block"><span class="kw">var</span> delta = Math<span class="nm">.abs</span>(gamma - lastGamma);
+lastGamma = gamma;
+
+<span class="kw">if</span> (delta > <span class="nm">25</span>) { <span class="cm">// SHAKE_ANGLE_THRESHOLD</span>
+  <span class="kw">var</span> now = Date<span class="nm">.now</span>();
+  <span class="cm">// Resetea si la ventana expiró</span>
+  <span class="kw">if</span> (now - shakeLastTime > <span class="nm">1500</span>) shakeCount = <span class="nm">0</span>;
+
+  shakeCount++;
+  shakeLastTime = now;
+  UI<span class="nm">.setGestureStatus</span>(<span class="st">'Gesto ('</span> + shakeCount + <span class="st">' / 2)'</span>);
+
+  <span class="kw">if</span> (shakeCount >= <span class="nm">2</span>) {
+    shakeCount = <span class="nm">0</span>;
+    triggerHeadShake();
+  }
+}</div>
+        </div>
+      </div>
+
+      <div class="ch-card fade-in" style="transition-delay:.3s">
+        <div class="ch-header">
+          <div class="ch-num">RETO 04</div>
+          <div class="ch-title">Cálculo del MAR con FaceMesh</div>
+        </div>
+        <div class="ch-body">
+          <div class="ch-desc">Los landmarks de FaceMesh están en coordenadas normalizadas (0–1). El MAR (Mouth Aspect Ratio) mide la apertura de boca de forma invariante a la distancia de la cámara. Umbral de 0.35 calibrado empíricamente: cerrada ≈ 0.10–0.20, abierta ≈ 0.35+.</div>
+          <div class="code-block"><span class="cm">// Landmarks: 13 (top), 14 (bottom),</span>
+<span class="cm">//            78 (left), 308 (right)</span>
+<span class="kw">function</span> <span class="fn">computeMAR</span>(landmarks) {
+  <span class="kw">var</span> vertical   = dist(landmarks[<span class="nm">13</span>], landmarks[<span class="nm">14</span>]);
+  <span class="kw">var</span> horizontal = dist(landmarks[<span class="nm">78</span>], landmarks[<span class="nm">308</span>]);
+  <span class="kw">if</span> (horizontal < <span class="nm">0.001</span>) <span class="kw">return</span> <span class="nm">0</span>;
+  <span class="kw">return</span> vertical / horizontal;
+}
+
+<span class="cm">// MAR >= 0.35 durante >= 2000 ms → request_supply</span>
+<span class="kw">if</span> (mar >= MAR_THRESHOLD && elapsed >= HOLD_MS)
+  triggerWaterRequest();</div>
+        </div>
+      </div>
+
+      <div class="ch-card fade-in" style="transition-delay:.4s">
+        <div class="ch-header">
+          <div class="ch-num">RETO 05</div>
+          <div class="ch-title">Torch API — control de linterna</div>
+        </div>
+        <div class="ch-body">
+          <div class="ch-desc">La API <code>torch</code> solo existe en algunos dispositivos Android y requiere que el stream ya esté activo. La solución guarda una referencia al VideoTrack en getUserMedia y aplica la constraint dinámicamente, con try/catch para hardware no compatible.</div>
+          <div class="code-block"><span class="cm">// Al iniciar el stream:</span>
+videoTrack = stream<span class="nm">.getVideoTracks</span>()[<span class="nm">0</span>];
+
+<span class="kw">function</span> <span class="fn">setTorch</span>(value) {
+  <span class="kw">if</span> (!videoTrack) <span class="kw">return</span>;
+  videoTrack<span class="nm">.applyConstraints</span>({
+    advanced: [{ torch: value }]
+  }).<span class="nm">catch</span>(err =>
+    console<span class="nm">.warn</span>(<span class="st">'[TORCH]'</span>, err)
+  );
+}
+
+<span class="cm">// Parpadeo 1 Hz:</span>
+torchInterval = setInterval(() => {
+  torchState = !torchState;
+  setTorch(torchState);
+}, <span class="nm">1000</span>);</div>
+        </div>
+      </div>
+
+      <div class="ch-card fade-in" style="transition-delay:.5s">
+        <div class="ch-header">
+          <div class="ch-num">RETO 06</div>
+          <div class="ch-title">Dos loops RAF para MediaPipe</div>
+        </div>
+        <div class="ch-body">
+          <div class="ch-desc">Ejecutar Pose y FaceMesh simultáneamente podría saturar el hilo principal. La solución usa loops RAF completamente independientes con flags <code>isSending</code> para evitar que se encolen múltiples frames si el modelo no ha terminado el anterior.</div>
+          <div class="code-block"><span class="cm">// Loop de Pose (siempre activo)</span>
+<span class="kw">function</span> <span class="fn">poseLoop</span>() {
+  <span class="kw">if</span> (!isSendingFrame && videoEl<span class="nm">.readyState</span> >= <span class="nm">2</span>) {
+    isSendingFrame = <span class="nm">true</span>;
+    pose<span class="nm">.send</span>({ image: videoEl })
+      <span class="nm">.finally</span>(() => isSendingFrame = <span class="nm">false</span>);
+  }
+  rafId = requestAnimationFrame(poseLoop);
+}
+
+<span class="cm">// Loop de FaceMesh (solo en ciclismo)</span>
+<span class="kw">function</span> <span class="fn">faceLoop</span>() {
+  <span class="kw">if</span> (!isSending && videoEl<span class="nm">.readyState</span> >= <span class="nm">2</span>) {
+    isSending = <span class="nm">true</span>;
+    faceMesh<span class="nm">.send</span>({ image: videoEl })
+      <span class="nm">.finally</span>(() => isSending = <span class="nm">false</span>);
+  }
+  rafId = requestAnimationFrame(faceLoop);
+}</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ CODE QUALITY ════════════════════════════════════════════════ -->
+  <section id="quality">
+    <div class="section-header fade-in">
+      <span class="section-label">07 · Calidad y arquitectura de código</span>
+      <h2>Diseño modular sin<br>dependencias externas</h2>
+    </div>
+
+    <div class="quality-grid">
+      <div class="q-card fade-in">
+        
+        <div class="q-title">Patrón IIFE por módulo</div>
+        <div class="q-desc">Cada vista encapsula su lógica en IIFEs independientes: <code>SocketClient</code>, <code>UI</code>, <code>Biometrics</code>, <code>VoiceControl</code>, <code>MotionControl</code>, <code>App</code>. Interfaces públicas mínimas, estado privado por closure.</div>
+      </div>
+      <div class="q-card fade-in" style="transition-delay:.1s">
+        
+        <div class="q-title">Design System compartido</div>
+        <div class="q-desc">Paleta de tokens CSS idéntica en los tres clientes (<code>--color-bg</code>, <code>--color-accent</code>, estados ok/warning/emergency). Coherencia visual total entre vistas sin un framework CSS.</div>
+      </div>
+      <div class="q-card fade-in" style="transition-delay:.2s">
+        <div class="q-icon">⚡</div>
+        <div class="q-title">Event-driven sin polling</div>
+        <div class="q-desc">Toda la comunicación es push via Socket.IO. El servidor no hace polling: reacciona a eventos. Los módulos cliente son reactivos y actualizan solo los elementos del DOM afectados.</div>
+      </div>
+      <div class="q-card fade-in" style="transition-delay:.3s">
+        
+        <div class="q-title">Estado bloqueado en emergencia</div>
+        <div class="q-desc">Una vez activado el SOS, el servidor bloquea las actualizaciones biométricas normales. La alerta no puede ser sobreescrita por un update de FC hasta que se resuelva explícitamente.</div>
+      </div>
+      <div class="q-card fade-in" style="transition-delay:.4s">
+        
+        <div class="q-title">State sync para late-joining</div>
+        <div class="q-desc">Cualquier cliente que se conecte tarde recibe el estado completo: FC, etapa, status, y el historial de eventos. El equipo de apoyo puede unirse en mitad de competición sin perder contexto.</div>
+      </div>
+      <div class="q-card fade-in" style="transition-delay:.5s">
+        
+        <div class="q-title">Limpieza de recursos</div>
+        <div class="q-desc">Los módulos limpian sus recursos al desactivarse: <code>removeEventListener</code>, <code>clearInterval</code>, <code>cancelAnimationFrame</code>. El torch se apaga si se pierde la conexión WebSocket.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ RESULTS ══════════════════════════════════════════════════════ -->
+  <section id="results">
+    <div class="section-header fade-in">
+      <span class="section-label">08 · Resultados</span>
+      <h2>¿Qué se consiguió?</h2>
+    </div>
+
+    <div class="results-grid">
+      <div class="r-card fade-in">
+        <div class="r-title">Sistema completo y funcional</div>
+        <div class="r-desc">Las tres vistas operan en tiempo real sobre múltiples dispositivos simultáneos, con WebSocket estable y sincronización de estado.</div>
+      </div>
+      <div class="r-card fade-in" style="transition-delay:.08s">
+        <div class="r-title">Detección SOS redundante</div>
+        <div class="r-desc">Cinco mecanismos independientes de activación garantizan que ninguna emergencia quede sin detectar, incluso con el atleta inconsciente.</div>
+      </div>
+      <div class="r-card fade-in" style="transition-delay:.16s">
+        <div class="r-title">IA on-device</div>
+        <div class="r-desc">MediaPipe Pose y FaceMesh se ejecutan íntegramente en el navegador del dron, sin servidores externos de IA ni latencia de red adicional.</div>
+      </div>
+      <div class="r-card fade-in" style="transition-delay:.24s">
+        <div class="r-title">Interfaces NUI verdaderas</div>
+        <div class="r-desc">Voz, gestos corporales, movimiento de cabeza y visión artificial operan sin necesidad de pantalla táctil durante la competición.</div>
+      </div>
+      <div class="r-card fade-in" style="transition-delay:.32s">
+        <div class="r-title">Adaptación contextual</div>
+        <div class="r-desc">El cambio de etapa sincroniza automáticamente todos los módulos: el sistema "sabe" qué sensores y qué modelos son relevantes en cada momento.</div>
+      </div>
+      <div class="r-card fade-in" style="transition-delay:.4s">
+        <div class="r-title">Trazabilidad completa</div>
+        <div class="r-desc">El log del equipo de apoyo registra exactamente qué trigger activó cada alerta, a qué hora y en qué etapa, permitiendo auditoría post-competición.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════ FUTURE ════════════════════════════════════════════════════════ -->
+  <section id="future">
+    <div class="section-header fade-in">
+      <span class="section-label">09 · Mejoras futuras</span>
+      <h2>Evoluciones planificadas</h2>
+    </div>
+
+    <div class="future-grid fade-in">
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div>
+          <div class="f-title">Geolocalización en tiempo real</div>
+          <div class="f-desc">Integrar la Geolocation API para mostrar la posición del atleta en un mapa interactivo en el dashboard del equipo de apoyo.</div>
+        </div>
+      </div>
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div>
+          <div class="f-title">Biometría real via Wearables</div>
+          <div class="f-desc">Conexión directa con APIs de smartwatches (Apple Health, Garmin Connect) para sustituir la FC simulada por datos biométricos reales.</div>
+        </div>
+      </div>
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div>
+          <div class="f-title">Alertas auditivas en soporte</div>
+          <div class="f-desc">Notificaciones sonoras diferenciadas en el panel de soporte para SOS, caídas y avituallamiento, mejorando la respuesta en entornos ruidosos.</div>
+        </div>
+      </div>
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div>
+          <div class="f-title">Clasificador de actividad</div>
+          <div class="f-desc">Reemplazar la selección manual de etapa por un clasificador ML que detecte automáticamente si el atleta nada, pedalea o corre usando el acelerómetro.</div>
+        </div>
+      </div>
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div>
+          <div class="f-title">Persistencia y analytics</div>
+          <div class="f-desc">Almacenar el historial de sesión en base de datos para análisis post-competición: picos de FC, tiempos de respuesta a emergencias, heatmaps de ubicación.</div>
+        </div>
+      </div>
+      <div class="f-item">
+        <div class="f-dot"></div>
+        <div>
+          <div class="f-title">Detección de fatiga</div>
+          <div class="f-desc">Usar la variación de FC y los patrones de movimiento para predecir estados de fatiga extrema antes de que se produzca una emergencia real.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ FOOTER ════════════════════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-brand">IRONMAN UBIQUITOUS SYSTEM</div>
+    <div class="footer-stack">
+      <span class="badge">Node.js</span>
+      <span class="badge">Socket.IO</span>
+      <span class="badge">MediaPipe</span>
+      <span class="badge">Web APIs</span>
+    </div>
+    <p>UC3M · Sistemas de Interacción Ubicua </p>
+  </footer>
+
+  <script>
+    /* ── Intersection Observer — scroll reveal ─────────────────────────── */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+    /* ── Nav — active section highlighting ─────────────────────────────── */
+    const navLinks   = document.querySelectorAll('.nav-links a');
+    const sections   = document.querySelectorAll('section[id]');
+
+    const navIO = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          navLinks.forEach(a => {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+          });
+        }
+      });
+    }, { threshold: 0.35 });
+
+    sections.forEach(s => navIO.observe(s));
+
+    /* ── Stagger delay for grids ───────────────────────────────────────── */
+    document.querySelectorAll('.features-grid .feature-card').forEach((c, i) => {
+      if (!c.style.transitionDelay) c.style.transitionDelay = (i * 0.07) + 's';
+    });
+
+    /* ── Smooth scroll for nav links ───────────────────────────────────── */
+    navLinks.forEach(a => {
+      a.addEventListener('click', e => {
+        const href = a.getAttribute('href');
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    /* ── Mini screen SOS pulse effect ──────────────────────────────────── */
+    (function() {
+      const sosBadge = document.querySelector('.ms-badge-sos');
+      const sosCard  = document.querySelectorAll('.mini-screen')[1];
+      if (!sosBadge || !sosCard) return;
+
+      let tick = 0;
+      setInterval(() => {
+        tick++;
+        const pulse = (tick % 6 === 0);
+        sosCard.style.boxShadow = pulse
+          ? '0 0 24px rgba(239,68,68,0.45), 0 8px 32px rgba(0,0,0,.5)'
+          : '0 8px 32px rgba(0,0,0,.5)';
+      }, 400);
+    })();
+  </script>
+</body>
+</html>

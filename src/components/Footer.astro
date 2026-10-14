@@ -1,0 +1,35 @@
+---
+import Ticker from './Ticker.astro'
+import { footerTicker, site } from '../data/site'
+---
+
+<Ticker items={footerTicker} tone="red" reverse />
+
+<footer class="relative z-10 bg-[var(--color-void)] py-10">
+  <div
+    class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 text-center sm:flex-row sm:px-6 sm:text-left lg:px-10"
+  >
+    <div class="flex items-center gap-3">
+      <span
+        class="flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-belt-gold)]/60 bg-[var(--color-belt-gold)]/10 font-head text-lg leading-none text-[var(--color-belt-gold)]"
+        aria-hidden="true">JC</span
+      >
+      <div>
+        <p class="font-head text-sm tracking-wide text-[var(--color-bone)]">JORGE CONDADO CARBALLO</p>
+        <p class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-muted)]">
+          Full-Stack · Infraestructura · Seguridad
+        </p>
+      </div>
+    </div>
+
+    <p class="font-mono text-[11px] text-[var(--color-faint)]">
+      Candidatura a programador oficial de La Velada del Año · © <span data-year>2027</span>
+    </p>
+
+    <div class="flex items-center gap-4 font-cond text-sm uppercase tracking-wide text-[var(--color-muted)]">
+      <a href={site.github} target="_blank" rel="noreferrer" class="transition-colors hover:text-[var(--color-bone)]">GitHub</a>
+      <a href={site.linkedin} target="_blank" rel="noreferrer" class="transition-colors hover:text-[var(--color-bone)]">LinkedIn</a>
+      <a href="#contrato" class="transition-colors hover:text-[var(--color-bone)]">Contacto</a>
+    </div>
+  </div>
+</footer>

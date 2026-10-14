@@ -1,0 +1,27 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="450" fill="#0A0C10"/>
+  <path d="M0 64H800M0 128H800M0 192H800M0 256H800M0 320H800M0 384H800M64 0V450M128 0V450M192 0V450M256 0V450M320 0V450M384 0V450M448 0V450M512 0V450M576 0V450M640 0V450M704 0V450" stroke="#263041" stroke-opacity=".42"/>
+  <circle cx="400" cy="215" r="170" fill="#34D399" fill-opacity=".07"/>
+  <rect x="42" y="34" width="716" height="48" rx="8" fill="#131820" stroke="#263041"/>
+  <circle cx="64" cy="58" r="5" fill="#34D399"/>
+  <text x="82" y="64" fill="#34D399" font-family="monospace" font-size="18" font-weight="700" letter-spacing="3">SECURESEND</text>
+  <text x="648" y="63" fill="#8F9BAB" font-family="monospace" font-size="12">PKI / CLI</text>
+  <path d="M210 207H330M470 207H590" stroke="#FBBF24" stroke-width="3" stroke-dasharray="9 7"/>
+  <path d="M400 259V323" stroke="#34D399" stroke-width="3" stroke-dasharray="9 7"/>
+  <path d="M326 201L338 207L326 213M584 201L596 207L584 213M394 317L400 329L406 317" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="54" y="156" width="156" height="102" rx="10" fill="#131820" stroke="#FBBF24" stroke-width="2"/>
+  <text x="132" y="184" text-anchor="middle" fill="#FBBF24" font-family="monospace" font-size="14" font-weight="700">AC RAIZ</text>
+  <text x="132" y="208" text-anchor="middle" fill="#8F9BAB" font-family="monospace" font-size="12">X.509</text>
+  <text x="132" y="230" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="11">TRUST ANCHOR</text>
+  <rect x="330" y="156" width="140" height="102" rx="10" fill="#131820" stroke="#34D399" stroke-width="2"/>
+  <text x="400" y="184" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="13" font-weight="700">AC SUB</text>
+  <text x="400" y="208" text-anchor="middle" fill="#8F9BAB" font-family="monospace" font-size="12">path_length=0</text>
+  <text x="400" y="230" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="11">ISSUER</text>
+  <rect x="590" y="156" width="156" height="102" rx="10" fill="#131820" stroke="#60A5FA" stroke-width="2"/>
+  <text x="668" y="184" text-anchor="middle" fill="#60A5FA" font-family="monospace" font-size="14" font-weight="700">USUARIO</text>
+  <text x="668" y="208" text-anchor="middle" fill="#8F9BAB" font-family="monospace" font-size="12">CERTIFICADO</text>
+  <text x="668" y="230" text-anchor="middle" fill="#60A5FA" font-family="monospace" font-size="11">VERIFIED</text>
+  <rect x="244" y="329" width="312" height="64" rx="10" fill="#10141B" stroke="#263041"/>
+  <text x="400" y="356" text-anchor="middle" fill="#EDF1F4" font-family="monospace" font-size="13" font-weight="700">AES-256-GCM  +  RSA-OAEP</text>
+  <text x="400" y="378" text-anchor="middle" fill="#FBBF24" font-family="monospace" font-size="11">RSA-PSS SIGNATURE</text>
+</svg>

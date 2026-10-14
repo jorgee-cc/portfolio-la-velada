@@ -1,0 +1,69 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = 'Jorge Condado — Candidato a Programador Oficial de La Velada del Año',
+  description = 'Más de 30.000 candidaturas. Una sola infraestructura. Portfolio-candidatura de Jorge Condado Carballo para ser el programador oficial de La Velada del Año.',
+} = Astro.props
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07070a" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Jorge Condado Carballo" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/images/1726564320490.jpeg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="relative antialiased">
+    <!-- Overlays globales: luz de focos, viñeta, grano -->
+    <div class="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+      <div class="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_-10%,rgba(255,45,63,0.14),transparent_55%),radial-gradient(90%_70%_at_50%_120%,rgba(47,107,255,0.14),transparent_55%)]"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(100%_100%_at_50%_50%,transparent_55%,rgba(0,0,0,0.85))]"></div>
+    </div>
+    <div class="grain pointer-events-none fixed inset-0 z-[1] opacity-[0.05]" aria-hidden="true"></div>
+
+    <slot />
+
+    <script is:inline>
+      // Reveal on scroll (IntersectionObserver, cero dependencias)
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible')
+              io.unobserve(entry.target)
+            }
+          }
+        },
+        { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }
+      )
+      document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el))
+
+      // Año dinámico en el footer
+      document.querySelectorAll('[data-year]').forEach((el) => {
+        el.textContent = String(new Date().getFullYear())
+      })
+    </script>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+
+# Build de Astro (generado por `npm run build`)
+dist/
+
+# Tipos/estado generado por Astro
+.astro/
+
+# Despliegue
+.vercel/
+
+# Lockfiles de otros gestores (este proyecto usa pnpm → pnpm-lock.yaml)
+package-lock.json
+yarn.lock
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

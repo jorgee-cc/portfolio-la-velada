@@ -1,0 +1,25 @@
+---
+interface Props {
+  kicker?: string
+  size?: 'md' | 'lg'
+  class?: string
+}
+
+const { kicker, size = 'lg', class: className = '' } = Astro.props
+const heading = size === 'md' ? 'text-5xl sm:text-6xl' : 'text-5xl sm:text-6xl lg:text-7xl'
+const hasSubtitle = Astro.slots.has('subtitle')
+---
+
+<div class={`max-w-3xl ${className}`}>
+  {kicker && <p data-reveal class="kicker mb-4">{kicker}</p>}
+  <h2 data-reveal class={`headline ${heading}`}>
+    <slot />
+  </h2>
+  {
+    hasSubtitle && (
+      <p data-reveal class="mt-6 text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
+        <slot name="subtitle" />
+      </p>
+    )
+  }
+</div>

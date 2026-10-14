@@ -1,0 +1,61 @@
+---
+import { contacts, site } from '../data/site'
+---
+
+<section id="contrato" class="relative z-10 border-t border-[var(--color-line)] py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10">
+    <div
+      data-reveal
+      class="relative overflow-hidden rounded-[2rem] border border-[var(--color-line)] bg-[var(--color-panel)] p-8 text-center sm:p-14"
+    >
+      <div
+        class="pointer-events-none absolute inset-x-0 -top-24 mx-auto h-48 w-3/4 rounded-full bg-[var(--color-ring-red)]/20 blur-3xl"
+        aria-hidden="true"
+      ></div>
+
+      <p class="kicker mb-5">El contrato · Última llamada</p>
+      <h2 class="headline text-5xl text-balance sm:text-7xl">
+        <span class="text-chrome">30.000 candidaturas.</span><br />
+        <span class="text-fire">Tú decides quién sube al ring.</span>
+      </h2>
+      <p class="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
+        Busco el reto que me ponga contra las cuerdas: construir y sostener la tecnología de un
+        evento que millones de personas van a mirar a la vez. Si mi perfil encaja con lo que
+        buscas, aquí me tienes — listo para firmar.
+      </p>
+
+      <div class="mt-10 grid gap-3 text-left sm:grid-cols-2">
+        {
+          contacts.map((c) => (
+            <a
+              href={c.href}
+              target={c.href.startsWith('http') ? '_blank' : undefined}
+              rel={c.href.startsWith('http') ? 'noreferrer' : undefined}
+              class="group flex items-center gap-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-void)]/60 p-4 transition-colors hover:border-[var(--color-belt-gold)]/50"
+            >
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--color-line)] text-[var(--color-belt-gold)] transition-colors group-hover:border-[var(--color-belt-gold)]/50">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <path d={c.icon} stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="min-w-0">
+                <span class="block font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-faint)]">{c.label}</span>
+                <span class="block truncate text-sm text-[var(--color-bone)]">{c.value}</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a
+          href={`mailto:${site.email}?subject=Firma%20del%20cartel%20-%20La%20Velada`}
+          class="btn btn-primary w-full sm:w-auto"
+        >
+          Firmar el contrato ahora
+        </a>
+        <a href="#cartelera" class="btn btn-ghost w-full sm:w-auto">Revisar el cartel otra vez</a>
+      </div>
+    </div>
+  </div>
+</section>

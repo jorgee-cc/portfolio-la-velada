@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Linear programming bus scheduling thumbnail</title>
+  <desc id="desc">Technical illustration of bus assignments flowing through a GLPK optimization model.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07130e"/>
+      <stop offset="60%" stop-color="#10251a"/>
+      <stop offset="100%" stop-color="#171208"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6ee7b0"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f0b429"/>
+    </linearGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="930" cy="135" r="170" fill="#34d399" opacity="0.12" filter="url(#blur)"/>
+  <circle cx="220" cy="570" r="190" fill="#f0b429" opacity="0.10" filter="url(#blur)"/>
+  <g opacity="0.13" stroke="#9ab5a3" stroke-width="1">
+    <path d="M0 100H1200M0 200H1200M0 300H1200M0 400H1200M0 500H1200M0 600H1200"/>
+    <path d="M100 0V675M220 0V675M340 0V675M460 0V675M580 0V675M700 0V675M820 0V675M940 0V675M1060 0V675"/>
+  </g>
+
+  <g transform="translate(76 72)">
+    <rect width="1048" height="150" rx="26" fill="#0d1b13" stroke="#294437" stroke-width="2"/>
+    <text x="34" y="43" fill="#6ee7b0" font-family="Space Grotesk, Arial, sans-serif" font-size="23" font-weight="700" letter-spacing="3">FLEET OPTIMIZATION</text>
+    <text x="34" y="82" fill="#e9efe9" font-family="Space Grotesk, Arial, sans-serif" font-size="32" font-weight="700">Programación lineal entera para autobuses</text>
+    <text x="34" y="117" fill="#93a39a" font-family="IBM Plex Mono, monospace" font-size="15">Python orchestration  ·  GNU MathProg  ·  GLPK / glpsol  ·  MIP</text>
+    <rect x="816" y="34" width="190" height="78" rx="16" fill="#16271d" stroke="#39624c"/>
+    <text x="842" y="62" fill="#f0b429" font-family="IBM Plex Mono, monospace" font-size="13">OBJECTIVE</text>
+    <text x="842" y="91" fill="#fcd34d" font-family="Space Grotesk, Arial, sans-serif" font-size="24" font-weight="700">MIN Z</text>
+  </g>
+
+  <g transform="translate(76 270)">
+    <rect width="310" height="274" rx="24" fill="#0d1b13" stroke="#294437" stroke-width="2"/>
+    <text x="28" y="43" fill="#6ee7b0" font-family="Space Grotesk, Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="2">INPUT DATA</text>
+    <text x="28" y="72" fill="#93a39a" font-family="IBM Plex Mono, monospace" font-size="13">buses · distances · passengers</text>
+    <g transform="translate(28 104)">
+      <rect x="0" y="0" width="254" height="34" rx="9" fill="#14251b" stroke="#315540"/>
+      <rect x="0" y="48" width="254" height="34" rx="9" fill="#14251b" stroke="#315540"/>
+      <rect x="0" y="96" width="254" height="34" rx="9" fill="#14251b" stroke="#315540"/>
+      <text x="16" y="22" fill="#c6ead6" font-family="IBM Plex Mono, monospace" font-size="13">B1  50 km  20 pax</text>
+      <text x="16" y="70" fill="#c6ead6" font-family="IBM Plex Mono, monospace" font-size="13">B2  120 km 45 pax</text>
+      <text x="16" y="118" fill="#c6ead6" font-family="IBM Plex Mono, monospace" font-size="13">B3  75 km  30 pax</text>
+    </g>
+  </g>
+
+  <g transform="translate(444 270)">
+    <rect width="310" height="274" rx="24" fill="#0d1b13" stroke="#6b5420" stroke-width="2"/>
+    <text x="28" y="43" fill="#f0b429" font-family="Space Grotesk, Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="2">GLPK SOLVER</text>
+    <text x="28" y="72" fill="#93a39a" font-family="IBM Plex Mono, monospace" font-size="13">branch &amp; bound · optimal</text>
+    <g transform="translate(28 104)">
+      <rect x="0" y="0" width="254" height="42" rx="10" fill="#251f0e" stroke="#6b5420"/>
+      <text x="127" y="27" text-anchor="middle" fill="#fcd34d" font-family="IBM Plex Mono, monospace" font-size="15">min Z = 250.0</text>
+      <path d="M18 78H236M18 101H190M18 124H218" stroke="#d2a72f" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+      <circle cx="18" cy="78" r="5" fill="#f0b429"/>
+      <circle cx="18" cy="101" r="5" fill="#f0b429"/>
+      <circle cx="18" cy="124" r="5" fill="#f0b429"/>
+    </g>
+  </g>
+
+  <g transform="translate(812 270)">
+    <rect width="312" height="274" rx="24" fill="#0d1b13" stroke="#294437" stroke-width="2"/>
+    <text x="28" y="43" fill="#6ee7b0" font-family="Space Grotesk, Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="2">ASSIGNMENT</text>
+    <text x="28" y="72" fill="#93a39a" font-family="IBM Plex Mono, monospace" font-size="13">optimal schedule</text>
+    <g transform="translate(28 105)">
+      <path d="M22 16C65 16 91 16 134 16M22 64C65 64 91 64 134 64M22 112C65 112 91 112 134 112" fill="none" stroke="url(#green)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="22" cy="16" r="10" fill="#34d399"/>
+      <circle cx="22" cy="64" r="10" fill="#34d399"/>
+      <circle cx="22" cy="112" r="10" fill="#34d399"/>
+      <rect x="150" y="-4" width="104" height="40" rx="10" fill="#14251b" stroke="#315540"/>
+      <rect x="150" y="44" width="104" height="40" rx="10" fill="#14251b" stroke="#315540"/>
+      <rect x="150" y="92" width="104" height="40" rx="10" fill="#14251b" stroke="#315540"/>
+      <text x="202" y="22" text-anchor="middle" fill="#c6ead6" font-family="IBM Plex Mono, monospace" font-size="13">S1</text>
+      <text x="202" y="70" text-anchor="middle" fill="#c6ead6" font-family="IBM Plex Mono, monospace" font-size="13">S2</text>
+      <text x="202" y="118" text-anchor="middle" fill="#c6ead6" font-family="IBM Plex Mono, monospace" font-size="13">S3</text>
+    </g>
+    <text x="28" y="242" fill="#6ee7b0" font-family="IBM Plex Mono, monospace" font-size="13">STATUS: OPTIMAL</text>
+  </g>
+</svg>

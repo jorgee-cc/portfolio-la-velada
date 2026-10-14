@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureSend — PKI &amp; Cifrado Híbrido — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #0a0c10;
+  --surface:      #131820;
+  --surface-2:    #10141b;
+  --surface-3:    #0b0e13;
+  --accent:       #34d399;
+  --accent-dim:   rgba(52,211,153,.11);
+  --accent-glow:  rgba(52,211,153,.22);
+  --accent2:      #fbbf24;
+  --accent2-dim:  rgba(251,191,36,.12);
+  --ok:           #34d399;
+  --ok-dim:       rgba(52,211,153,.11);
+  --warning:      #fbbf24;
+  --warn-dim:     rgba(251,191,36,.11);
+  --danger:       #f87171;
+  --danger-dim:   rgba(248,113,113,.11);
+  --text:         #edf1f4;
+  --muted:        #8f9bab;
+  --border:       #263041;
+  --radius:       12px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+h1,h2,h3,h4,.label { font-family: 'Rajdhani', sans-serif; letter-spacing:.03em; }
+code, .mono        { font-family: 'IBM Plex Mono', monospace; }
+
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .5rem;
+  display: block;
+}
+.section-label.v2 { color: var(--accent2); }
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.site-header {
+  position: fixed; top:0; left:0; right:0; z-index: 200;
+  border-bottom: 1px solid rgba(52,211,153,.12);
+  background: rgba(10,12,16,.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.site-header-inner {
+  max-width: 1280px; margin: 0 auto; padding: .95rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative;
+}
+@media (min-width: 640px) { .site-header-inner { padding: .95rem 3rem; } }
+.site-header-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at right, rgba(52,211,153,.15), #000, #000);
+  opacity: .6; pointer-events: none;
+}
+.site-header-left { position: relative; z-index: 10; flex: 1; display:flex; align-items:center; gap:2rem; }
+.site-brand { display:flex; align-items:center; gap:.5rem; text-decoration:none; }
+.site-brand-j, .site-brand-c { font-family:'Rajdhani',sans-serif; font-size:1.25rem; font-weight:900; text-transform:uppercase; letter-spacing:-.025em; }
+.site-brand-j { color:#ffffff; }
+.site-brand-c { background:linear-gradient(to right,#6ee7b7,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+.template-nav { display:flex; align-items:center; gap:.2rem; margin-left:1.5rem; }
+.template-nav a {
+  font-family:'Rajdhani',sans-serif; font-weight:600; font-size:.78rem; letter-spacing:.07em; text-transform:uppercase;
+  color: var(--muted); text-decoration:none; padding:.4rem .55rem; border-radius:6px;
+  transition: color .18s, background .18s;
+}
+.template-nav a:hover, .template-nav a:focus-visible, .template-nav a.active { color:var(--accent); background:var(--accent-dim); outline:none; }
+
+.site-header-right { position: relative; z-index: 10; display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
+.github-btn {
+  display:flex; align-items:center; gap:.5rem; border-radius:9999px;
+  border:1px solid rgba(52,211,153,.28); background: rgba(52,211,153,.1);
+  padding:.5rem 1rem; font-family:'Rajdhani',sans-serif; font-weight:700; color:#6ee7b7;
+  box-shadow: 0 0 15px rgba(52,211,153,.16); transition: all .3s; text-decoration:none;
+}
+.github-btn:hover { border-color: rgba(52,211,153,.5); background: rgba(52,211,153,.18); box-shadow: 0 0 30px rgba(52,211,153,.3); transform: scale(1.03); }
+.github-btn svg { width:1rem; height:1rem; }
+.github-text { display:none; }
+.linkedin-text { display:inline; }
+@media (min-width: 640px) { .github-text { display:inline; } }
+@media (max-width: 900px) { .template-nav { display:none; } }
+@media (max-width: 640px) {
+  .site-header-inner { padding:.75rem 1rem; }
+  .site-header-left { min-width:0; }
+  .site-brand-j, .site-brand-c { font-size:1.08rem; }
+  .site-header-right { gap:.35rem; }
+  .github-btn { padding:.48rem .62rem; }
+}
+
+section { padding: 5.5rem 2rem; max-width: 1180px; margin: 0 auto; }
+.section-header { margin-bottom: 2.75rem; }
+.section-header h2 { font-size: clamp(1.9rem,3.8vw,2.8rem); font-weight:700; line-height:1.1; }
+.section-header p { font-size: 1.05rem; color: var(--muted); margin-top:.7rem; max-width:66ch; }
+
+.fade-in { opacity:0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+.fade-in.visible { opacity:1; transform: translateY(0); }
+
+/* ── HERO ─────────────────────────────────────────────────────────── */
+#hero {
+  min-height: 100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding: 8rem 2rem 5rem; max-width:none; margin:0; position:relative; overflow:hidden; background: var(--bg);
+}
+#hero::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(51,65,85,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(51,65,85,.14) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events:none;
+}
+#hero::after {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 75% 55% at 50% 40%, rgba(52,211,153,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-content { position:relative; z-index:1; max-width:920px; margin:0 auto; }
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  padding:.32rem 1rem; border:1px solid rgba(52,211,153,.28); border-radius:20px; background: rgba(52,211,153,.06);
+  margin-bottom:1.6rem;
+}
+.hero-eyebrow-dot { width:7px; height:7px; border-radius:50%; background: var(--ok); animation: blink-dot 1.8s ease-in-out infinite; }
+@keyframes blink-dot { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+
+h1.hero-title {
+  font-size: clamp(2.3rem,6.4vw,4.6rem); font-weight:700; line-height:1.04; letter-spacing:.03em; margin-bottom:.6rem;
+  background: linear-gradient(135deg, #fff 0%, #34d399 46%, #fbbf24 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-sub { font-size: clamp(.95rem,2.2vw,1.2rem); color:var(--muted); font-weight:300; max-width:64ch; margin:.9rem auto 2rem; line-height:1.7; }
+.hero-badges { display:flex; flex-wrap:wrap; gap:.45rem; justify-content:center; margin-bottom:2.5rem; }
+.badge {
+  font-family:'IBM Plex Mono',monospace; font-size:.7rem; padding:.28rem .7rem; border-radius:6px;
+  border:1px solid var(--border); background: var(--surface-2); color:var(--muted); transition: border-color .2s, color .2s;
+}
+.badge:hover { border-color: var(--accent); color: var(--text); }
+.badge.hi { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.badge.hi2 { border-color: var(--accent2); color: var(--accent2); background: var(--accent2-dim); }
+
+.hero-cta {
+  display:inline-flex; align-items:center; gap:.5rem; font-family:'Rajdhani',sans-serif; font-weight:700;
+  font-size:1rem; letter-spacing:.1em; text-transform:uppercase; color:#031810; background: var(--accent);
+  padding:.85rem 2.25rem; border-radius:8px; text-decoration:none; transition: opacity .18s, transform .18s;
+}
+.hero-cta:hover { opacity:.9; transform: translateY(-2px); }
+
+.hero-screens { display:flex; gap:1.5rem; justify-content:center; margin-top:4.5rem; flex-wrap:wrap; }
+.screen-wrap { display:flex; flex-direction:column; align-items:center; gap:.65rem; }
+.mini-screen {
+  width:210px; background: var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5); transition: transform .25s, box-shadow .25s;
+}
+.mini-screen:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(52,211,153,.15); }
+.ms-header {
+  display:flex; align-items:center; justify-content:space-between; padding:.45rem .6rem; background: var(--surface-2);
+  border-bottom:1px solid var(--border); font-family:'Rajdhani',sans-serif; font-size:.62rem; font-weight:700;
+  letter-spacing:.1em; color: var(--accent);
+}
+.ms-header.v2 { color: var(--accent2); }
+.ms-dot { width:5px; height:5px; border-radius:50%; background: var(--ok); }
+.ms-badge-ok { font-family:'IBM Plex Mono',monospace; font-size:.5rem; background:var(--ok); color:#03150c; padding:.08rem .3rem; border-radius:3px; font-weight:600; }
+.ms-body { padding:.6rem .65rem; }
+.ms-row { display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--muted); padding:.16rem 0; border-bottom:1px solid rgba(51,65,85,.4); }
+.ms-row .v { color: var(--ok); font-weight:500; }
+.ms-row .v.accent { color: var(--accent2); }
+.screen-label { font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+
+/* mini chain-of-trust */
+.ms-chain { display:flex; flex-direction:column; gap:.3rem; margin-bottom:.5rem; }
+.ms-chain-node { display:flex; align-items:center; gap:.4rem; font-family:'IBM Plex Mono',monospace; font-size:.52rem; padding:.28rem .4rem; border-radius:4px; border:1px solid var(--border); background: var(--surface-3); }
+.ms-chain-node .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.ms-chain-node.root .dot { background: var(--accent2); }
+.ms-chain-node.sub .dot { background: var(--accent); }
+.ms-chain-node.user .dot { background: #60a5fa; }
+
+/* ═══════ OVERVIEW ═══════════════════════════════════════════════ */
+.overview-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:3rem; align-items:start; }
+.overview-text h2 { font-size: clamp(1.7rem,3.2vw,2.4rem); font-weight:700; line-height:1.15; margin-bottom:1.1rem; }
+.overview-text p { color: var(--muted); font-size:1.02rem; margin-bottom:.8rem; }
+.hl { color: var(--accent); }
+.hl2 { color: var(--accent2); }
+.overview-stats { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
+.stat-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.25rem; transition: border-color .2s, transform .2s; }
+.stat-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.stat-val { font-family:'Rajdhani',sans-serif; font-size:2.05rem; font-weight:800; color:var(--accent); line-height:1; }
+.stat-lbl { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--muted); margin-top:.35rem; text-transform:uppercase; letter-spacing:.05em; }
+
+/* ═══════ PILLARS ══════════════════════════════════════════════════ */
+.pillar-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; }
+.pillar-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.4rem; transition: border-color .2s, transform .2s; }
+.pillar-card:hover { transform: translateY(-4px); }
+.pillar-card.c1 { border-color: rgba(52,211,153,.35); }
+.pillar-card.c2 { border-color: rgba(96,165,250,.35); }
+.pillar-card.c3 { border-color: rgba(251,191,36,.35); }
+.pillar-card.c4 { border-color: rgba(248,113,113,.35); }
+.pillar-icon { font-family:'IBM Plex Mono',monospace; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; margin-bottom:.6rem; }
+.pillar-card.c1 .pillar-icon { color: var(--accent); }
+.pillar-card.c2 .pillar-icon { color: #60a5fa; }
+.pillar-card.c3 .pillar-icon { color: var(--accent2); }
+.pillar-card.c4 .pillar-icon { color: var(--danger); }
+.pillar-title { font-family:'Rajdhani',sans-serif; font-size:1.15rem; font-weight:700; margin-bottom:.5rem; }
+.pillar-desc { font-size:.85rem; color:var(--muted); line-height:1.55; }
+
+/* ═══════ ARCHITECTURE ═════════════════════════════════════════════ */
+.arch-container { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:2rem; margin-top:1.5rem; overflow:hidden; }
+.arch-container + .arch-container { margin-top: 1.5rem; }
+.arch-container svg { width:100%; height:auto; }
+@keyframes dash-flow { to { stroke-dashoffset: -24; } }
+.fl { animation: dash-flow 2s linear infinite; }
+.arch-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text); margin-bottom:1rem; letter-spacing:.02em; }
+
+/* ═══════ TECH STACK ══════════════════════════════════════════════ */
+.stack-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1rem; }
+.stack-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.25rem; position:relative; overflow:hidden; transition: border-color .2s, transform .2s; }
+.stack-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--accent); opacity:0; transition: opacity .2s; }
+.stack-card:hover { border-color: rgba(52,211,153,.4); transform: translateY(-4px); }
+.stack-card:hover::before { opacity:1; }
+.stack-cat { font-family:'IBM Plex Mono',monospace; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:.55rem; }
+.stack-name { font-family:'Rajdhani',sans-serif; font-size:1.22rem; font-weight:700; color:var(--text); margin-bottom:.4rem; }
+.stack-desc { font-size:.875rem; color:var(--muted); line-height:1.5; }
+
+/* ═══════ MODULE (formula cards) ══════════════════════════════════ */
+.module-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+.formula-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.4rem; }
+.formula-card .f-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; color:var(--text); margin-bottom:.5rem; }
+.formula-card .f-math { font-family:'IBM Plex Mono',monospace; font-size:.79rem; color: var(--accent2); background: var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:.7rem .85rem; margin:.5rem 0; line-height:1.8; overflow-x:auto; white-space:pre; }
+.formula-card p { font-size:.875rem; color: var(--muted); line-height:1.55; }
+
+/* ═══════ CODE BLOCK / CHALLENGES ═════════════════════════════════ */
+.challenges-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+.ch-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; transition: border-color .2s; }
+.ch-card:hover { border-color: rgba(52,211,153,.35); }
+.ch-header { padding:1.1rem 1.25rem .8rem; border-bottom:1px solid var(--border); }
+.ch-num { font-family:'IBM Plex Mono',monospace; font-size:.63rem; color:var(--accent); letter-spacing:.1em; margin-bottom:.25rem; }
+.ch-title { font-family:'Rajdhani',sans-serif; font-size:1.08rem; font-weight:700; color:var(--text); }
+.ch-body { padding:1rem 1.25rem; }
+.ch-desc { font-size:.875rem; color:var(--muted); margin-bottom:.8rem; line-height:1.55; }
+.code-block { background: var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:.85rem; font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:#cbd5e1; overflow-x:auto; line-height:1.7; white-space:pre; }
+.kw { color:#f472b6; } .fn { color:#60a5fa; } .nm { color:#34d399; } .cm { color:#5b6b85; font-style:italic; } .st { color:#fbbf24; }
+
+/* ═══════ PIPELINE (hybrid encryption steps) ═══════════════════════ */
+.pipeline { display:flex; flex-direction:column; gap:0; margin-top:1.5rem; }
+.pipeline-step { display:grid; grid-template-columns:56px 1fr; gap:1.2rem; padding:1.1rem 0; border-bottom:1px solid var(--border); }
+.pipeline-step:last-child { border-bottom:none; }
+.pipeline-num { font-family:'Rajdhani',sans-serif; font-size:1.6rem; font-weight:800; color: var(--accent); opacity:.6; line-height:1; }
+.pipeline-body h4 { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:700; margin-bottom:.3rem; }
+.pipeline-body p { font-size:.875rem; color:var(--muted); line-height:1.55; }
+.pipeline-body code { color: var(--accent2); }
+
+/* ═══════ LIMITATIONS / FUTURE ═════════════════════════════════════ */
+.future-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.f-item { display:flex; gap:.75rem; align-items:flex-start; padding:1.2rem; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); transition: border-color .2s; }
+.f-item:hover { border-color: var(--accent); }
+.f-dot { width:10px; height:10px; border-radius:50%; border:2px solid var(--accent); flex-shrink:0; margin-top:.3rem; }
+.f-dot.warn { border-color: var(--warning); }
+.f-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.3rem; }
+.f-desc { font-size:.85rem; color:var(--muted); line-height:1.5; }
+
+/* ═══════ TESTING ═══════════════════════════════════════════════ */
+.test-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.9rem; margin-top:1.5rem; }
+.test-card { background: var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:1rem 1.1rem; }
+.test-card .tc-n { font-family:'Rajdhani',sans-serif; font-size:1.4rem; font-weight:800; color: var(--accent); }
+.test-card .tc-l { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--muted); margin-top:.2rem; }
+
+/* ═══════ FOOTER ════════════════════════════════════════════════ */
+footer { border-top:1px solid var(--border); padding:2.5rem 2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; max-width:1180px; margin:0 auto; }
+.footer-brand { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:.12em; color:var(--accent); }
+.footer-stack { display:flex; gap:.5rem; flex-wrap:wrap; }
+footer p { font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); }
+
+.divider { height:1px; background: linear-gradient(90deg, transparent, var(--border), transparent); max-width:1180px; margin:0 auto; }
+
+@media (max-width:920px) {
+  .overview-grid, .challenges-grid, .module-grid, .future-grid { grid-template-columns:1fr; }
+  .site-nav { display:none; }
+}
+@media (max-width:600px) {
+  section { padding:3.5rem 1.25rem; }
+  .overview-stats { grid-template-columns:1fr 1fr; }
+  .hero-screens { gap:1rem; }
+  .mini-screen { width:160px; }
+  .stack-grid { grid-template-columns:1fr; }
+  .pipeline-step { grid-template-columns:36px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="site-header-bg"></div>
+    <div class="site-header-left">
+      <a class="site-brand" href="/" aria-label="Ir a la página de inicio">
+        <span class="site-brand-j">Jorge</span>
+        <span class="site-brand-c">Condado</span>
+      </a>
+      <nav class="template-nav" aria-label="Navegación del proyecto">
+        <a href="#hero">Inicio</a><a href="#overview">Resumen</a><a href="#architecture">Arquitectura</a><a href="#stack">Stack</a><a href="#pipeline">Cifrado</a><a href="#testing">Tests</a>
+      </nav>
+    </div>
+    <div class="site-header-right">
+      <a href="https://github.com/jorgee-cc/Infraestructura-PKI" target="_blank" rel="noopener noreferrer" class="github-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        <span class="github-text">GitHub</span>
+      </a>
+      <a href="https://www.linkedin.com/in/jorge-condado-carballo-4065bb2b4/" target="_blank" rel="noopener noreferrer" class="github-btn" aria-label="Abrir perfil de LinkedIn">
+        <span class="linkedin-text">LinkedIn</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ HERO ═══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Criptografía Aplicada &amp; Seguridad · UC3M
+    </div>
+
+    <h1 class="hero-title">SECURESEND<br>PKI &amp; CIFRADO HÍBRIDO</h1>
+
+    <p class="hero-sub">
+      Gestor CLI de documentos confidenciales en Python con una Infraestructura de Clave
+      Pública jerárquica de dos niveles: AES-256-GCM para el contenido, RSA-OAEP para
+      encapsular las claves, RSA-PSS para la firma digital y certificados X.509 para la
+      cadena de confianza.
+    </p>
+
+    <div class="hero-badges">
+      <span class="badge hi">Python 3</span>
+      <span class="badge hi2">cryptography (OpenSSL)</span>
+      <span class="badge">X.509 · PKI de 2 niveles</span>
+      <span class="badge">AES-256-GCM</span>
+      <span class="badge">RSA-OAEP</span>
+      <span class="badge">RSA-PSS</span>
+      <span class="badge">PBKDF2 · 600k iteraciones</span>
+    </div>
+
+    <a href="#overview" class="hero-cta">Explorar el proyecto ↓</a>
+  </div>
+
+  <div class="hero-screens">
+    <div class="screen-wrap fade-in">
+      <div class="mini-screen">
+        <div class="ms-header v2">
+          <div class="ms-dot"></div>
+          CADENA DE CONFIANZA
+          <div class="ms-badge-ok">OK</div>
+        </div>
+        <div class="ms-body">
+          <div class="ms-chain">
+            <div class="ms-chain-node root"><span class="dot"></span> AC Raíz · 10 años</div>
+            <div class="ms-chain-node sub"><span class="dot"></span> AC Subordinada · 5 años</div>
+            <div class="ms-chain-node user"><span class="dot"></span> Certificado usuario · 1 año</div>
+          </div>
+          <div class="ms-row"><span>path length</span><span class="v accent">1 → 0</span></div>
+          <div class="ms-row" style="border-bottom:none;"><span>firma</span><span class="v">RSA-SHA256</span></div>
+        </div>
+      </div>
+      <span class="screen-label">Jerarquía X.509</span>
+    </div>
+
+    <div class="screen-wrap fade-in" style="transition-delay:.12s">
+      <div class="mini-screen">
+        <div class="ms-header">
+          <div class="ms-dot"></div>
+          DOCUMENTO.ENC
+          <div class="ms-badge-ok">OK</div>
+        </div>
+        <div class="ms-body">
+          <div class="ms-row"><span>firma</span><span class="v">RSA-PSS ✓</span></div>
+          <div class="ms-row"><span>contenido</span><span class="v">AES-256-GCM</span></div>
+          <div class="ms-row"><span>clave AES</span><span class="v accent">RSA-OAEP</span></div>
+          <div class="ms-row"><span>clave HMAC</span><span class="v accent">RSA-OAEP</span></div>
+          <div class="ms-row" style="border-bottom:none;"><span>salidas</span><span class="v">.enc .sig .meta</span></div>
+        </div>
+      </div>
+      <span class="screen-label">Pipeline de cifrado híbrido</span>
+    </div>
+
+    <div class="screen-wrap fade-in" style="transition-delay:.24s">
+      <div class="mini-screen">
+        <div class="ms-header v2">
+          <div class="ms-dot"></div>
+          SUITE DE TESTS
+          <div class="ms-badge-ok">42/42</div>
+        </div>
+        <div class="ms-body">
+          <div class="ms-row"><span>test_pki_manager</span><span class="v">✓</span></div>
+          <div class="ms-row"><span>test_auth</span><span class="v">✓</span></div>
+          <div class="ms-row"><span>test_digital_signature</span><span class="v">✓</span></div>
+          <div class="ms-row" style="border-bottom:none;"><span>+4 módulos más</span><span class="v">✓</span></div>
+        </div>
+      </div>
+      <span class="screen-label">unittest · 1.404 líneas</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ OVERVIEW ═══════════════════════════════════════════════ -->
+<section id="overview">
+  <div class="overview-grid">
+    <div class="overview-text fade-in">
+      <span class="section-label">01 · Contexto del proyecto</span>
+      <h2>Una PKI real,<br>no una simulación de juguete</h2>
+      <p>
+        SecureSend es una aplicación de línea de comandos que resuelve un problema concreto:
+        cómo compartir un documento garantizando que <span class="hl">nadie más pueda leerlo</span>,
+        que <span class="hl">nadie lo haya alterado</span>, que <span class="hl2">quien lo firmó
+        sea quien dice ser</span> y que <span class="hl2">no pueda negar haberlo firmado</span>
+        después. En seguridad de la información esto tiene nombre: confidencialidad, integridad,
+        autenticidad y no repudio.
+      </p>
+      <p>
+        Para lograrlo, el sistema despliega su propia <span class="hl">Infraestructura de Clave
+        Pública de dos niveles</span> —una Autoridad de Certificación Raíz autofirmada y una
+        Subordinada que emite los certificados de usuario— y orquesta cuatro primitivas
+        criptográficas independientes (AES-GCM, RSA-OAEP, RSA-PSS y HMAC-SHA256) en un único
+        flujo de cifrado híbrido.
+      </p>
+      <p>
+        El proyecto está respaldado por una suite de <span class="hl2">42 pruebas unitarias</span>
+        (1.404 líneas) que verifican, entre otras cosas, que una firma alterada se detecta, que
+        una contraseña incorrecta no descifra una clave privada y que la cadena de confianza
+        se invalida correctamente si algún certificado expira.
+      </p>
+    </div>
+
+    <div class="overview-stats fade-in" style="transition-delay:.15s">
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Niveles de CA<br>Raíz → Subordinada</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">4</div>
+        <div class="stat-lbl">Primitivas criptográficas<br>AES · RSA-OAEP · RSA-PSS · HMAC</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">600K</div>
+        <div class="stat-lbl">Iteraciones PBKDF2<br>por contraseña de usuario</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">42</div>
+        <div class="stat-lbl">Tests unitarios<br>todos en verde</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ PILARES DE SEGURIDAD ═══════════════════════════════════ -->
+<section id="pillars">
+  <div class="section-header fade-in">
+    <span class="section-label v2">02 · Los cuatro pilares</span>
+    <h2>Cada garantía de seguridad,<br>resuelta por una primitiva distinta</h2>
+    <p>El diseño evita mezclar responsabilidades: una primitiva por garantía, para que un fallo
+    en una no comprometa a las demás.</p>
+  </div>
+  <div class="pillar-grid fade-in">
+    <div class="pillar-card c1">
+      <div class="pillar-icon">Confidencialidad</div>
+      <div class="pillar-title">AES-256-GCM</div>
+      <div class="pillar-desc">Cifrado híbrido: una clave simétrica efímera protege el contenido, y esa clave se encapsula (KEM) con RSA-OAEP usando la clave pública del destinatario.</div>
+    </div>
+    <div class="pillar-card c2">
+      <div class="pillar-icon">Integridad</div>
+      <div class="pillar-title">AES-GCM + HMAC-SHA256</div>
+      <div class="pillar-desc">GCM ya autentica el ciphertext con su propio tag; el sistema añade además un HMAC independiente sobre el documento cifrado, con su propia clave protegida por RSA.</div>
+    </div>
+    <div class="pillar-card c3">
+      <div class="pillar-icon">Autenticidad</div>
+      <div class="pillar-title">Certificados X.509</div>
+      <div class="pillar-desc">Cada usuario posee un certificado emitido por la AC Subordinada, que a su vez está avalada por la AC Raíz: una cadena de confianza verificable criptográficamente.</div>
+    </div>
+    <div class="pillar-card c4">
+      <div class="pillar-icon">No repudio</div>
+      <div class="pillar-title">Firma digital RSA-PSS</div>
+      <div class="pillar-desc">El documento se firma con la clave privada del emisor antes de cifrarse (detached signature). Solo su clave pública puede verificarla: no puede negar haberlo firmado.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ ARCHITECTURE ═══════════════════════════════════════════ -->
+<section id="architecture">
+  <div class="section-header fade-in">
+    <span class="section-label">03 · Arquitectura</span>
+    <h2>Un controlador CLI,<br>seis módulos criptográficos independientes</h2>
+    <p><code>main.py</code> orquesta la sesión y delega cada operación a un módulo
+    especializado. Ningún módulo criptográfico conoce a los demás.</p>
+  </div>
+
+  <div class="arch-container fade-in">
+    <div class="arch-title">SecureSendApp — orquestación desde main.py</div>
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrP" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#34d399" opacity=".9"/>
+        </marker>
+      </defs>
+
+      <rect x="330" y="15" width="240" height="65" rx="10" fill="#101526" stroke="#34d399" stroke-width="2"/>
+      <text x="450" y="42" fill="#34d399" font-size="13" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">SecureSendApp (main.py)</text>
+      <text x="450" y="60" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">CLI · sesión · menús progresivos</text>
+
+      <line class="fl" x1="390" y1="80" x2="110" y2="140" stroke="#34d399" stroke-width="1.4" stroke-dasharray="7,5" marker-end="url(#arrP)"/>
+      <line class="fl" x1="420" y1="80" x2="270" y2="140" stroke="#34d399" stroke-width="1.4" stroke-dasharray="7,5" marker-end="url(#arrP)"/>
+      <line class="fl" x1="450" y1="80" x2="450" y2="140" stroke="#34d399" stroke-width="1.4" stroke-dasharray="7,5" marker-end="url(#arrP)"/>
+      <line class="fl" x1="480" y1="80" x2="630" y2="140" stroke="#34d399" stroke-width="1.4" stroke-dasharray="7,5" marker-end="url(#arrP)"/>
+      <line class="fl" x1="510" y1="80" x2="790" y2="140" stroke="#34d399" stroke-width="1.4" stroke-dasharray="7,5" marker-end="url(#arrP)"/>
+
+      <rect x="20" y="140" width="180" height="90" rx="10" fill="#101526" stroke="#60a5fa" stroke-width="1.4"/>
+      <text x="110" y="166" fill="#60a5fa" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">auth.py</text>
+      <text x="110" y="182" fill="#93a1b8" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">PBKDF2-HMAC-SHA256</text>
+      <text x="110" y="195" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">600.000 iteraciones</text>
+      <text x="110" y="208" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">users.json + salt 32B</text>
+
+      <rect x="220" y="140" width="180" height="90" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.4"/>
+      <text x="310" y="166" fill="#a78bfa" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">pki_manager.py</text>
+      <text x="310" y="182" fill="#93a1b8" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">key_manager.py</text>
+      <text x="310" y="195" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">X.509 · claves RSA PEM</text>
+      <text x="310" y="208" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">verify_certificate_chain()</text>
+
+      <rect x="420" y="140" width="150" height="90" rx="10" fill="#101526" stroke="#34d399" stroke-width="1.4"/>
+      <text x="495" y="166" fill="#34d399" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">cifrado_simetrico</text>
+      <text x="495" y="182" fill="#93a1b8" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">AES-256-GCM</text>
+      <text x="495" y="195" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">nonce 96 bits</text>
+      <text x="495" y="208" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">tag 128 bits</text>
+
+      <rect x="590" y="140" width="150" height="90" rx="10" fill="#101526" stroke="#fbbf24" stroke-width="1.4"/>
+      <text x="665" y="166" fill="#fbbf24" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">cifrado_asimetrico</text>
+      <text x="665" y="182" fill="#93a1b8" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">RSA-2048 OAEP</text>
+      <text x="665" y="195" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">MGF1-SHA256</text>
+      <text x="665" y="208" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">encapsula claves (KEM)</text>
+
+      <rect x="750" y="140" width="135" height="90" rx="10" fill="#101526" stroke="#f87171" stroke-width="1.4"/>
+      <text x="817" y="166" fill="#f87171" font-size="10" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">digital_signature</text>
+      <text x="817" y="182" fill="#93a1b8" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">RSA-PSS</text>
+      <text x="817" y="195" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">hmac_auth.py</text>
+      <text x="817" y="208" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">detached signatures</text>
+
+      <text x="450" y="270" fill="#5f6f8a" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Cada módulo importa solo config.py — ninguno depende de otro módulo criptográfico</text>
+    </svg>
+  </div>
+
+  <div class="arch-container fade-in" style="transition-delay:.1s">
+    <div class="arch-title">Jerarquía de confianza X.509</div>
+    <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrX" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#fbbf24" opacity=".9"/>
+        </marker>
+      </defs>
+      <line class="fl" x1="230" y1="80" x2="330" y2="80" stroke="#fbbf24" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrX)"/>
+      <line class="fl" x1="560" y1="80" x2="660" y2="80" stroke="#34d399" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrX)"/>
+
+      <rect x="10" y="40" width="220" height="80" rx="10" fill="#101526" stroke="#fbbf24" stroke-width="2"/>
+      <text x="120" y="68" fill="#fbbf24" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">AC RAÍZ (AC1)</text>
+      <text x="120" y="86" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">autofirmada · 10 años</text>
+      <text x="120" y="99" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">BasicConstraints ca=True, path_length=1</text>
+
+      <rect x="330" y="40" width="230" height="80" rx="10" fill="#101526" stroke="#34d399" stroke-width="2"/>
+      <text x="445" y="68" fill="#34d399" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">AC SUBORDINADA (AC2)</text>
+      <text x="445" y="86" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">firmada por AC1 · 5 años</text>
+      <text x="445" y="99" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">BasicConstraints ca=True, path_length=0</text>
+
+      <rect x="660" y="40" width="190" height="80" rx="10" fill="#101526" stroke="#60a5fa" stroke-width="2"/>
+      <text x="755" y="68" fill="#60a5fa" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">USUARIO</text>
+      <text x="755" y="86" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">firmado por AC2 · 1 año</text>
+      <text x="755" y="99" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">ExtendedKeyUsage: clientAuth, email</text>
+
+      <text x="430" y="170" fill="#5f6f8a" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">path_length=0 en AC2 impide crear más CAs por debajo: la cadena queda fija en dos niveles</text>
+      <text x="430" y="188" fill="#5f6f8a" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">verify_certificate_chain() recorre la cadena hacia arriba verificando firma + vigencia en cada eslabón</text>
+    </svg>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ TECH STACK ══════════════════════════════════════════════ -->
+<section id="stack">
+  <div class="section-header fade-in">
+    <span class="section-label">04 · Stack tecnológico</span>
+    <h2>Python de orquestación,<br>OpenSSL bajo el capó</h2>
+  </div>
+  <div class="stack-grid">
+    <div class="stack-card fade-in">
+      <div class="stack-cat">Lenguaje</div>
+      <div class="stack-name">Python 3</div>
+      <div class="stack-desc">CLI interactiva, gestión de sesión y persistencia en disco (JSON, PEM, binarios <code>.enc</code>).</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.07s">
+      <div class="stack-cat">Primitivas criptográficas</div>
+      <div class="stack-name">cryptography</div>
+      <div class="stack-desc">Wrapper de Python sobre OpenSSL. Aporta <code>x509</code>, <code>AESGCM</code>, <code>rsa</code>, <code>padding</code> (OAEP/PSS) y <code>PBKDF2HMAC</code>.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.14s">
+      <div class="stack-cat">Formato de claves</div>
+      <div class="stack-name">PEM / PKCS#8</div>
+      <div class="stack-desc">Todas las claves privadas se serializan en PKCS#8 y se cifran con <code>BestAvailableEncryption</code> usando la contraseña del propietario.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.21s">
+      <div class="stack-cat">Autenticación</div>
+      <div class="stack-name">hashlib.pbkdf2_hmac</div>
+      <div class="stack-desc">Derivación de contraseñas con HMAC-SHA256, 600.000 iteraciones (recomendación OWASP 2023) y salt de 32 bytes por usuario.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.28s">
+      <div class="stack-cat">Comparaciones seguras</div>
+      <div class="stack-name">secrets.compare_digest</div>
+      <div class="stack-desc">Usado tanto para comparar hashes de contraseña como HMACs, evitando fugas de información por <em>timing attacks</em>.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.35s">
+      <div class="stack-cat">Testing</div>
+      <div class="stack-name">unittest</div>
+      <div class="stack-desc">7 suites, 1.404 líneas de test, cubriendo PKI, autenticación, cifrado simétrico/asimétrico, firmas y HMAC.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ PIPELINE — CIFRADO HÍBRIDO ═══════════════════════════════ -->
+<section id="pipeline">
+  <div class="section-header fade-in">
+    <span class="section-label v2">05 · El pipeline de aseguramiento de documentos</span>
+    <h2>Firmar antes de cifrar,<br>y proteger cada clave con RSA</h2>
+    <p>Así es exactamente como <code>upload_document()</code> transforma un archivo en
+    <code>.enc</code> + <code>.sig</code> + <code>.meta</code>.</p>
+  </div>
+
+  <div class="pipeline fade-in">
+    <div class="pipeline-step">
+      <div class="pipeline-num">01</div>
+      <div class="pipeline-body">
+        <h4>Firma digital sobre el documento en claro</h4>
+        <p>Se pide la contraseña de firma y se calcula <code>private_key.sign(data, PSS(MGF1(SHA-256), salt_length=MAX), SHA-256)</code> sobre el contenido original. Esto es lo que garantiza el no repudio: solo esa clave privada pudo generar esa firma.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">02</div>
+      <div class="pipeline-body">
+        <h4>Generación de una clave AES-256 efímera</h4>
+        <p><code>os.urandom(32)</code> genera una clave simétrica de un solo uso, exclusiva para este documento.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">03</div>
+      <div class="pipeline-body">
+        <h4>Cifrado del contenido con AES-GCM</h4>
+        <p>Un nonce de 96 bits cifra el documento; GCM produce además un tag de 128 bits que autentica el propio ciphertext. El resultado (<code>nonce + ciphertext + tag</code>) se escribe como <code>&lt;archivo&gt;.enc</code>.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">04</div>
+      <div class="pipeline-body">
+        <h4>Encapsulación de la clave AES con RSA-OAEP (KEM)</h4>
+        <p>La clave pública del destinatario (extraída de su certificado) cifra la clave AES de 32 bytes. Solo su clave privada podrá recuperarla.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">05</div>
+      <div class="pipeline-body">
+        <h4>HMAC independiente sobre el criptograma</h4>
+        <p>Se genera una segunda clave aleatoria (HMAC-SHA256) y se calcula un HMAC sobre <code>encrypted_document</code>. Esta clave HMAC también se cifra con RSA-OAEP, igual que la clave AES: una capa de integridad separada de la que ya ofrece GCM.</p>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">06</div>
+      <div class="pipeline-body">
+        <h4>Persistencia de los tres artefactos</h4>
+        <p><code>&lt;archivo&gt;.enc</code> (contenido cifrado), <code>&lt;archivo&gt;.sig</code> (firma binaria detached) y <code>&lt;archivo&gt;.meta</code> (JSON con las claves cifradas en hexadecimal y el tag HMAC), todo en <code>data/documents/&lt;usuario&gt;/</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ PKI EN DETALLE ═══════════════════════════════════════════ -->
+<section id="pki">
+  <div class="section-header fade-in">
+    <span class="section-label">06 · La PKI en detalle</span>
+    <h2>Por qué dos niveles de Autoridad<br>de Certificación, y no uno</h2>
+  </div>
+
+  <div class="module-grid">
+    <div class="formula-card fade-in">
+      <div class="f-title">Extensiones X.509 de cada CA</div>
+      <div class="f-math">AC Raíz:
+  BasicConstraints(ca=True, path_length=1)
+  KeyUsage: key_cert_sign, crl_sign
+  → puede firmar UNA capa de CAs por debajo
+
+AC Subordinada:
+  BasicConstraints(ca=True, path_length=0)
+  KeyUsage: key_cert_sign, crl_sign
+  → NO puede firmar más CAs (solo usuarios)
+
+Usuario:
+  ExtendedKeyUsage: CLIENT_AUTH, EMAIL_PROTECTION
+  SubjectAlternativeName: email del usuario</div>
+      <p>El <code>path_length</code> es lo que impide, por diseño, que la cadena de confianza
+      crezca más allá de Raíz → Subordinada → Usuario. Un sistema que no entienda estas
+      extensiones críticas debe rechazar el certificado directamente.</p>
+    </div>
+
+    <div class="formula-card fade-in" style="transition-delay:.1s">
+      <div class="f-title">¿Por qué separar Raíz y Subordinada?</div>
+      <p>La clave privada de la <strong>AC Raíz</strong> solo se usa una vez: para firmar el
+      certificado de la AC Subordinada. Después de eso, puede permanecer cifrada y sin usarse
+      —en un sistema real, incluso desconectada de la red (<em>air-gapped</em>).</p>
+      <p>Todas las operaciones frecuentes (emitir certificados de usuario) las realiza la
+      <strong>AC Subordinada</strong>. Si su clave privada se viera comprometida, bastaría con
+      revocarla y emitir una nueva subordinada: la Raíz —el ancla de confianza real— nunca
+      estuvo expuesta.</p>
+      <p>Es la misma lógica que usan las CAs públicas de Internet (DigiCert, Let's Encrypt):
+      nunca firman certificados de servidor directamente con su clave raíz.</p>
+    </div>
+  </div>
+
+  <div class="module-grid" style="margin-top:1.4rem;">
+    <div class="formula-card fade-in">
+      <div class="f-title">Verificación de la cadena — <code>verify_certificate_chain()</code></div>
+      <div class="code-block"><span class="cm"># 1. La AC Subordinada firmó realmente este certificado</span>
+sub_ca_public_key.verify(
+    user_cert.signature,
+    user_cert.tbs_certificate_bytes,
+    padding.PKCS1v15(),
+    user_cert.signature_hash_algorithm,
+)
+
+<span class="cm"># 2. La AC Raíz firmó realmente a la Subordinada</span>
+root_ca_public_key.verify(
+    sub_ca_cert.signature,
+    sub_ca_cert.tbs_certificate_bytes, ...
+)
+
+<span class="cm"># 3. Ningún certificado de la cadena ha expirado</span>
+<span class="kw">if</span> user_cert.not_valid_before &gt; now <span class="kw">or</span> ...</div>
+    </div>
+    <div class="formula-card fade-in" style="transition-delay:.1s">
+      <div class="f-title">Contraseñas de usuario — PBKDF2</div>
+      <div class="f-math">salt = secrets.token_bytes(32)
+
+hash = PBKDF2-HMAC-SHA256(
+  password, salt,
+  iterations = 600.000,
+  dklen = 32
+)</div>
+      <p>600.000 iteraciones es la recomendación de OWASP (2023) para PBKDF2-HMAC-SHA256. La
+      comparación en el login usa <code>secrets.compare_digest()</code> en lugar de <code>==</code>
+      para no filtrar información por diferencias de tiempo de ejecución.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ RETOS TÉCNICOS ════════════════════════════════════════════ -->
+<section id="challenges">
+  <div class="section-header fade-in">
+    <span class="section-label">07 · Retos técnicos</span>
+    <h2>Decisiones de diseño criptográfico</h2>
+  </div>
+
+  <div class="challenges-grid">
+    <div class="ch-card fade-in">
+      <div class="ch-header"><div class="ch-num">RETO 01</div><div class="ch-title">Firmar antes de cifrar, no después</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">El orden importa: la firma RSA-PSS se calcula sobre el documento en claro <em>antes</em> del cifrado AES-GCM. Si se firmara el ciphertext, cualquiera con el documento cifrado (sin descifrarlo) podría verificar quién lo firmó, filtrando metadatos innecesarios.</div>
+        <div class="code-block">signature = signature_manager.sign_document(
+    original_data, username, sign_password
+)
+<span class="cm"># ... solo después:</span>
+encrypted_document = sym_encryptor.encrypt(
+    original_data, sym_key
+)</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.1s">
+      <div class="ch-header"><div class="ch-num">RETO 02</div><div class="ch-title">Dos claves cifradas, no solo la de AES</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">GCM ya autentica su propio ciphertext, pero el proyecto añade además un HMAC-SHA256 independiente sobre <code>encrypted_document</code>, con una clave separada que también se protege con RSA-OAEP. Dos mecanismos de integridad que no comparten clave.</div>
+        <div class="code-block">hmac_key = hmac_manager.generate_key()
+hmac_tag = hmac_manager.generate_hmac(
+    encrypted_document, hmac_key
+)
+encrypted_hmac_key = asym_encryptor.encrypt(
+    hmac_key, public_key  <span class="cm"># mismo KEM que la clave AES</span>
+)</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.2s">
+      <div class="ch-header"><div class="ch-num">RETO 03</div><div class="ch-title">Comparaciones resistentes a timing attacks</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Comparar hashes de contraseña o HMACs con <code>==</code> puede filtrar información: Python compara byte a byte y sale en cuanto encuentra una diferencia, lo que produce tiempos de respuesta medibles. La solución usa <code>secrets.compare_digest()</code> en ambos casos.</div>
+        <div class="code-block">is_valid = secrets.compare_digest(
+    provided_hash, stored_hash
+)
+<span class="cm"># mismo patrón en HmacManager.verify_hmac()</span></div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.3s">
+      <div class="ch-header"><div class="ch-num">RETO 04</div><div class="ch-title">RSA-PSS frente a PKCS1v15 para firmar</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Las firmas de usuario usan PSS (Probabilistic Signature Scheme), que introduce aleatoriedad (<em>salt</em>) en cada firma —dos firmas del mismo documento con la misma clave son distintas byte a byte—. La verificación de la cadena de certificados sí usa PKCS1v15 porque X.509 exige ese esquema por estándar.</div>
+        <div class="code-block">private_key.sign(
+    data,
+    padding.PSS(
+        mgf=padding.MGF1(hashes.SHA256()),
+        salt_length=padding.PSS.MAX_LENGTH
+    ),
+    hashes.SHA256()
+)</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.4s">
+      <div class="ch-header"><div class="ch-num">RETO 05</div><div class="ch-title">Claves privadas de CA cifradas en reposo</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Tanto la clave de la AC Raíz como la de la AC Subordinada se serializan con <code>BestAvailableEncryption(password)</code> en formato PKCS#8. Sin la contraseña correspondiente, ni siquiera el propio sistema puede cargar esas claves desde disco.</div>
+        <div class="code-block">encryption = serialization.BestAvailableEncryption(
+    password.encode(<span class="st">'utf-8'</span>)
+) <span class="kw">if</span> password <span class="kw">else</span> serialization.NoEncryption()
+
+private_key.private_bytes(
+    encoding=Encoding.PEM,
+    format=PrivateFormat.PKCS8,
+    encryption_algorithm=encryption
+)</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.5s">
+      <div class="ch-header"><div class="ch-num">RETO 06</div><div class="ch-title">Menús progresivos según el estado del usuario</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">La CLI no muestra "Subir y cifrar documento" hasta que el usuario tiene par de claves <em>y</em> certificado emitido. El menú se reconstruye dinámicamente a partir de <code>has_keypair</code> y <code>certificate_issued</code>, guiando al usuario por el flujo correcto sin necesitar documentación externa.</div>
+        <div class="code-block"><span class="kw">if</span> <span class="kw">not</span> has_keys:
+    print(<span class="st">"2. Generar mi par de claves"</span>)
+<span class="kw">elif</span> <span class="kw">not</span> has_cert:
+    print(<span class="st">"2. Solicitar certificado digital"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">"2. Subir, Firmar y Cifrar documento"</span>)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ TESTING ════════════════════════════════════════════════ -->
+<section id="testing">
+  <div class="section-header fade-in">
+    <span class="section-label v2">08 · Cobertura de pruebas</span>
+    <h2>Verificar criptografía significa<br>probar también los casos de fallo</h2>
+    <p>La suite no solo comprueba que cifrar y descifrar funciona: comprueba que un tag
+    manipulado, una contraseña incorrecta o un certificado caducado se detectan correctamente.</p>
+  </div>
+  <div class="test-grid fade-in">
+    <div class="test-card"><div class="tc-n">552</div><div class="tc-l">líneas · test_pki_manager.py</div></div>
+    <div class="test-card"><div class="tc-n">469</div><div class="tc-l">líneas · test_auth.py</div></div>
+    <div class="test-card"><div class="tc-n">130</div><div class="tc-l">líneas · test_digital_signature.py</div></div>
+    <div class="test-card"><div class="tc-n">89</div><div class="tc-l">líneas · test_key_manager.py</div></div>
+    <div class="test-card"><div class="tc-n">63</div><div class="tc-l">líneas · test_cifrado_simetrico.py</div></div>
+    <div class="test-card"><div class="tc-n">51</div><div class="tc-l">líneas · test_cifrado_asimetrico.py</div></div>
+    <div class="test-card"><div class="tc-n">50</div><div class="tc-l">líneas · test_hmac_auth.py</div></div>
+    <div class="test-card" style="border-left-color:var(--accent2)"><div class="tc-n" style="color:var(--accent2)">42/42</div><div class="tc-l">tests · python -m unittest discover</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ LIMITACIONES ════════════════════════════════════════════ -->
+<section id="limitations">
+  <div class="section-header fade-in">
+    <span class="section-label">09 · Limitaciones</span>
+    <h2>Lo que esta PKI no pretende ser</h2>
+  </div>
+  <div class="future-grid fade-in">
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Base de datos de usuarios sin concurrencia</div>
+      <div class="f-desc"><code>users.json</code> no ofrece control de concurrencia seguro: dos escrituras simultáneas podrían corromperse mutuamente. No apto para múltiples instancias en paralelo.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Las CAs residen en el mismo sistema de archivos</div>
+      <div class="f-desc">La separación Raíz/Subordinada es lógica, no física. En una PKI de producción, la AC Raíz debería vivir en un entorno aislado (idealmente offline).</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Sin lista de revocación de certificados (CRL)</div>
+      <div class="f-desc">Aunque las CAs tienen permiso <code>crl_sign</code>, el sistema no implementa la emisión ni comprobación de CRLs: un certificado de usuario comprometido no puede invalidarse antes de su expiración natural.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Interacción puramente secuencial por terminal</div>
+      <div class="f-desc">Sin GUI ni API: todo el flujo bloquea en <code>stdin</code> dentro del bucle principal, lo que descarta su uso como servicio o backend de otra aplicación tal cual está.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-brand">SECURESEND · PKI &amp; CIFRADO HÍBRIDO</div>
+  <div class="footer-stack">
+    <span class="badge">Python 3</span>
+    <span class="badge">cryptography</span>
+    <span class="badge">X.509</span>
+    <span class="badge">AES-GCM · RSA</span>
+  </div>
+  <p>UC3M · Criptografía Aplicada &amp; Seguridad · Jorge Condado Carballo</p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+  const navLinks = document.querySelectorAll('.template-nav a');
+  const sections = document.querySelectorAll('section[id]');
+  const navIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(s => navIO.observe(s));
+
+  navLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+</body>
+</html>

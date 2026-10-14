@@ -1,0 +1,77 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e27;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1f3a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="codeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4ade80;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="800" height="450" fill="url(#bgGrad)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.1">
+    <line x1="0" y1="100" x2="800" y2="100" stroke="#4ade80" stroke-width="1"/>
+    <line x1="0" y1="200" x2="800" y2="200" stroke="#4ade80" stroke-width="1"/>
+    <line x1="0" y1="300" x2="800" y2="300" stroke="#4ade80" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="450" stroke="#4ade80" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="450" stroke="#4ade80" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="450" stroke="#4ade80" stroke-width="1"/>
+  </g>
+  
+  <!-- C Code Block -->
+  <rect x="50" y="80" width="200" height="120" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="2"/>
+  <text x="150" y="110" font-family="monospace" font-size="18" fill="#4ade80" text-anchor="middle" font-weight="bold">C</text>
+  <text x="70" y="140" font-family="monospace" font-size="12" fill="#94a3b8">int a = 10;</text>
+  <text x="70" y="160" font-family="monospace" font-size="12" fill="#94a3b8">main() {</text>
+  <text x="70" y="180" font-family="monospace" font-size="12" fill="#94a3b8">  if(a&gt;5)</text>
+  
+  <!-- Arrow 1 -->
+  <path d="M 260 140 L 300 140" stroke="url(#codeGrad)" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#22d3ee" />
+    </marker>
+  </defs>
+  
+  <!-- Lisp Code Block -->
+  <rect x="300" y="80" width="200" height="120" rx="8" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+  <text x="400" y="110" font-family="monospace" font-size="18" fill="#22d3ee" text-anchor="middle" font-weight="bold">Lisp</text>
+  <text x="320" y="140" font-family="monospace" font-size="12" fill="#94a3b8">(setq a 10)</text>
+  <text x="320" y="160" font-family="monospace" font-size="12" fill="#94a3b8">(defun main()</text>
+  <text x="320" y="180" font-family="monospace" font-size="12" fill="#94a3b8">  (if (&gt; a 5)</text>
+  
+  <!-- Arrow 2 -->
+  <path d="M 510 140 L 550 140" stroke="url(#codeGrad)" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Forth Code Block -->
+  <rect x="550" y="80" width="200" height="120" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+  <text x="650" y="110" font-family="monospace" font-size="18" fill="#f59e0b" text-anchor="middle" font-weight="bold">Forth</text>
+  <text x="570" y="140" font-family="monospace" font-size="12" fill="#94a3b8">variable v_a</text>
+  <text x="570" y="160" font-family="monospace" font-size="12" fill="#94a3b8">: main</text>
+  <text x="570" y="180" font-family="monospace" font-size="12" fill="#94a3b8">  v_a @ 5 &gt;</text>
+  
+  <!-- Pipeline arrow at bottom -->
+  <path d="M 150 320 L 650 320" stroke="url(#codeGrad)" stroke-width="4" stroke-dasharray="10,5" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Labels -->
+  <text x="150" y="350" font-family="monospace" font-size="14" fill="#4ade80" text-anchor="middle">Frontend</text>
+  <text x="400" y="350" font-family="monospace" font-size="14" fill="#22d3ee" text-anchor="middle">IR</text>
+  <text x="650" y="350" font-family="monospace" font-size="14" fill="#f59e0b" text-anchor="middle">Backend</text>
+  
+  <!-- Title -->
+  <text x="400" y="50" font-family="monospace" font-size="24" fill="#e2e8f0" text-anchor="middle" font-weight="bold">Multi-Stage Compiler</text>
+  
+  <!-- Tech badges -->
+  <rect x="250" y="380" width="80" height="30" rx="4" fill="#1e293b" stroke="#4ade80" stroke-width="1"/>
+  <text x="290" y="400" font-family="monospace" font-size="12" fill="#4ade80" text-anchor="middle">C</text>
+  
+  <rect x="350" y="380" width="100" height="30" rx="4" fill="#1e293b" stroke="#22d3ee" stroke-width="1"/>
+  <text x="400" y="400" font-family="monospace" font-size="12" fill="#22d3ee" text-anchor="middle">Bison</text>
+  
+  <rect x="470" y="380" width="100" height="30" rx="4" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="520" y="400" font-family="monospace" font-size="12" fill="#f59e0b" text-anchor="middle">Gforth</text>
+</svg>

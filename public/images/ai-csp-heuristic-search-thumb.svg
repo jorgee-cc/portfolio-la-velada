@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Binairo CSP and A* Search Engine Thumbnail</title>
+  <desc id="desc">Abstract thumbnail with a Binairo board and a path-finding route over a dark technical background.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#08111f"/>
+      <stop offset="55%" stop-color="#0b1730"/>
+      <stop offset="100%" stop-color="#090d18"/>
+    </linearGradient>
+    <linearGradient id="cyanGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.65"/>
+    </linearGradient>
+    <linearGradient id="violetGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.65"/>
+    </linearGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="930" cy="160" r="150" fill="#38bdf8" opacity="0.12" filter="url(#blur)"/>
+  <circle cx="270" cy="520" r="180" fill="#a78bfa" opacity="0.10" filter="url(#blur)"/>
+  <g opacity="0.12" stroke="#94a3b8" stroke-width="1">
+    <path d="M0 90H1200"/>
+    <path d="M0 180H1200"/>
+    <path d="M0 270H1200"/>
+    <path d="M0 360H1200"/>
+    <path d="M0 450H1200"/>
+    <path d="M0 540H1200"/>
+    <path d="M120 0V675"/>
+    <path d="M240 0V675"/>
+    <path d="M360 0V675"/>
+    <path d="M480 0V675"/>
+    <path d="M600 0V675"/>
+    <path d="M720 0V675"/>
+    <path d="M840 0V675"/>
+    <path d="M960 0V675"/>
+    <path d="M1080 0V675"/>
+  </g>
+
+  <g transform="translate(88 92)">
+    <rect x="0" y="0" width="440" height="220" rx="28" fill="#0b1324" stroke="#24324f" stroke-width="2"/>
+    <text x="34" y="44" fill="#7dd3fc" font-family="Rajdhani, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="4">BINAIRO CSP</text>
+    <text x="34" y="78" fill="#94a3b8" font-family="IBM Plex Mono, monospace" font-size="14">X / O / .  •  Balance  •  No consecutivos</text>
+
+    <g transform="translate(34 102)">
+      <rect x="0" y="0" width="132" height="28" rx="8" fill="#111b2f" stroke="#334155"/>
+      <rect x="140" y="0" width="132" height="28" rx="8" fill="#111b2f" stroke="#334155"/>
+      <rect x="280" y="0" width="132" height="28" rx="8" fill="#111b2f" stroke="#334155"/>
+      <rect x="0" y="36" width="132" height="28" rx="8" fill="#111b2f" stroke="#334155"/>
+      <rect x="140" y="36" width="132" height="28" rx="8" fill="#111b2f" stroke="#334155"/>
+      <rect x="280" y="36" width="132" height="28" rx="8" fill="#111b2f" stroke="#334155"/>
+      <text x="66" y="19" text-anchor="middle" fill="#c4b5fd" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700">X X O</text>
+      <text x="206" y="19" text-anchor="middle" fill="#7dd3fc" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700">O X O</text>
+      <text x="346" y="19" text-anchor="middle" fill="#c4b5fd" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700">X O X</text>
+      <text x="66" y="55" text-anchor="middle" fill="#7dd3fc" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700">O X X</text>
+      <text x="206" y="55" text-anchor="middle" fill="#c4b5fd" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700">X O O</text>
+      <text x="346" y="55" text-anchor="middle" fill="#7dd3fc" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700">O X X</text>
+    </g>
+  </g>
+
+  <g transform="translate(648 108)">
+    <rect x="0" y="0" width="452" height="318" rx="28" fill="#0b1324" stroke="#24324f" stroke-width="2"/>
+    <text x="34" y="46" fill="#38bdf8" font-family="Rajdhani, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="3">A* SEARCH ENGINE</text>
+    <text x="34" y="78" fill="#94a3b8" font-family="IBM Plex Mono, monospace" font-size="14">C++17  •  Haversine  •  Dial Queue</text>
+
+    <path d="M64 242C118 184 170 160 220 170C268 180 312 130 372 86" fill="none" stroke="url(#cyanGlow)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M64 242C118 184 170 160 220 170C268 180 312 130 372 86" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="6 10" opacity="0.55"/>
+
+    <g transform="translate(56 210)">
+      <circle cx="8" cy="32" r="13" fill="#38bdf8" opacity="0.95"/>
+      <circle cx="8" cy="32" r="5" fill="#08111f"/>
+      <circle cx="120" cy="12" r="13" fill="#a78bfa" opacity="0.95"/>
+      <circle cx="120" cy="12" r="5" fill="#08111f"/>
+      <circle cx="236" cy="22" r="13" fill="#38bdf8" opacity="0.95"/>
+      <circle cx="236" cy="22" r="5" fill="#08111f"/>
+      <circle cx="352" cy="-24" r="13" fill="#22c55e" opacity="0.95"/>
+      <circle cx="352" cy="-24" r="5" fill="#08111f"/>
+    </g>
+
+    <g transform="translate(34 124)">
+      <rect x="0" y="0" width="120" height="44" rx="12" fill="#101b32" stroke="#23314a"/>
+      <rect x="132" y="0" width="120" height="44" rx="12" fill="#101b32" stroke="#23314a"/>
+      <rect x="264" y="0" width="120" height="44" rx="12" fill="#101b32" stroke="#23314a"/>
+      <text x="60" y="28" text-anchor="middle" fill="#93c5fd" font-family="IBM Plex Mono, monospace" font-size="12">g(n)+h(n)</text>
+      <text x="192" y="28" text-anchor="middle" fill="#c4b5fd" font-family="IBM Plex Mono, monospace" font-size="12">bucket queue</text>
+      <text x="324" y="28" text-anchor="middle" fill="#86efac" font-family="IBM Plex Mono, monospace" font-size="12">optimal path</text>
+    </g>
+  </g>
+
+  <g transform="translate(88 408)">
+    <rect x="0" y="0" width="1012" height="176" rx="26" fill="#0b1324" stroke="#24324f" stroke-width="2"/>
+    <text x="34" y="42" fill="#a78bfa" font-family="Rajdhani, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="3">CASE STUDY</text>
+    <text x="34" y="76" fill="#e2e8f0" font-family="Rajdhani, Arial, sans-serif" font-size="34" font-weight="700">Heuristic search + constraint solving on real-world data</text>
+    <text x="34" y="112" fill="#94a3b8" font-family="IBM Plex Mono, monospace" font-size="15">Python orchestration · CSP modeling · C++ native solver · DIMACS road graphs</text>
+
+    <g transform="translate(760 34)">
+      <rect x="0" y="0" width="214" height="108" rx="18" fill="#101b32" stroke="#23314a"/>
+      <text x="22" y="31" fill="#7dd3fc" font-family="IBM Plex Mono, monospace" font-size="13">A* speed</text>
+      <text x="22" y="56" fill="#e2e8f0" font-family="Rajdhani, Arial, sans-serif" font-size="28" font-weight="700">1.16M</text>
+      <text x="22" y="82" fill="#94a3b8" font-family="IBM Plex Mono, monospace" font-size="13">nodes / second</text>
+    </g>
+  </g>
+</svg>

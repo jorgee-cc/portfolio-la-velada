@@ -1,0 +1,58 @@
+---
+import SectionHeader from './ui/SectionHeader.astro'
+import { rounds } from '../data/content'
+
+const toneText: Record<string, string> = {
+  red: 'text-[var(--color-ring-red)]',
+  gold: 'text-[var(--color-belt-gold)]',
+  blue: 'text-[var(--color-ring-blue)]',
+}
+const toneBorder: Record<string, string> = {
+  red: 'hover:border-[var(--color-ring-red)]/50',
+  gold: 'hover:border-[var(--color-belt-gold)]/50',
+  blue: 'hover:border-[var(--color-ring-blue)]/50',
+}
+---
+
+<section id="reto" class="relative z-10 border-t border-[var(--color-line)] py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+    <SectionHeader kicker="El reto · A doce asaltos" class="mb-14">
+      Nadie firma un cartel<br /><span class="text-fire">sin ver la pelea</span>
+      <span slot="subtitle">
+        Dirigir la tecnología de La Velada no es hacer una web bonita. Es ganar seis asaltos
+        seguidos sin margen de error, con todo el mundo mirando. Este es mi plan para cada round.
+      </span>
+    </SectionHeader>
+
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        rounds.map((r) => (
+          <article data-reveal class={`card group relative overflow-hidden p-6 ${toneBorder[r.tone]}`}>
+            <span
+              class={`pointer-events-none absolute -right-3 -top-6 font-head text-8xl opacity-10 ${toneText[r.tone]}`}
+              aria-hidden="true"
+            >
+              {r.n}
+            </span>
+            <div class="flex items-center gap-3">
+              <span class={`font-mono text-xs tracking-[0.25em] ${toneText[r.tone]}`}>ROUND {r.n}</span>
+              <span class="rule-belt flex-1 opacity-40"></span>
+            </div>
+            <h3 class="mt-4 font-head text-2xl text-[var(--color-bone)]">{r.name}</h3>
+
+            <div class="mt-5 space-y-4 text-sm">
+              <div>
+                <p class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-faint)]">Lo que exige</p>
+                <p class="mt-1 text-[var(--color-muted)]">{r.demand}</p>
+              </div>
+              <div>
+                <p class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-faint)]">Mi jugada</p>
+                <p class="mt-1 text-[var(--color-bone)]">{r.play}</p>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

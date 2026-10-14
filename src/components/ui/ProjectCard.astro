@@ -1,0 +1,44 @@
+---
+import Tag from './Tag.astro'
+import type { Project } from '../../data/projects'
+
+interface Props {
+  project: Project
+  cta?: string
+}
+
+const { project, cta = 'Ver combate' } = Astro.props
+---
+
+<article data-reveal class="card flex flex-col overflow-hidden p-0">
+  <div class="relative aspect-video overflow-hidden border-b border-[var(--color-line)]">
+    <img
+      src={project.img}
+      alt={project.title}
+      class="h-full w-full object-cover opacity-90"
+      width="800"
+      height="450"
+      loading="lazy"
+      decoding="async"
+    />
+    <span
+      class="absolute left-3 top-3 rounded-full border border-[var(--color-line)] bg-[var(--color-void)]/80 px-2.5 py-1 font-mono text-[9px] tracking-[0.2em] text-[var(--color-belt-gold)] backdrop-blur"
+    >
+      {project.tag}
+    </span>
+  </div>
+  <div class="flex flex-1 flex-col p-6">
+    <h3 class="font-head text-lg text-[var(--color-bone)]">{project.title}</h3>
+    <p class="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-muted)]">{project.desc}</p>
+    <div class="mt-4 flex flex-wrap gap-1.5">
+      {project.tags.map((t) => <Tag size="sm" variant="plain">{t}</Tag>)}
+    </div>
+    <a
+      href={project.link}
+      {...project.external ? { target: '_blank', rel: 'noreferrer' } : {}}
+      class="mt-4 inline-flex items-center gap-2 font-cond text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)] transition-colors hover:text-[var(--color-bone)]"
+    >
+      {cta} <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</article>

@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalleresOja — Portfolio</title>
+<meta name="description" content="TalleresOja — plataforma de citas para taller mecánico en producción. Flask, PostgreSQL, n8n, Coolify. Seguridad auditada, concurrencia verificada en PostgreSQL, cumplimiento RGPD y 186 tests.">
+<meta name="author" content="Jorge Condado">
+<meta property="og:title" content="TalleresOja — Proyecto Full-Stack en Producción">
+<meta property="og:description" content="Full-stack en producción: sesiones revocables, reautenticación de admin en servidor, control de concurrencia verificado en PostgreSQL, RGPD, logs de auditoría y 186 tests.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0b0c;
+    --bg-2:      #111114;
+    --bg-3:      #17171a;
+    --border:    #26262a;
+    --border-hi: #35333a;
+    --text:      #e6e7eb;
+    --muted:     #9ca3af;
+    --accent:    #a855f7; /* purple-500 */
+    --accent2:   #06b6d4; /* cyan-500 */
+    --accent-dim:#5b21b6;
+    --accent-lo: rgba(168,85,247,0.06);
+    --accent2-lo: rgba(6,182,212,0.04);
+    --green:     #3dba7a;
+    --green-lo:  rgba(61,186,122,0.08);
+    --red:       #e85555;
+    --blue:      #5b9cf6;
+    --blue-lo:   rgba(91,156,246,0.08);
+    --radius:    8px;
+    --radius-lg: 14px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── OJA PORTFOLIO HEADER ──────────────────────────────── */
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(168,85,247,0.1);
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .site-header-inner {
+    max-width: 1280px; /* max-w-7xl */
+    margin: 0 auto;
+    padding: 1rem 1.5rem; /* px-6 py-4 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  @media (min-width: 640px) {
+    .site-header-inner { padding: 1rem 3rem; } /* sm:px-12 */
+  }
+
+  .site-header-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(ellipse at right, rgba(88,28,135,0.2), #000, #000);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .site-header-left {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .site-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .site-brand-j, .site-brand-c {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 900; /* font-black */
+    text-transform: uppercase;
+    letter-spacing: -0.025em; /* tracking-tight */
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .site-brand-j { color: #ffffff; }
+
+  .site-brand-c {
+    background: linear-gradient(to right, #c084fc, #e879f9); /* from-purple-400 to-fuchsia-400 */
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .template-nav { display:flex; align-items:center; gap:1rem; margin-left:1.5rem; }
+  .template-nav a { color:var(--muted); font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:600; text-decoration:none; transition:color .2s; }
+  .template-nav a:hover { color:var(--text); }
+
+  .site-header-right {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .github-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(168,85,247,0.3);
+    background: rgba(168,85,247,0.1);
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    color: #d8b4fe; /* text-purple-300 */
+    box-shadow: 0 0 15px rgba(168,85,247,0.2);
+    transition: all 0.3s;
+    text-decoration: none;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .github-btn:hover {
+    border-color: rgba(168,85,247,0.5);
+    background: rgba(168,85,247,0.2);
+    box-shadow: 0 0 30px rgba(168,85,247,0.4);
+    transform: scale(1.05);
+  }
+
+  .github-btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .github-text {
+    display: none;
+  }
+  .linkedin-text { display: inline; }
+
+  @media (min-width: 640px) {
+    .github-text { display: inline; }
+  }
+  @media (max-width: 1000px) { .template-nav { display:none; } }
+
+  /* ─── HERO ─────────────────────────────────────── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 2rem 4rem;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--border) 39px, var(--border) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--border) 39px, var(--border) 40px);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-lo);
+    border: 1px solid rgba(168,85,247,0.2);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 2.5rem;
+  }
+  .hero-tag::before { content: '//'; opacity: 0.5; }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 span {
+    display: block;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero-desc {
+    font-size: 1.2rem;
+    color: #a09a93;
+    max-width: 600px;
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+  }
+
+  .hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 4rem;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--border-hi);
+    color: #c0bab3;
+    padding: 5px 12px;
+    border-radius: 100px;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    max-width: 960px;
+  }
+
+  .stat {
+    background: var(--bg-2);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── LAYOUT ───────────────────────────────────── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  section {
+    padding: 5rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0.45;
+  }
+
+  h2.section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 3rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── PROBLEM ──────────────────────────────────── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+  }
+
+  .problem-col {
+    background: var(--bg-2);
+    padding: 2rem;
+  }
+
+  .problem-col h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+  .problem-col:first-child h3 { color: var(--red); }
+  .problem-col:last-child h3 { color: var(--green); }
+
+  .problem-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .problem-list li {
+    font-size: 14px;
+    color: #b0aaa3;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .problem-list li::before {
+    content: '×';
+    color: var(--red);
+    font-size: 16px;
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+  .solution-list li::before { content: '✓'; color: var(--green) !important; }
+
+  /* ─── ARCHITECTURE ─────────────────────────────── */
+  .arch-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 3rem;
+  }
+
+  .arch-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2px;
+    background: var(--border);
+  }
+
+  .arch-row:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden; }
+  .arch-row:last-child  { border-radius: 0 0 var(--radius-lg) var(--radius-lg); overflow: hidden; }
+
+  .arch-label {
+    background: var(--bg-3);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .arch-label .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .arch-label span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .arch-content {
+    background: var(--bg-2);
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .arch-content strong {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .arch-content p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 2rem;
+    overflow: hidden;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+
+  .flow-node {
+    background: var(--bg-3);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    text-align: center;
+  }
+  .flow-node .fn-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .flow-node .fn-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .flow-node.accent { border-color: rgba(168,85,247,0.35); background: linear-gradient(90deg, rgba(168,85,247,0.04), rgba(6,182,212,0.02)); }
+  .flow-node.accent .fn-name { color: var(--accent); }
+
+  .flow-arrow {
+    width: 32px;
+    height: 1px;
+    background: var(--border-hi);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .flow-arrow::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid var(--border-hi);
+  }
+
+  /* ─── TECH STACK ───────────────────────────────── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .tech-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .tech-card:hover { border-color: var(--border-hi); }
+
+  .tech-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .tech-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .tech-category {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--border-hi);
+    margin-bottom: 8px;
+  }
+
+  /* ─── FEATURES ─────────────────────────────────── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  .feature-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: var(--border-hi); }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+
+  .feature-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .feature-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* ─── SECURITY ─────────────────────────────────── */
+  .security-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    align-items: start;
+  }
+
+  .security-intro p {
+    color: #a09a93;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .vuln-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  .vuln-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 120px 80px;
+    gap: 2px;
+    background: var(--border);
+  }
+  .vuln-row.header > div {
+    background: var(--bg-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 10px 14px;
+  }
+  .vuln-row > div {
+    background: var(--bg-2);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #b0aaa3;
+    display: flex;
+    align-items: center;
+  }
+  .vuln-sev {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .sev-critica  { background: rgba(232,85,85,0.15);  color: #e85555; border: 1px solid rgba(232,85,85,0.25); }
+  .sev-alta     { background: rgba(168,85,247,0.15); color: var(--accent); border: 1px solid rgba(168,85,247,0.25); }
+  .sev-media    { background: rgba(91,156,246,0.12); color: var(--blue); border: 1px solid rgba(91,156,246,0.25); }
+  .sev-baja     { background: rgba(61,186,122,0.12); color: var(--green); border: 1px solid rgba(61,186,122,0.25); }
+
+  .status-ok {
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .status-doc {
+    color: var(--blue);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .status-progress {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .hcheck-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .hcheck-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 130px;
+    gap: 2px;
+    background: var(--border);
+  }
+  .hcheck-row.header > div {
+    background: var(--bg-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 10px 14px;
+  }
+  .hcheck-row > div {
+    background: var(--bg-2);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #b0aaa3;
+    display: flex;
+    align-items: center;
+  }
+  @media (max-width: 640px) {
+    .hcheck-row { grid-template-columns: 1fr 1fr; }
+    .hcheck-row > div:nth-child(2) { display: none; }
+  }
+
+  .layers {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .layer {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 2px;
+    background: var(--border);
+  }
+  .layer-num {
+    background: var(--bg-3);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .layer-num span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .layer-n {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .layer-body {
+    background: var(--bg-2);
+    padding: 1rem 1.5rem;
+  }
+  .layer-body strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .layer-body p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── CHALLENGES ───────────────────────────────── */
+  .challenge-list { display: flex; flex-direction: column; gap: 24px; }
+
+  .challenge {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .challenge-problem, .challenge-solution {
+    padding: 1.5rem 2rem;
+  }
+  .challenge-problem { background: var(--bg-2); }
+  .challenge-solution { background: var(--bg-3); }
+
+  .challenge-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 10px;
+  }
+  .challenge-problem .challenge-label { color: var(--red); }
+  .challenge-solution .challenge-label { color: var(--green); }
+
+  .challenge h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .challenge p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--bg-3);
+    border: 1px solid var(--border-hi);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* ─── RESULTS ──────────────────────────────────── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 3rem;
+  }
+
+  .result-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .result-card:hover { border-color: rgba(168,85,247,0.28); }
+
+  .result-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.2rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .result-label {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ─── FUTURE ───────────────────────────────────── */
+  .future-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .future-item {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+  .future-item:hover { border-color: var(--border-hi); }
+
+  .future-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent-lo);
+    border: 1px solid rgba(168,85,247,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+
+  .future-item h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .future-item p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── FOOTER ───────────────────────────────────── */
+  footer {
+    padding: 3rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ─── RESPONSIVE ───────────────────────────────── */
+  @media (max-width: 768px) {
+    .site-header-inner { padding: 0.9rem 1rem; }
+    .problem-grid,
+    .security-intro,
+    .challenge,
+    .arch-row  { grid-template-columns: 1fr; }
+    .vuln-row  { grid-template-columns: 1fr 1fr; }
+    .vuln-row > div:nth-child(3),
+    .vuln-row > div:nth-child(4) { display: none; }
+    .flow-diagram { overflow-x: auto; }
+    .layer { grid-template-columns: 80px 1fr; }
+    footer { flex-direction: column; }
+  }
+
+  /* ─── ANIMATIONS ───────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-tag {
+    color: var(--accent);
+    background: linear-gradient(90deg, rgba(168,85,247,0.04), rgba(6,182,212,0.02));
+    border: 1px solid rgba(168,85,247,0.12);
+  }
+
+  .hero-tag,
+  .hero h1,
+  .hero-desc,
+  .hero-badges,
+  .hero-stats {
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero h1      { animation-delay: 0.08s; }
+  .hero-desc    { animation-delay: 0.16s; }
+  .hero-badges  { animation-delay: 0.24s; }
+  .hero-stats   { animation-delay: 0.32s; }
+
+  /* ─── AÑADIDOS v2 ──────────────────────────────── */
+  .hero-cta { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:3rem; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:.65rem 1.25rem; border-radius:9999px; font-size:14px; font-weight:600; text-decoration:none; transition:all .25s; }
+  .btn-primary { background:linear-gradient(90deg,var(--accent),#7c3aed); color:#fff; box-shadow:0 0 24px rgba(168,85,247,.3); }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 0 34px rgba(168,85,247,.5); }
+  .btn-ghost { border:1px solid var(--border-hi); color:var(--text); }
+  .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+  .lead { font-size:15px; color:#a09a93; max-width:760px; line-height:1.75; margin-bottom:2.5rem; }
+  .lead strong { color:var(--text); font-weight:600; }
+  .tag-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .tag { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2); background:var(--accent2-lo); border:1px solid rgba(6,182,212,.2); padding:2px 8px; border-radius:100px; }
+  .tbl { display:flex; flex-direction:column; gap:2px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; margin-bottom:2.5rem; }
+  .tbl-row { display:grid; grid-template-columns:var(--cols,1fr 1fr 1fr); gap:2px; background:var(--border); }
+  .tbl-row > div { background:var(--bg-2); padding:10px 14px; font-size:13px; color:#b0aaa3; line-height:1.5; }
+  .tbl-row.header > div { background:var(--bg-3); font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+  .tbl-row .k { color:var(--text); font-weight:500; }
+  .sub-title { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:2.5rem 0 1rem; }
+  .callout { background:var(--bg-2); border:1px solid var(--border); border-left:3px solid var(--accent2); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; font-size:14px; color:#a09a93; line-height:1.7; margin-bottom:2rem; }
+  .callout strong { color:var(--text); }
+  .future-item.done { opacity:.85; }
+  .note { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:1.5rem; }
+  .template-nav { gap:.9rem; }
+  a:focus-visible, .btn:focus-visible { outline:2px solid var(--accent2); outline-offset:3px; }
+  @media (max-width: 768px) {
+    .tbl-row { grid-template-columns:1fr; }
+    .tbl-row.header { display:none; }
+    .tbl-row > div:not(:first-child) { padding-top:0; font-size:12px; }
+    section { padding:3.5rem 1.25rem; }
+    .hero { padding:6rem 1.25rem 3rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { html{scroll-behavior:auto} .hero-tag,.hero h1,.hero-desc,.hero-badges,.hero-stats{animation:none} }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="site-header-bg"></div>
+    <div class="site-header-left">
+      <a class="site-brand" href="/" aria-label="Ir a la página de inicio">
+        <span class="site-brand-j">Jorge</span>
+        <span class="site-brand-c">Condado</span>
+      </a>
+      <nav class="template-nav" aria-label="Navegación del proyecto">
+        <a href="#arquitectura">Arquitectura</a><a href="#seguridad">Seguridad</a><a href="#concurrencia">Concurrencia</a><a href="#privacidad">RGPD</a><a href="#calidad">Calidad</a><a href="#retos">Retos</a>
+      </nav>
+    </div>
+    <div class="site-header-right">
+      <a href="https://github.com/jorgee-cc" target="_blank" rel="noopener noreferrer" class="github-btn" aria-label="Perfil de GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        <span class="github-text">GitHub</span>
+      </a>
+      <a href="https://www.linkedin.com/in/jorge-condado-carballo-4065bb2b4/" target="_blank" rel="noopener noreferrer" class="github-btn" aria-label="Abrir perfil de LinkedIn">
+        <span class="linkedin-text">LinkedIn</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ═══════════════ HERO ═══════════════ -->
+<section id="hero" class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Full-Stack · Seguridad · En producción</div>
+
+    <h1>Talleres<span>OJA</span></h1>
+
+    <p class="hero-desc">
+      Plataforma de citas para un taller mecánico, diseñada como un sistema de producción: sesiones revocables, reautenticación de administrador en servidor, control de concurrencia verificado en PostgreSQL, cumplimiento RGPD y trazabilidad completa mediante logs de auditoría.
+    </p>
+
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#demo">▶ Ver demo en vídeo</a>
+      <a class="btn btn-ghost" href="#seguridad">Ver decisiones de seguridad</a>
+    </div>
+
+    <div class="hero-badges">
+      <span class="badge">Python 3.12</span>
+      <span class="badge">Flask 3.1</span>
+      <span class="badge">SQLAlchemy 2</span>
+      <span class="badge">PostgreSQL 16</span>
+      <span class="badge">gunicorn</span>
+      <span class="badge">n8n</span>
+      <span class="badge">Coolify · Nixpacks</span>
+      <span class="badge">Traefik</span>
+      <span class="badge">Tailwind</span>
+      <span class="badge">JS vanilla</span>
+      <span class="badge">pytest</span>
+      <span class="badge">RGPD</span>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">186</span><span class="stat-label">Tests automáticos</span></div>
+      <div class="stat"><span class="stat-num">3</span><span class="stat-label">Auditorías internas</span></div>
+      <div class="stat"><span class="stat-num">13</span><span class="stat-label">Carreras de concurrencia cerradas</span></div>
+      <div class="stat"><span class="stat-num">8</span><span class="stat-label">Eventos de notificación</span></div>
+      <div class="stat"><span class="stat-num">~11k</span><span class="stat-label">Líneas (Python, JS, Jinja)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DEMO ═══════════════ -->
+<section id="demo">
+  <div class="section-inner">
+    <div class="section-label">Demo</div>
+    <h2 class="section-title">Demo en vídeo</h2>
+    <video controls preload="none" playsinline poster="/videos/Demo-poster.jpg" style="width:100%;max-width:960px;border-radius:12px;border:1px solid var(--border-hi);display:block;background:#000">
+      <source src="/videos/Demo.mp4" type="video/mp4">
+    </video>
+  </div>
+</section>
+
+<!-- ═══════════════ CONTEXTO ═══════════════ -->
+<section id="contexto">
+  <div class="section-inner">
+    <div class="section-label">01 — Contexto</div>
+    <h2 class="section-title">El Problema Real</h2>
+
+    <p class="lead">
+      Un taller que gestionaba las citas por teléfono. Diseñé y desplegué el sistema completo, de la interfaz al servidor, tratándolo desde el primer día como un servicio expuesto a Internet: <strong>datos personales reales</strong>, un panel de administración y correo transaccional.
+    </p>
+
+    <div class="problem-grid">
+      <div class="problem-col">
+        <h3>Antes</h3>
+        <ul class="problem-list">
+          <li>Citas solo por teléfono, sin historial ni trazabilidad</li>
+          <li>Dobles reservas y cancelaciones de última hora sin control</li>
+          <li>Vehículos sin asociar de forma fiable a sus clientes</li>
+          <li>Sin avisos automáticos al cliente ni al taller</li>
+        </ul>
+      </div>
+      <div class="problem-col">
+        <h3>Después</h3>
+        <ul class="problem-list solution-list">
+          <li>Solicitud online 24/7 con reglas de negocio validadas en servidor</li>
+          <li>Panel de administración con estados de cita y observaciones internas</li>
+          <li>Historial por cliente y vehículos N:M (coche compartido en familia)</li>
+          <li>Notificaciones por evento con reintentos y deduplicación</li>
+          <li>Cancelación del cliente con regla de 24 h aplicada en backend</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARQUITECTURA ═══════════════ -->
+<section id="arquitectura">
+  <div class="section-inner">
+    <div class="section-label">02 — Arquitectura</div>
+    <h2 class="section-title">Cómo Funciona el Sistema</h2>
+
+    <div class="flow-diagram">
+      <div class="flow-step"><div class="flow-node"><span class="fn-label">Cliente</span><span class="fn-name">Navegador</span></div><div class="flow-arrow"></div></div>
+      <div class="flow-step"><div class="flow-node"><span class="fn-label">Proxy</span><span class="fn-name">Traefik · TLS</span></div><div class="flow-arrow"></div></div>
+      <div class="flow-step"><div class="flow-node accent"><span class="fn-label">Backend</span><span class="fn-name">Flask · gunicorn</span></div><div class="flow-arrow"></div></div>
+      <div class="flow-step"><div class="flow-node"><span class="fn-label">Datos</span><span class="fn-name">PostgreSQL</span></div><div class="flow-arrow"></div></div>
+      <div class="flow-step"><div class="flow-node accent"><span class="fn-label">Automatización</span><span class="fn-name">n8n · Webhook</span></div><div class="flow-arrow"></div></div>
+      <div class="flow-step"><div class="flow-node"><span class="fn-label">Salida</span><span class="fn-name">Email</span></div></div>
+    </div>
+
+    <div class="arch-flow">
+      <div class="arch-row">
+        <div class="arch-label"><div class="icon" style="background:var(--accent-lo);color:var(--accent)">⬡</div><span>Core</span></div>
+        <div class="arch-content">
+          <strong>Monolito modular con application factory y Blueprints</strong>
+          <p><code>auth</code>, <code>cliente</code>, <code>admin</code> y <code>legal</code>, con <code>create_app()</code>, modelos SQLAlchemy 2 y utilidades separadas por responsabilidad (seguridad, decoradores, logs, webhook, bloqueo de login, mantenimiento). Sin dependencias externas para CSRF, hashing ni rate limiting: implementados y testeados sobre la stdlib.</p>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label"><div class="icon" style="background:var(--blue-lo);color:var(--blue)">⊞</div><span>Notificaciones</span></div>
+        <div class="arch-content">
+          <strong>Envío asíncrono con cola de reintentos (outbox)</strong>
+          <p>Pool de 4 hilos hacia un único webhook autenticado de n8n. Si falla, el aviso se guarda en <code>notificaciones_fallidas</code> y se reintenta con <strong>backoff exponencial (2 → 120 min) durante 24 h</strong>. Cada evento lleva un <code>id_evento</code> para deduplicar. Los eventos con token (recuperación, verificación) <strong>nunca se persisten en la cola</strong>.</p>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label"><div class="icon" style="background:var(--green-lo);color:var(--green)">▶</div><span>Sesiones</span></div>
+        <div class="arch-content">
+          <strong>Sesión mínima y revocable</strong>
+          <p>La cookie solo contiene <code>user_id</code> y una versión de sesión; nombre y rol se leen siempre de la BD. Incrementar <code>session_version</code> (de forma atómica en SQL) cierra todas las sesiones del usuario: logout, cambio de contraseña, de email, de rol o baja.</p>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label"><div class="icon" style="background:rgba(122,118,114,0.12);color:var(--muted)">⛭</div><span>Infra</span></div>
+        <div class="arch-content">
+          <strong>VPS Hetzner · Coolify · Nixpacks · Traefik</strong>
+          <p>Despliegue continuo desde GitHub. gunicorn con 1 worker y 8 hilos (decisión consciente: rate limiter y scheduler viven en memoria). Un middleware de proxy propio solo acepta <code>X-Forwarded-For</code> si el salto pertenece a redes de confianza. La app <strong>se niega a arrancar</strong> en producción con secretos débiles, sin cookie <code>Secure</code>, con DEBUG o con un dominio sin https.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ STACK ═══════════════ -->
+<section id="stack">
+  <div class="section-inner">
+    <div class="section-label">03 — Stack Tecnológico</div>
+    <h2 class="section-title">Tecnologías Utilizadas</h2>
+
+    <div class="tech-grid">
+      <div class="tech-card"><div class="tech-category">Backend</div><div class="tech-name">Python 3.12 · Flask 3.1</div><p class="tech-desc">Blueprints, application factory, comandos CLI propios (<code>init-db</code>, <code>revocar-sesiones</code>, purgas de conservación).</p></div>
+      <div class="tech-card"><div class="tech-category">Datos</div><div class="tech-name">PostgreSQL · SQLAlchemy 2</div><p class="tech-desc">Bloqueos <code>SELECT … FOR UPDATE</code>, <code>INSERT … ON CONFLICT</code> y <code>UPDATE</code> condicionales. SQLite solo en desarrollo.</p></div>
+      <div class="tech-card"><div class="tech-category">Frontend</div><div class="tech-name">Jinja2 · Tailwind · JS vanilla</div><p class="tech-desc">Sin frameworks: módulos ES6 con <code>fetch</code> y delegación de eventos, compatibles con una CSP que prohíbe JS en línea.</p></div>
+      <div class="tech-card"><div class="tech-category">Automatización</div><div class="tech-name">n8n</div><p class="tech-desc">Webhook único con cabecera de API key; el flujo enruta por tipo de evento y envía el email correspondiente.</p></div>
+      <div class="tech-card"><div class="tech-category">Tareas programadas</div><div class="tech-name">APScheduler</div><p class="tech-desc">Reintentos de notificaciones, purga de cuentas no verificadas (cada hora) y destrucción de datos caducados (diaria).</p></div>
+      <div class="tech-card"><div class="tech-category">Servidor</div><div class="tech-name">gunicorn · Nixpacks</div><p class="tech-desc">Configuración propia que sustituye la cabecera <code>Server</code>; build reproducible sin Dockerfile.</p></div>
+      <div class="tech-card"><div class="tech-category">Infraestructura</div><div class="tech-name">Hetzner · Coolify · Traefik</div><p class="tech-desc">PaaS self-hosted con TLS automático, despliegue desde repositorio privado y Log Drain.</p></div>
+      <div class="tech-card"><div class="tech-category">Calidad</div><div class="tech-name">pytest</div><p class="tech-desc">186 tests: seguridad, concurrencia, privacidad, logs, SEO y verificación contra PostgreSQL real.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FUNCIONALIDADES ═══════════════ -->
+<section id="funcionalidades">
+  <div class="section-inner">
+    <div class="section-label">04 — Funcionalidades</div>
+    <h2 class="section-title">Qué Hace la Aplicación</h2>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-num">CLIENTE</div>
+        <div class="feature-title">Reserva y gestión de citas</div>
+        <p class="feature-desc">Solo lunes a viernes, hasta 90 días de antelación y 3 citas activas por cliente. Historial propio, cancelación con regla de 24 h y protección contra doble clic y peticiones duplicadas.</p>
+        <div class="tag-row"><span class="tag">reglas en servidor</span><span class="tag">anti-IDOR</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">CLIENTE</div>
+        <div class="feature-title">Vehículos N:M con anti-enumeración</div>
+        <p class="feature-desc">Hasta 5 matrículas por cliente. Si una matrícula pertenece a otro usuario, la cita se crea igualmente con una nota interna para el taller: el sistema nunca revela a quién pertenece.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">AUTENTICACIÓN</div>
+        <div class="feature-title">Registro con verificación de email</div>
+        <p class="feature-desc">Verificación obligatoria; el GET solo muestra un botón y la activación es un POST con CSRF, para que los escáneres de correo no consuman el token. Tokens guardados como hash SHA-256 y consumidos de forma atómica.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">AUTENTICACIÓN</div>
+        <div class="feature-title">Login resistente a fuerza bruta</div>
+        <p class="feature-desc">Bloqueo por email+IP con backoff (15 min → 24 h) y bloqueo de cuenta ante ataques distribuidos. El intento se reserva de forma atómica <em>antes</em> de calcular el hash. Salida por reset o desbloqueo desde el panel.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">ADMIN</div>
+        <div class="feature-title">Panel de citas</div>
+        <p class="feature-desc">Confirmar, completar, cambio manual de estado y observaciones internas. Control optimista de edición: si otro administrador modificó el mismo campo, el servidor responde 409 y la UI no queda incoherente.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">ADMIN</div>
+        <div class="feature-title">Gestión de usuarios</div>
+        <p class="feature-desc">Búsqueda por nombre, email, teléfono y matrícula; ficha, cambio de rol, vehículos, reset de contraseña, alta de citas y desbloqueo de cuentas. No se puede degradar ni dar de baja al último administrador.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">ADMIN</div>
+        <div class="feature-title">Reautenticación en el servidor</div>
+        <p class="feature-desc">Todo el panel exige confirmar la contraseña: caduca a los 15 min de inactividad y a las 2 h como máximo. Las peticiones JSON reciben 401 y el frontend solo vuelve a pedirla cuando hace falta.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">SISTEMA</div>
+        <div class="feature-title">Notificaciones por evento</div>
+        <p class="feature-desc">Solicitud, cancelación, aceptación, creación por admin, recuperación, verificación, aviso de cambio de email a la dirección anterior y confirmación de baja con las citas anuladas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">OPERACIÓN</div>
+        <div class="feature-title">Herramientas de mantenimiento</div>
+        <p class="feature-desc">Consola de solo lectura sobre la BD (SQL libre en transacción de solo lectura), comandos CLI para revocar sesiones, hashear emails de logs y ejecutar purgas de conservación.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">WEB</div>
+        <div class="feature-title">Interfaz móvil y SEO técnico</div>
+        <p class="feature-desc">Portada y menú rediseñados para móvil, carga optimizada de imágenes, <code>robots.txt</code>, <code>sitemap.xml</code>, favicon y metadatos de sitio cubiertos por tests.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SEGURIDAD ═══════════════ -->
+<section id="seguridad">
+  <div class="section-inner">
+    <div class="section-label">05 — Ciberseguridad</div>
+    <h2 class="section-title">Seguridad por Diseño y Auditada</h2>
+
+    <p class="lead">
+      Realicé <strong>tres rondas de auditoría</strong> sobre mi propio código (seguridad, concurrencia y una revisión de seguimiento), con más de 28 hallazgos corregidos. Cada corrección tiene un test de regresión que reproduce el fallo. Además, el modelo es de <strong>defensa en profundidad</strong>: ninguna capa es la única barrera.
+    </p>
+
+    <div class="tbl" style="--cols:1.4fr 1.6fr 1fr">
+      <div class="tbl-row header"><div>Riesgo</div><div>Mitigación implementada</div><div>Categoría</div></div>
+      <div class="tbl-row"><div class="k">Stored XSS en paneles</div><div>Escape en todas las salidas, CSP con nonce por petición y <strong>sin JS en línea</strong> (todo en <code>static/js</code>)</div><div>A03 · Inyección</div></div>
+      <div class="tbl-row"><div class="k">CSRF</div><div>Tokens HMAC-SHA256 propios, <code>csrfFetch</code> unificado en el frontend, verificación en todos los POST</div><div>A01 · Control de acceso</div></div>
+      <div class="tbl-row"><div class="k">Escalada y sesiones robadas</div><div><code>session_version</code> revocable, rol leído de la BD (no de la cookie), caducidad de 12 h para admin y reauth en servidor</div><div>A01 / A07</div></div>
+      <div class="tbl-row"><div class="k">Fuerza bruta y relleno de credenciales</div><div>Bloqueo por email+IP con backoff y por cuenta, reserva atómica del intento, PBKDF2-SHA256</div><div>A07 · Autenticación</div></div>
+      <div class="tbl-row"><div class="k">Enumeración de usuarios</div><div>Misma respuesta <strong>y mismo tiempo</strong> en registro, login y recuperación (hash calculado en ambos caminos y tiempo mínimo de respuesta)</div><div>A07</div></div>
+      <div class="tbl-row"><div class="k">Suplantación de IP / X-Forwarded-For</div><div><code>ProxyConfiable</code>: solo acepta cabeceras de proxies en redes de confianza y con el número de saltos esperado</div><div>A05 · Configuración</div></div>
+      <div class="tbl-row"><div class="k">IDOR</div><div>Comprobación de propiedad en cada recurso; 404 indistinguible de «no existe»</div><div>A01</div></div>
+      <div class="tbl-row"><div class="k">Fuga de secretos en logs</div><div>Emails como HMAC, redacción de contraseñas, tokens, cookies y query strings; trazas de BD sin parámetros</div><div>A09 · Logging</div></div>
+      <div class="tbl-row"><div class="k">Configuración insegura en producción</div><div>Fail-fast: la app no arranca con secretos cortos, en modo DEBUG, con dominio sin https o con cookie sin <code>Secure</code></div><div>A05</div></div>
+      <div class="tbl-row"><div class="k">Dependencia de import circular</div><div>Detectado por una prueba que importa cada punto de entrada en un intérprete limpio (pytest no lo veía)</div><div>Robustez</div></div>
+    </div>
+
+    <div class="sub-title">Defensa en profundidad · 5 capas</div>
+    <div class="layers">
+      <div class="layer"><div class="layer-num"><span>Capa</span><span class="layer-n" style="color:var(--muted)">1</span></div><div class="layer-body"><strong>Presentación</strong><p>CSP con nonce · Jinja2 auto-escape · X-Content-Type-Options · X-Frame-Options · Cache-Control: no-store en páginas dinámicas</p></div></div>
+      <div class="layer"><div class="layer-num"><span>Capa</span><span class="layer-n" style="color:var(--blue)">2</span></div><div class="layer-body"><strong>Integridad de petición</strong><p>CSRF HMAC · rate limiting por IP y por usuario · validación de entrada en backend y frontend · bloqueo de IPs por configuración</p></div></div>
+      <div class="layer"><div class="layer-num"><span>Capa</span><span class="layer-n" style="color:var(--accent)">3</span></div><div class="layer-body"><strong>Autenticación y autorización</strong><p>PBKDF2-SHA256 · compare_digest · @login_required / @admin_required / @reauth_required · reautenticación en servidor</p></div></div>
+      <div class="layer"><div class="layer-num"><span>Capa</span><span class="layer-n" style="color:var(--green)">4</span></div><div class="layer-body"><strong>Sesión y transporte</strong><p>Cookie HttpOnly + Secure + SameSite · HSTS · sesiones revocables · caducidad diferenciada por rol</p></div></div>
+      <div class="layer"><div class="layer-num"><span>Capa</span><span class="layer-n" style="color:var(--red)">5</span></div><div class="layer-body"><strong>Infraestructura</strong><p>Traefik TLS · proxy de confianza · UFW · Fail2Ban · Snort IDS/IPS · iptables hashlimit en DOCKER-USER</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CONCURRENCIA ═══════════════ -->
+<section id="concurrencia">
+  <div class="section-inner">
+    <div class="section-label">06 — Fiabilidad</div>
+    <h2 class="section-title">Concurrencia y Consistencia</h2>
+
+    <p class="lead">
+      Un sistema de citas es, en esencia, un problema de condiciones de carrera: dos administradores, un cliente que cancela mientras se confirma, doble clic, reintentos. Auditué <strong>13 escenarios (R1–R13)</strong> y los cerré con mecanismos de base de datos, no con parches en Python.
+    </p>
+
+    <div class="tbl" style="--cols:1.2fr 1.8fr">
+      <div class="tbl-row header"><div>Escenario</div><div>Mecanismo</div></div>
+      <div class="tbl-row"><div class="k">Cambio de estado simultáneo de una cita</div><div><code>UPDATE … WHERE estado IN (…)</code> y comprobación de <code>rowcount</code>. El perdedor recibe <strong>409</strong> y <strong>no se envía notificación</strong></div></div>
+      <div class="tbl-row"><div class="k">Superar el límite de citas activas en paralelo</div><div><code>SELECT … FOR UPDATE</code> sobre el usuario al pedir cita, dar de baja, crear desde admin y emitir tokens</div></div>
+      <div class="tbl-row"><div class="k">Matrículas duplicadas por peticiones paralelas</div><div><code>INSERT … ON CONFLICT DO NOTHING</code> en creación y asociación</div></div>
+      <div class="tbl-row"><div class="k">Sobrescritura de observaciones</div><div>Control optimista: el cliente envía el valor original y el servidor rechaza con 409 si cambió</div></div>
+      <div class="tbl-row"><div class="k">Reutilización de un token de un solo uso</div><div><code>UPDATE … WHERE usado = false</code> atómico; el ganador se decide en la BD</div></div>
+      <div class="tbl-row"><div class="k">Degradar a la vez a dos administradores</div><div>Bloqueo de la lista de admins: siempre queda al menos uno y quien actúa sigue siéndolo</div></div>
+    </div>
+
+    <div class="callout">
+      <strong>Verificado contra PostgreSQL 16 real.</strong> SQLite ignora <code>FOR UPDATE</code>, así que los tests de concurrencia sobre SQLite solo comprobarían que se pide el bloqueo. Preparé una batería específica (<code>tests/test_postgres.py</code>) que se ejecuta contra una BD real y comprobé que <strong>sin el bloqueo, R1, R2 y R9 fallan</strong>: la prueba detecta la ausencia del arreglo.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PRIVACIDAD ═══════════════ -->
+<section id="privacidad">
+  <div class="section-inner">
+    <div class="section-label">07 — Cumplimiento</div>
+    <h2 class="section-title">Privacidad y RGPD</h2>
+
+    <p class="lead">
+      Las decisiones de privacidad se definieron con un asesor legal y se implementaron como comportamiento del sistema, no solo como texto en una página.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-title">Baja con bloqueo</div><p class="feature-desc">La baja no borra: marca la cuenta, anonimiza el email en uso (queda libre para registrarse de nuevo), revoca sesiones y tokens y cancela las citas futuras. La cuenta pasa a ser un 404 en todo el sistema.</p></div>
+      <div class="feature-card"><div class="feature-title">Plazos de conservación</div><p class="feature-desc">Cuentas no verificadas sin citas: borrado a las 48 h. Datos bloqueados: destrucción a los 6 años de la última interacción, mediante tareas programadas que registran un evento de auditoría.</p></div>
+      <div class="feature-card"><div class="feature-title">Consentimiento de cookies</div><p class="feature-desc">Banner con «Configurar cookies» siempre accesible. El mapa de Google solo carga con consentimiento y se retira al instante si se revoca. El logout limpia el almacenamiento local.</p></div>
+      <div class="feature-card"><div class="feature-title">Minimización en logs y cola</div><p class="feature-desc">Sin datos personales en claro en logs; la baja y la destrucción de datos purgan los avisos pendientes del usuario de la cola de notificaciones.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ OBSERVABILIDAD ═══════════════ -->
+<section id="observabilidad">
+  <div class="section-inner">
+    <div class="section-label">08 — Operación</div>
+    <h2 class="section-title">Observabilidad y Respuesta a Incidentes</h2>
+
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-title">Logs JSON estructurados</div><p class="feature-desc">Una línea por evento con <code>ts</code>, <code>level</code>, <code>event</code>, <code>rid</code> (también en la cabecera <code>X-Request-ID</code>), <code>ip</code> y <code>uid</code>: correlación de extremo a extremo.</p></div>
+      <div class="feature-card"><div class="feature-title">Catálogo de eventos</div><p class="feature-desc">Eventos de seguridad con nombre estable (<code>LOGIN_ACCOUNT_LOCKED</code>, <code>UNAUTHORIZED_ADMIN_ACCESS</code>…) documentados junto a guías de investigación y de contención de ataques.</p></div>
+      <div class="feature-card"><div class="feature-title">Privacidad en observabilidad</div><p class="feature-desc">Emails como HMAC con clave dedicada, para poder buscar una cuenta sin almacenarla. Envío a Axiom vía Log Drain de Coolify.</p></div>
+      <div class="feature-card"><div class="feature-title">Herramientas de respuesta</div><p class="feature-desc"><code>BLOCKED_IPS</code> para cortar un ataque sin desplegar, <code>flask revocar-sesiones</code> para cerrar todas las sesiones de una cuenta comprometida.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CALIDAD ═══════════════ -->
+<section id="calidad">
+  <div class="section-inner">
+    <div class="section-label">09 — Calidad</div>
+    <h2 class="section-title">Estrategia de Pruebas</h2>
+
+    <div class="results-grid">
+      <div class="result-card"><div class="result-num">186</div><div class="result-label">Tests (181 en SQLite + 5 contra PostgreSQL real)</div></div>
+      <div class="result-card"><div class="result-num">9</div><div class="result-label">Módulos de test por dominio</div></div>
+      <div class="result-card"><div class="result-num">1:1</div><div class="result-label">Cada bug hallado tiene su test de regresión</div></div>
+    </div>
+
+    <div class="tbl" style="--cols:1fr 2fr">
+      <div class="tbl-row header"><div>Suite</div><div>Cubre</div></div>
+      <div class="tbl-row"><div class="k">Seguridad y auditorías</div><div>CSRF, cabeceras, reautenticación, sesiones revocables, bloqueo de login, proxy de confianza, enumeración por tiempo, IDOR</div></div>
+      <div class="tbl-row"><div class="k">Concurrencia</div><div>Estados de cita, tokens de un solo uso, límites por usuario; más batería específica en PostgreSQL</div></div>
+      <div class="tbl-row"><div class="k">Privacidad</div><div>Baja, anonimización, purgas por plazo y purga de la cola de notificaciones</div></div>
+      <div class="tbl-row"><div class="k">Logs y SEO</div><div>Redacción de datos sensibles, formato de eventos, robots, sitemap e iconos</div></div>
+      <div class="tbl-row"><div class="k">Puntos de entrada</div><div>Importación de cada script en un intérprete nuevo (detecta ciclos que pytest oculta)</div></div>
+    </div>
+
+    <p class="note">La validación en navegador (móvil, modales, flujos de baja y ascenso de rol) se planificó como protocolo de pruebas manuales y automatizadas con un agente de Chrome.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ RETOS ═══════════════ -->
+<section id="retos">
+  <div class="section-inner">
+    <div class="section-label">10 — Ingeniería</div>
+    <h2 class="section-title">Retos y Soluciones</h2>
+
+    <div class="challenge-list">
+      <div class="challenge">
+        <div class="challenge-problem"><div class="challenge-label">Reto</div><h4>CSRF que creía funcionar</h4><p>Un error de precedencia de operadores en Python hacía que la validación nunca se ejecutara, dejando los POST desprotegidos sin ningún síntoma visible.</p></div>
+        <div class="challenge-solution"><div class="challenge-label">Solución</div><h4>Reescritura + tests que fallan sin ella</h4><p>Tokens HMAC-SHA256 y <code>csrfFetch</code> unificado. Lección aplicada a todo el proyecto: una defensa no cuenta hasta que existe un test que falla cuando se elimina.</p></div>
+      </div>
+
+      <div class="challenge">
+        <div class="challenge-problem"><div class="challenge-label">Reto</div><h4>Una CSP estricta rompe una interfaz llena de <code>onclick</code></h4><p>Al prohibir JS en línea, los paneles de administración dejaron de responder.</p></div>
+        <div class="challenge-solution"><div class="challenge-label">Solución</div><h4>Delegación de eventos + <code>data-*</code></h4><p>Se eliminó todo el JS embebido; listeners en contenedores leyendo <code>data-cita-id</code>, <code>data-estado</code> o <code>data-verify-url</code>, y CSP con nonce por petición.</p></div>
+      </div>
+
+      <div class="challenge">
+        <div class="challenge-problem"><div class="challenge-label">Reto</div><h4>Carreras invisibles en SQLite</h4><p>Los tests de concurrencia pasaban en SQLite porque este ignora <code>FOR UPDATE</code>: eran falsos positivos.</p></div>
+        <div class="challenge-solution"><div class="challenge-label">Solución</div><h4>Verificación contra PostgreSQL 16</h4><p>Batería específica ejecutada contra PostgreSQL real, comprobando además que <strong>falla</strong> al retirar los bloqueos (prueba negativa de la propia prueba).</p></div>
+      </div>
+
+      <div class="challenge">
+        <div class="challenge-problem"><div class="challenge-label">Reto</div><h4>Enumeración de cuentas por tiempo de respuesta</h4><p>Aunque los mensajes eran idénticos, un email existente tardaba más (cálculo de hash y envío), delatando qué cuentas existen.</p></div>
+        <div class="challenge-solution"><div class="challenge-label">Solución</div><h4>Igualar el trabajo y fijar un mínimo</h4><p>El registro calcula el hash en ambos caminos y registro y recuperación imponen un tiempo mínimo de respuesta configurable.</p></div>
+      </div>
+
+      <div class="challenge">
+        <div class="challenge-problem"><div class="challenge-label">Reto</div><h4>Import circular oculto por pytest</h4><p>El script de consulta a la BD fallaba en producción con <code>ImportError</code>, mientras la web y los tests funcionaban porque los módulos ya estaban cargados.</p></div>
+        <div class="challenge-solution"><div class="challenge-label">Solución</div><h4>Rediseño de <code>utils/__init__</code> y test de aislamiento</h4><p>El paquete ya no reexporta nada y una prueba importa cada punto de entrada en un intérprete nuevo.</p></div>
+      </div>
+
+      <div class="challenge">
+        <div class="challenge-problem"><div class="challenge-label">Reto</div><h4>Emails y tokens frente a la resiliencia</h4><p>Reintentar avisos garantiza la entrega, pero guardar en una cola un enlace de recuperación es un riesgo de seguridad.</p></div>
+        <div class="challenge-solution"><div class="challenge-label">Solución</div><h4>Cola selectiva con deduplicación</h4><p>Los eventos con token jamás se persisten; el resto usa backoff exponencial durante 24 h y un <code>id_evento</code> para que n8n no envíe duplicados.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HARDENING ═══════════════ -->
+<section id="hardening">
+  <div class="section-inner">
+    <div class="section-label">11 — Infraestructura</div>
+    <h2 class="section-title">Hardening del Servidor</h2>
+
+    <div class="security-intro">
+      <p>
+        El servidor sigue un proceso de endurecimiento continuo basado en la guía
+        <a href="https://github.com/imthenachoman/How-To-Secure-A-Linux-Server" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">How-To-Secure-A-Linux-Server</a>.
+      </p>
+    </div>
+
+    <div class="tbl" style="--cols:1.6fr 1fr 130px">
+      <div class="tbl-row header"><div>Medida</div><div>Bloque</div><div>Estado</div></div>
+      <div class="tbl-row"><div>UFW deny-by-default, solo puertos necesarios</div><div>Firewall</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Snort IDS/IPS integrado con Fail2Ban</div><div>Detección de intrusiones</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Fail2Ban con jails para SSH y patrones web</div><div>Fuerza bruta</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Traefik con TLS automático (Let's Encrypt vía Coolify)</div><div>Transporte</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>SSH solo con clave pública, sin root, puerto no estándar</div><div>Acceso remoto</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Actualizaciones de seguridad automáticas</div><div>Mantenimiento</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Endurecimiento de kernel vía sysctl</div><div>Kernel</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Registro centralizado y auditoría</div><div>Logging</div><div><span class="status-ok">✓ Implementado</span></div></div>
+      <div class="tbl-row"><div>Copias de seguridad fuera del VPS</div><div>Recuperación</div><div><span class="status-ok">✓ Implementado</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ RESULTADOS ═══════════════ -->
+<section id="resultados">
+  <div class="section-inner">
+    <div class="section-label">12 — Resultados</div>
+    <h2 class="section-title">Qué se Consiguió</h2>
+
+    <div class="results-grid">
+      <div class="result-card"><div class="result-num">186</div><div class="result-label">Tests automáticos</div></div>
+      <div class="result-card"><div class="result-num">28+</div><div class="result-label">Hallazgos de 3 auditorías corregidos</div></div>
+      <div class="result-card"><div class="result-num">13</div><div class="result-label">Condiciones de carrera cerradas y verificadas</div></div>
+      <div class="result-card"><div class="result-num">5</div><div class="result-label">Capas de seguridad independientes</div></div>
+      <div class="result-card"><div class="result-num">6 años</div><div class="result-label">Plazo de conservación aplicado automáticamente</div></div>
+      <div class="result-card"><div class="result-num">24/7</div><div class="result-label">Solicitud de citas online</div></div>
+    </div>
+
+    <div class="callout" style="border-left-color:var(--accent)">
+      Desplegado en producción con despliegue continuo, un sistema de notificaciones tolerante a fallos, seguridad auditada con regresión automatizada y cumplimiento RGPD implementado como comportamiento. Documenté además los límites conocidos con honestidad: es lo que hace útil una auditoría.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ROADMAP ═══════════════ -->
+<section style="border-bottom:none">
+  <div class="section-inner">
+    <div class="section-label">13 — Roadmap</div>
+    <h2 class="section-title">Próximos Pasos</h2>
+
+    <div class="future-list">
+      <div class="future-item"><div><h4>Migraciones con Flask-Migrate</h4><p>Antes del siguiente cambio de modelos con clientes reales: hoy se recrea la BD.</p></div></div>
+      <div class="future-item"><div><h4>MFA para administradores</h4><p>Segundo factor sobre la reautenticación en servidor ya existente.</p></div></div>
+      <div class="future-item"><div><h4>Rate limiting compartido (Redis)</h4><p>Permitiría escalar a varios workers sin multiplicar límites ni duplicar reintentos.</p></div></div>
+      <div class="future-item"><div><h4>Capacidad por franja horaria</h4><p>Modelar la capacidad real del taller por hueco y evitar la sobreocupación.</p></div></div>
+      <div class="future-item"><div><h4>Pruebas de carga</h4><p>Medir el comportamiento con concurrencia real sobre la infraestructura de producción.</p></div></div>
+      <div class="future-item"><div><h4>Adjuntos en notificaciones</h4><p>Presupuestos en PDF adjuntos al email vía n8n.</p></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>TalleresOja — Sistema de Gestión de Citas · 2026 · Jorge Condado</p>
+  <p>Flask · PostgreSQL · n8n · Coolify · Hetzner</p>
+</footer>
+
+</body>
+</html>

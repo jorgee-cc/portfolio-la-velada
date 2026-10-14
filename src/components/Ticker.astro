@@ -1,0 +1,47 @@
+---
+interface Props {
+  items?: string[]
+  reverse?: boolean
+  tone?: 'gold' | 'red' | 'blue' | 'bone'
+}
+const {
+  items = [],
+  reverse = false,
+  tone = 'gold',
+} = Astro.props
+
+const toneClass = {
+  gold: 'text-[var(--color-belt-gold)]',
+  red: 'text-[var(--color-ring-red)]',
+  blue: 'text-[var(--color-ring-blue)]',
+  bone: 'text-[var(--color-bone)]',
+}[tone]
+
+const row = [...items, ...items]
+---
+
+<div class={`relative flex overflow-hidden border-y border-[var(--color-line)] bg-[var(--color-ink)] py-3 ${toneClass}`}>
+  <div class={`flex shrink-0 items-center gap-8 pr-8 ${reverse ? 'animate-marquee-rev' : 'animate-marquee'}`}>
+    {
+      row.map((item) => (
+        <span class="flex shrink-0 items-center gap-8 font-head text-sm tracking-[0.15em] sm:text-base">
+          {item}
+          <span class="h-1.5 w-1.5 rotate-45 bg-current opacity-70" aria-hidden="true"></span>
+        </span>
+      ))
+    }
+  </div>
+  <div
+    class={`flex shrink-0 items-center gap-8 pr-8 ${reverse ? 'animate-marquee-rev' : 'animate-marquee'}`}
+    aria-hidden="true"
+  >
+    {
+      row.map((item) => (
+        <span class="flex shrink-0 items-center gap-8 font-head text-sm tracking-[0.15em] sm:text-base">
+          {item}
+          <span class="h-1.5 w-1.5 rotate-45 bg-current opacity-70"></span>
+        </span>
+      ))
+    }
+  </div>
+</div>

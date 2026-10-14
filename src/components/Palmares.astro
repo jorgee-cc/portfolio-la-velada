@@ -1,0 +1,91 @@
+---
+import SectionHeader from './ui/SectionHeader.astro'
+import { fights } from '../data/content'
+
+const toneText: Record<string, string> = {
+  red: 'text-[var(--color-ring-red)]',
+  gold: 'text-[var(--color-belt-gold)]',
+  blue: 'text-[var(--color-ring-blue)]',
+}
+---
+
+<section id="palmares" class="relative z-10 border-t border-[var(--color-line)] py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+    <SectionHeader kicker="Palmarés · Historial de combates" class="mb-14">
+      Código forjado<br /><span class="text-gold">bajo presión</span>
+      <span slot="subtitle">
+        Cada pelea fuera del teclado me dio una habilidad que hoy aplico al desarrollo. Este no es
+        un CV: es el historial real que me preparó para este cartel.
+      </span>
+    </SectionHeader>
+
+    <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
+      <div class="flex flex-col gap-4">
+        {
+          fights.map((f) => (
+            <details data-reveal class="card group p-0 [&_summary::-webkit-details-marker]:hidden">
+              <summary class="flex cursor-pointer list-none items-center gap-4 p-6">
+                <span
+                  class={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-void)] font-head text-lg ${toneText[f.tone]}`}
+                >
+                  ✓
+                </span>
+                <span class="flex-1">
+                  <span class="block font-head text-xl text-[var(--color-bone)]">{f.title}</span>
+                  <span class="block font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-muted)]">
+                    {f.subtitle} · {f.period}
+                  </span>
+                </span>
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-muted)] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <div class="border-t border-[var(--color-line)] px-6 py-5">
+                <p class="text-sm text-[var(--color-muted)]">{f.desc}</p>
+                <ul class="mt-4 space-y-2">
+                  {f.points.map((p) => (
+                    <li class="flex gap-2 text-sm text-[var(--color-bone)]">
+                      <span class={toneText[f.tone]} aria-hidden="true">▸</span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+
+      <div class="flex flex-col gap-5">
+        <div data-reveal class="card p-7">
+          <p class="font-mono text-[11px] uppercase tracking-[0.25em] text-[var(--color-belt-gold)]">La cantera</p>
+          <h3 class="mt-3 font-head text-2xl text-[var(--color-bone)]">Ingeniería Informática</h3>
+          <p class="mt-2 text-sm text-[var(--color-muted)]">
+            Universidad Carlos III de Madrid · 4.º curso · 2027
+          </p>
+          <p class="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] px-3 py-1 font-mono text-xs text-[var(--color-muted)]">
+            <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-signal)]"></span> Grado impartido en bilingüe
+          </p>
+        </div>
+
+        <div data-reveal class="card p-7">
+          <p class="font-mono text-[11px] uppercase tracking-[0.25em] text-[var(--color-belt-gold)]">
+            Esquinas internacionales
+          </p>
+          <h3 class="mt-3 font-head text-2xl text-[var(--color-bone)]">Inglés · C1</h3>
+          <p class="mt-2 text-sm text-[var(--color-muted)]">
+            Nivel autoevaluado respaldado por hechos: grado bilingüe en la UC3M y atención habitual a
+            clientes internacionales en Puma y Samsung.
+          </p>
+        </div>
+
+        <div data-reveal class="relative overflow-hidden rounded-2xl border border-[var(--color-belt-gold)]/40 bg-[var(--color-ink)] p-7">
+          <p class="font-head text-2xl leading-tight text-[var(--color-bone)]">
+            ¿Un reto de los que asustan? <span class="text-gold">Es mi peso.</span>
+          </p>
+          <a href="#contrato" class="btn btn-primary mt-5 w-full">Hablemos del cartel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

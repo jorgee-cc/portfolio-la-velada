@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Distributed messaging system thumbnail</title>
+  <desc id="desc">Technical illustration of a distributed messaging architecture connecting TCP, P2P, SOAP and ONC-RPC services.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#071512"/>
+      <stop offset="58%" stop-color="#0a2020"/>
+      <stop offset="100%" stop-color="#07111c"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6ee7b7"/>
+      <stop offset="100%" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="965" cy="130" r="170" fill="#2dd4bf" opacity="0.12" filter="url(#blur)"/>
+  <circle cx="180" cy="565" r="190" fill="#38bdf8" opacity="0.10" filter="url(#blur)"/>
+  <g opacity="0.13" stroke="#8fb9b0" stroke-width="1">
+    <path d="M0 100H1200M0 200H1200M0 300H1200M0 400H1200M0 500H1200M0 600H1200"/>
+    <path d="M100 0V675M220 0V675M340 0V675M460 0V675M580 0V675M700 0V675M820 0V675M940 0V675M1060 0V675"/>
+  </g>
+
+  <g transform="translate(74 66)">
+    <rect width="1052" height="146" rx="26" fill="#0b1e1b" stroke="#28534c" stroke-width="2"/>
+    <text x="34" y="42" fill="#6ee7b7" font-family="Space Grotesk, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="3">DISTRIBUTED MESSAGING</text>
+    <text x="34" y="80" fill="#edfafa" font-family="Space Grotesk, Arial, sans-serif" font-size="31" font-weight="700">TCP · P2P · SOAP · ONC-RPC</text>
+    <text x="34" y="115" fill="#9ab7b3" font-family="IBM Plex Mono, monospace" font-size="14">Multi-threaded C server  ·  Python clients  ·  fail-safe audit</text>
+    <rect x="840" y="34" width="178" height="76" rx="16" fill="#102b27" stroke="#36766b"/>
+    <text x="866" y="62" fill="#67e8f9" font-family="IBM Plex Mono, monospace" font-size="12">STATUS</text>
+    <text x="866" y="91" fill="#6ee7b7" font-family="Space Grotesk, Arial, sans-serif" font-size="23" font-weight="700">ONLINE</text>
+  </g>
+
+  <g transform="translate(74 270)">
+    <rect width="300" height="278" rx="24" fill="#0b1e1b" stroke="#28534c" stroke-width="2"/>
+    <text x="27" y="42" fill="#6ee7b7" font-family="Space Grotesk, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2">CLIENTS</text>
+    <text x="27" y="70" fill="#9ab7b3" font-family="IBM Plex Mono, monospace" font-size="12">interactive users + P2P</text>
+    <g transform="translate(30 106)">
+      <circle cx="34" cy="28" r="22" fill="#12342d" stroke="#6ee7b7" stroke-width="3"/>
+      <circle cx="34" cy="22" r="7" fill="#6ee7b7"/>
+      <path d="M20 42c4-10 24-10 28 0" fill="none" stroke="#6ee7b7" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="34" cy="112" r="22" fill="#102c3a" stroke="#67e8f9" stroke-width="3"/>
+      <circle cx="34" cy="106" r="7" fill="#67e8f9"/>
+      <path d="M20 126c4-10 24-10 28 0" fill="none" stroke="#67e8f9" stroke-width="5" stroke-linecap="round"/>
+      <rect x="92" y="5" width="150" height="45" rx="10" fill="#102b27" stroke="#28534c"/>
+      <rect x="92" y="89" width="150" height="45" rx="10" fill="#102333" stroke="#24536a"/>
+      <text x="167" y="33" text-anchor="middle" fill="#b6eee0" font-family="IBM Plex Mono, monospace" font-size="12">alice · CONNECT</text>
+      <text x="167" y="117" text-anchor="middle" fill="#a7edf7" font-family="IBM Plex Mono, monospace" font-size="12">bob · OFFLINE</text>
+    </g>
+  </g>
+
+  <g transform="translate(450 270)">
+    <rect width="300" height="278" rx="24" fill="#0b1e1b" stroke="#2a6170" stroke-width="2"/>
+    <text x="27" y="42" fill="#67e8f9" font-family="Space Grotesk, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2">CORE SERVER</text>
+    <text x="27" y="70" fill="#9ab7b3" font-family="IBM Plex Mono, monospace" font-size="12">C · worker pool · FIFO queues</text>
+    <g transform="translate(28 105)">
+      <rect x="0" y="0" width="244" height="52" rx="12" fill="#102c3a" stroke="#2a6170"/>
+      <text x="122" y="22" text-anchor="middle" fill="#a7edf7" font-family="IBM Plex Mono, monospace" font-size="12">MESSAGE 42</text>
+      <text x="122" y="41" text-anchor="middle" fill="#67e8f9" font-family="IBM Plex Mono, monospace" font-size="11">STORE &amp; FORWARD</text>
+      <path d="M22 92H222M22 116H188M22 140H210" stroke="url(#cyan)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>
+      <circle cx="22" cy="92" r="5" fill="#67e8f9"/>
+      <circle cx="22" cy="116" r="5" fill="#67e8f9"/>
+      <circle cx="22" cy="140" r="5" fill="#67e8f9"/>
+    </g>
+  </g>
+
+  <g transform="translate(826 270)">
+    <rect width="300" height="278" rx="24" fill="#0b1e1b" stroke="#28534c" stroke-width="2"/>
+    <text x="27" y="42" fill="#6ee7b7" font-family="Space Grotesk, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2">SERVICES</text>
+    <text x="27" y="70" fill="#9ab7b3" font-family="IBM Plex Mono, monospace" font-size="12">SOAP normalize · RPC audit</text>
+    <g transform="translate(27 103)">
+      <rect x="0" y="0" width="246" height="48" rx="12" fill="#102b27" stroke="#36766b"/>
+      <rect x="0" y="67" width="246" height="48" rx="12" fill="#102333" stroke="#24536a"/>
+      <rect x="0" y="134" width="246" height="48" rx="12" fill="#182515" stroke="#5f6330"/>
+      <text x="123" y="30" text-anchor="middle" fill="#b6eee0" font-family="IBM Plex Mono, monospace" font-size="13">SOAP  NORMALIZE</text>
+      <text x="123" y="97" text-anchor="middle" fill="#a7edf7" font-family="IBM Plex Mono, monospace" font-size="13">ONC-RPC  AUDIT</text>
+      <text x="123" y="164" text-anchor="middle" fill="#d7e89f" font-family="IBM Plex Mono, monospace" font-size="13">FAIL-SAFE  MODE</text>
+    </g>
+  </g>
+
+  <g fill="none" stroke-linecap="round" stroke-width="5" opacity="0.9">
+    <path d="M374 410H450" stroke="url(#mint)"/>
+    <path d="M750 410H826" stroke="url(#cyan)"/>
+    <path d="M374 480C405 480 413 505 450 505" stroke="#6ee7b7" stroke-dasharray="8 10"/>
+    <path d="M750 505C785 505 793 480 826 480" stroke="#67e8f9" stroke-dasharray="8 10"/>
+  </g>
+</svg>

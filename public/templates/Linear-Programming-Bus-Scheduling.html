@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimización de Flotas de Autobuses con Programación Lineal (GLPK) — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0b0f0c;
+  --surface:     #131a15;
+  --surface-2:   #0f1512;
+  --surface-3:   #0a0e0b;
+  --accent:      #34d399;
+  --accent-dim:  rgba(52,211,153,.11);
+  --accent-glow: rgba(52,211,153,.22);
+  --accent2:     #f0b429;
+  --accent2-dim: rgba(240,180,41,.12);
+  --danger:      #f87171;
+  --danger-dim:  rgba(248,113,113,.11);
+  --text:        #e9efe9;
+  --muted:       #93a39a;
+  --border:      #263229;
+  --radius:      10px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+h1,h2,h3,h4,.label { font-family: 'Space Grotesk', sans-serif; }
+code, .mono        { font-family: 'IBM Plex Mono', monospace; }
+
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  color: var(--accent);
+  margin-bottom: .6rem;
+  display: block;
+}
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.site-header {
+  position: fixed; top:0; left:0; right:0; z-index: 200;
+  border-bottom: 1px solid rgba(52,211,153,.14);
+  background: rgba(11,15,12,.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.site-header-inner {
+  max-width: 1280px; margin: 0 auto; padding: .95rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative;
+}
+@media (min-width: 640px) { .site-header-inner { padding: .95rem 3rem; } }
+.site-header-left { position: relative; z-index: 10; flex: 1; display:flex; align-items:center; }
+.site-brand { display:flex; align-items:center; gap:.5rem; text-decoration:none; }
+.site-brand-j, .site-brand-c { font-family:'Space Grotesk',sans-serif; font-size:1.25rem; font-weight:700; text-transform:uppercase; }
+.site-brand-j { color:#ffffff; }
+.site-brand-c { background:linear-gradient(to right,#6ee7b0,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.template-nav { display:flex; align-items:center; gap:1rem; margin-left:1.5rem; }
+.template-nav a { color:var(--muted); font-family:'Space Grotesk',sans-serif; font-size:.78rem; font-weight:600; text-decoration:none; transition:color .2s; }
+.template-nav a:hover { color:var(--text); }
+
+.site-header-right { position: relative; z-index: 10; display:flex; align-items:center; gap:.5rem; }
+.github-btn {
+  display:flex; align-items:center; gap:.5rem; border-radius:8px;
+  border:1px solid rgba(52,211,153,.3); background: rgba(52,211,153,.1);
+  padding:.5rem .95rem; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.85rem; color:#8ff3c4;
+  transition: all .25s; text-decoration:none;
+}
+.github-btn:hover { border-color: rgba(52,211,153,.55); background: rgba(52,211,153,.18); }
+.github-btn svg { width:1rem; height:1rem; flex-shrink:0; }
+.github-text { display:none; }
+.linkedin-text { display:inline; }
+@media (min-width: 560px) { .github-text { display:inline; } }
+@media (max-width: 900px) { .template-nav { display:none; } }
+
+section { padding: 5.5rem 2rem; max-width: 1160px; margin: 0 auto; }
+.section-header { margin-bottom: 2.75rem; max-width: 62ch; }
+.section-header h2 { font-size: clamp(1.7rem,3.4vw,2.5rem); font-weight:600; line-height:1.18; letter-spacing:-.01em; }
+.section-header p { font-size: 1.02rem; color: var(--muted); margin-top:.8rem; }
+
+.divider { max-width:1160px; margin:0 auto; height:1px; background: linear-gradient(to right, transparent, var(--border), transparent); }
+
+.fade-in { opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.fade-in.visible { opacity:1; transform: translateY(0); }
+
+/* ── HERO ─────────────────────────────────────────────────────────── */
+#hero {
+  min-height: 100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding: 8rem 2rem 5rem; max-width:none; margin:0; position:relative; overflow:hidden; background: var(--bg);
+}
+#hero::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(60,90,75,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(60,90,75,.13) 1px, transparent 1px);
+  background-size: 46px 46px; pointer-events:none;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 20%, transparent 80%);
+}
+.hero-content { position:relative; z-index:1; max-width:900px; margin:0 auto; }
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:.55rem; font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem; letter-spacing:.08em; color:var(--accent);
+  padding:.35rem 1rem; border:1px solid rgba(52,211,153,.3); border-radius:20px; background: rgba(52,211,153,.07);
+  margin-bottom:1.7rem;
+}
+.hero-eyebrow-dot { width:7px; height:7px; border-radius:50%; background: var(--accent); animation: blink-dot 1.8s ease-in-out infinite; }
+@keyframes blink-dot { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+
+h1.hero-title {
+  font-size: clamp(2.1rem,5.4vw,4rem); font-weight:600; line-height:1.14; margin-bottom:1rem;
+  background: linear-gradient(120deg, #fff 0%, #6ee7b0 55%, #f0b429 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-sub { font-size: clamp(.95rem,1.9vw,1.15rem); color:var(--muted); font-weight:300; max-width:58ch; margin:.9rem auto 2.1rem; line-height:1.75; }
+.hero-badges { display:flex; flex-wrap:wrap; gap:.45rem; justify-content:center; margin-bottom:2.5rem; }
+.badge {
+  font-family:'IBM Plex Mono',monospace; font-size:.7rem; padding:.3rem .75rem; border-radius:6px;
+  border:1px solid var(--border); background: var(--surface-2); color:var(--muted); transition: border-color .2s, color .2s;
+}
+.badge:hover { border-color: var(--accent); color: var(--text); }
+
+.hero-cta { display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
+.hero-screens { display:flex; gap:1.4rem; justify-content:center; margin-top:4rem; flex-wrap:wrap; }
+.mini-screen {
+  width:280px; background: var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  box-shadow: 0 10px 34px rgba(0,0,0,.5); text-align:left;
+}
+.ms-header {
+  display:flex; align-items:center; justify-content:space-between; padding:.5rem .7rem; background: var(--surface-2);
+  border-bottom:1px solid var(--border); font-family:'Space Grotesk',sans-serif; font-size:.68rem; font-weight:600;
+  letter-spacing:.03em; color: var(--accent);
+}
+.ms-header.v2 { color: var(--accent2); }
+.ms-dot { width:5px; height:5px; border-radius:50%; background: var(--accent); }
+.ms-badge-ok { font-family:'IBM Plex Mono',monospace; font-size:.5rem; background:var(--accent); color:#052014; padding:.1rem .35rem; border-radius:3px; font-weight:700; }
+.ms-body { padding:.65rem .75rem; font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--muted); line-height:1.9; }
+.ms-body .ok { color: var(--accent); }
+.ms-body .warn { color: var(--accent2); }
+.screen-label { font-family:'Space Grotesk',sans-serif; font-size:.72rem; font-weight:500; color:var(--muted); margin-top:.6rem; display:block; text-align:center; }
+
+/* ═══════ OVERVIEW ═══════════════════════════════════════════════ */
+.overview-grid { display:grid; grid-template-columns:1.15fr 1fr; gap:3rem; align-items:start; }
+@media (max-width: 860px) { .overview-grid { grid-template-columns:1fr; } }
+.overview-text h2 { font-size: clamp(1.6rem,3vw,2.2rem); font-weight:600; line-height:1.2; margin-bottom:1.1rem; }
+.overview-text p { color: var(--muted); font-size:1.02rem; margin-bottom:.9rem; }
+.hl { color: var(--accent); font-style:normal; }
+.hl2 { color: var(--accent2); font-style:normal; }
+.overview-stats { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
+.stat-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.2rem; transition: border-color .2s; }
+.stat-card:hover { border-color: var(--accent); }
+.stat-val { font-family:'Space Grotesk',sans-serif; font-size:1.95rem; font-weight:700; color:var(--accent); line-height:1; }
+.stat-lbl { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--muted); margin-top:.4rem; line-height:1.5; }
+
+.timeline-note { margin-top:1.6rem; padding:1rem 1.15rem; border-left:2px solid var(--accent2); background: var(--surface-3); border-radius: 0 8px 8px 0; }
+.timeline-note p { color: var(--muted); font-size:.9rem; margin:0; }
+.timeline-note .tn-title { font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--text); font-size:.9rem; margin-bottom:.35rem; }
+
+/* ═══════ ARCHITECTURE ═══════════════════════════════════════════ */
+.arch-container { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.75rem; margin-top:1.5rem; overflow:hidden; }
+.arch-container svg { width:100%; height:auto; }
+@keyframes dash-flow { to { stroke-dashoffset: -24; } }
+.fl { animation: dash-flow 2s linear infinite; }
+.arch-title { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1rem; color:var(--text); margin-bottom:1rem; }
+.arch-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:1.6rem; }
+@media (max-width: 800px) { .arch-steps { grid-template-columns:1fr 1fr; } }
+.arch-step { padding:1rem; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); }
+.arch-step .as-n { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--accent); margin-bottom:.4rem; }
+.arch-step .as-t { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.92rem; margin-bottom:.35rem; }
+.arch-step .as-d { font-size:.83rem; color:var(--muted); line-height:1.5; }
+
+/* ═══════ TECH STACK ══════════════════════════════════════════════ */
+.stack-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1rem; }
+.stack-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.25rem; position:relative; overflow:hidden; transition: border-color .2s, transform .2s; }
+.stack-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--accent); opacity:0; transition: opacity .2s; }
+.stack-card:hover { border-color: rgba(52,211,153,.4); transform: translateY(-3px); }
+.stack-card:hover::before { opacity:1; }
+.stack-cat { font-family:'IBM Plex Mono',monospace; font-size:.63rem; letter-spacing:.08em; color:var(--accent); margin-bottom:.55rem; }
+.stack-name { font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:600; color:var(--text); margin-bottom:.4rem; }
+.stack-desc { font-size:.86rem; color:var(--muted); line-height:1.55; }
+
+/* ═══════ MATH MODELS ══════════════════════════════════════════════ */
+.model-tag { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.66rem; padding:.28rem .7rem; border-radius:20px; border:1px solid var(--accent); color:var(--accent); background: var(--accent-dim); margin-bottom:1rem; }
+.model-tag.v2 { border-color: var(--accent2); color:var(--accent2); background: var(--accent2-dim); }
+.module-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; margin-bottom:1.4rem; }
+@media (max-width: 860px) { .module-grid { grid-template-columns:1fr; } }
+.formula-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.5rem; }
+.formula-card h3 { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.15rem; margin-bottom:1rem; }
+.formula-card .f-sub { font-family:'IBM Plex Mono',monospace; font-size:.68rem; letter-spacing:.06em; color:var(--muted); margin: 1rem 0 .5rem; text-transform:uppercase; }
+.formula-card .f-sub:first-of-type { margin-top:0; }
+.formula-card .f-math { font-family:'IBM Plex Mono',monospace; font-size:.82rem; color: var(--accent2); background: var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:.75rem .9rem; margin:.4rem 0; line-height:1.85; overflow-x:auto; white-space:pre; }
+.formula-card ul { padding-left:1.1rem; }
+.formula-card li { font-size:.86rem; color: var(--muted); line-height:1.6; margin-bottom:.3rem; }
+.formula-card li code { color: var(--text); }
+
+.insight-box { background: linear-gradient(135deg, rgba(52,211,153,.06), rgba(240,180,41,.05)); border:1px solid rgba(52,211,153,.28); border-radius: var(--radius); padding:1.6rem; margin-top: 1rem; }
+.insight-box .ib-label { font-family:'IBM Plex Mono',monospace; font-size:.66rem; letter-spacing:.08em; color:var(--accent); margin-bottom:.7rem; display:block; }
+.insight-box h4 { font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:600; margin-bottom:.7rem; }
+.insight-box p { color: var(--muted); font-size:.92rem; margin-bottom:.9rem; line-height:1.65; }
+.insight-box .code-block { margin-top: .5rem; }
+
+/* ═══════ CODE BLOCK / CHALLENGES ═════════════════════════════════ */
+.challenges-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+@media (max-width: 860px) { .challenges-grid { grid-template-columns:1fr; } }
+.ch-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; transition: border-color .2s; }
+.ch-card:hover { border-color: rgba(52,211,153,.35); }
+.ch-header { padding:1.1rem 1.25rem .8rem; border-bottom:1px solid var(--border); }
+.ch-num { font-family:'IBM Plex Mono',monospace; font-size:.63rem; color:var(--accent); letter-spacing:.06em; margin-bottom:.3rem; }
+.ch-title { font-family:'Space Grotesk',sans-serif; font-size:1.03rem; font-weight:600; color:var(--text); }
+.ch-body { padding:1rem 1.25rem; }
+.ch-desc { font-size:.86rem; color:var(--muted); margin-bottom:.8rem; line-height:1.6; }
+.code-block { background: var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:.9rem; font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:#cbd8d0; overflow-x:auto; line-height:1.7; white-space:pre; }
+.kw { color:#f0b429; } .fn { color:#6ee7b0; } .nm { color:#7dd3fc; } .cm { color:#5f7268; font-style:italic; } .st { color:#f87171; }
+
+/* ═══════ USAGE ═════════════════════════════════════════════════ */
+.usage-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+@media (max-width: 860px) { .usage-grid { grid-template-columns:1fr; } }
+.usage-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.5rem; }
+.usage-card h3 { font-family:'Space Grotesk',sans-serif; font-size:1.05rem; font-weight:600; margin-bottom:.9rem; }
+.usage-card ol, .usage-card ul { padding-left: 1.2rem; margin-bottom: .8rem; }
+.usage-card li { font-size:.88rem; color: var(--muted); margin-bottom:.45rem; line-height:1.6; }
+.usage-card li code { color: var(--text); background: var(--surface-3); padding:.1rem .35rem; border-radius:4px; }
+
+.io-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; margin-top:1.6rem; }
+@media (max-width: 860px) { .io-grid { grid-template-columns:1fr; } }
+.io-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.4rem; }
+.io-card .io-label { font-family:'IBM Plex Mono',monospace; font-size:.66rem; letter-spacing:.06em; color:var(--accent2); margin-bottom:.7rem; text-transform:uppercase; }
+
+/* ═══════ RESULTS / BENCHMARKS ═════════════════════════════════════ */
+.bench-tabs { display:flex; gap:.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.bench-tab {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.85rem;
+  padding:.55rem 1.1rem; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--muted);
+  cursor:pointer; transition: all .18s;
+}
+.bench-tab.active, .bench-tab:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.bench-panel { display:none; }
+.bench-panel.active { display:block; }
+.bench-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius: var(--radius); }
+table.bench { width:100%; border-collapse: collapse; font-family:'IBM Plex Mono',monospace; font-size:.78rem; min-width: 480px; }
+table.bench th { background: var(--surface-2); color: var(--accent); text-align:left; padding:.75rem .9rem; font-weight:600; border-bottom:1px solid var(--border); white-space:nowrap; }
+table.bench td { padding:.7rem .9rem; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
+table.bench tr:last-child td { border-bottom:none; }
+table.bench td.muted { color: var(--muted); }
+table.bench tr:hover td { background: rgba(52,211,153,.04); }
+
+.finding-grid { margin-top:1.5rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
+.finding-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.1rem 1.25rem; }
+.finding-card .fc-icon { font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--accent2); margin-bottom:.5rem; }
+.finding-card p { font-size:.86rem; color:var(--muted); line-height:1.6; }
+
+/* ═══════ LIMITATIONS / FUTURE ═══════════════════════════════════ */
+.future-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.3rem 2rem; }
+.f-item { display:flex; gap:.9rem; align-items:flex-start; }
+.f-dot { width:9px; height:9px; border-radius:50%; background: var(--accent); margin-top:.4rem; flex-shrink:0; }
+.f-dot.warn { background: var(--danger); }
+.f-title { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.98rem; margin-bottom:.35rem; }
+.f-desc { font-size:.87rem; color:var(--muted); line-height:1.6; }
+
+/* ═══════ FOOTER ══════════════════════════════════════════════════ */
+footer { text-align:center; padding:4rem 2rem 3rem; border-top:1px solid var(--border); margin-top:2rem; }
+.footer-brand { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; letter-spacing:.04em; margin-bottom:1rem; color:var(--text); }
+.footer-stack { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.3rem; }
+footer p { color: var(--muted); font-size:.87rem; }
+footer a { color: var(--accent); text-decoration:none; }
+footer a:hover { text-decoration:underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="site-header-left">
+      <a class="site-brand" href="/" aria-label="Ir a la página de inicio">
+        <span class="site-brand-j">Jorge</span>
+        <span class="site-brand-c">Condado</span>
+      </a>
+      <nav class="template-nav" aria-label="Navegación del proyecto">
+        <a href="#hero">Inicio</a><a href="#overview">Resumen</a><a href="#architecture">Arquitectura</a><a href="#stack">Stack</a><a href="#results">Resultados</a><a href="#challenges">Retos</a>
+      </nav>
+    </div>
+    <div class="site-header-right">
+    <a class="github-btn" href="https://github.com/jorgee-cc/Linear-Programming-Bus-Scheduling" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58 0-.29-.01-1.04-.02-2.04-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6-.02 2.89-.02 3.29 0 .32.22.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <span class="github-text">GitHub</span>
+    </a>
+    <a class="github-btn" href="https://www.linkedin.com/in/jorge-condado-carballo-4065bb2b4/" target="_blank" rel="noopener noreferrer" aria-label="Abrir perfil de LinkedIn">
+      <span class="linkedin-text">LinkedIn</span>
+    </a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ HERO ══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Case study · Investigación Operativa</div>
+    <h1 class="hero-title">Programación lineal entera para<br>la planificación de flotas de autobuses</h1>
+    <p class="hero-sub">
+      Dos modelos de optimización que transforman texto plano en modelos de programación
+      matemática, resueltos por GLPK y orquestados íntegramente desde la línea de comandos:
+      uno minimiza el coste de asignar autobuses a franjas horarias, el otro minimiza el
+      impacto sobre pasajeros al repartirlos entre talleres.
+    </p>
+    <div class="hero-badges">
+      <span class="badge">Python 3</span>
+      <span class="badge">GLPK · glpsol</span>
+      <span class="badge">GNU MathProg</span>
+      <span class="badge">Programación Entera Binaria</span>
+      <span class="badge">Regex</span>
+      <span class="badge">CLI</span>
+    </div>
+    <div class="hero-screens">
+      <div class="mini-screen">
+        <div class="ms-header"><div style="display:flex;align-items:center;gap:.4rem;"><div class="ms-dot"></div>MODELO 1 · COSTES</div><div class="ms-badge-ok">ÓPTIMO</div></div>
+        <div class="ms-body">
+Z = 250.0 · vars: 16 · restr: 7
+<span class="ok">a1 → franja s1</span>
+<span class="ok">a3 → franja s2</span>
+<span class="ok">a4 → franja s3</span>
+<span class="warn">a2 sin asignar</span>
+        </div>
+      </div>
+      <div class="mini-screen">
+        <div class="ms-header v2"><div style="display:flex;align-items:center;gap:.4rem;"><div class="ms-dot" style="background:var(--accent2);"></div>MODELO 2 · TALLERES</div><div class="ms-badge-ok" style="background:var(--accent2);">ÓPTIMO</div></div>
+        <div class="ms-body">
+Impacto = 15.0 · vars: 340 · restr: 654
+<span class="ok">A1 → S4 / T2</span>
+<span class="ok">A2 → S2 / T5</span>
+<span class="ok">A5 → S3 / T3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ OVERVIEW ═══════════════════════════════════════════════ -->
+<section id="overview">
+  <div class="overview-grid">
+    <div class="overview-text fade-in">
+      <span class="eyebrow">Contexto del proyecto</span>
+      <h2>De un problema de asignación en papel a dos solvers de línea de comandos</h2>
+      <p>
+        El proyecto nace de un ejercicio clásico de <span class="hl">Investigación Operativa</span>:
+        asignar 5 autobuses a 5 talleres minimizando la distancia total, un problema de asignación
+        bipartito resuelto sobre una hoja de cálculo como primer paso de modelado. A partir de esa
+        base, el trabajo evoluciona hacia dos <span class="hl">modelos de programación entera binaria
+        (MIP)</span> completamente automatizados y ejecutables por CLI.
+      </p>
+      <p>
+        El <span class="hl">Modelo 1</span> asigna autobuses a franjas horarias de taller minimizando
+        el coste total: el coste por kilómetro de enviar un autobús frente a la penalización por
+        dejar sin revisar a los pasajeros que lleva. El <span class="hl2">Modelo 2</span> añade una
+        tercera dimensión, el taller, y cambia el objetivo: minimizar el "impacto" de que dos
+        autobuses con pasajeros en común coincidan en la misma franja.
+      </p>
+      <p>
+        Ambos modelos comparten un mismo patrón arquitectónico: Python no resuelve el problema
+        matemático, solo genera los datos de entrada, invoca a <code>glpsol</code> (el solver de
+        <span class="hl">GLPK</span>) y traduce su salida de texto plano en un informe legible.
+      </p>
+    </div>
+
+    <div class="overview-stats fade-in" style="transition-delay:.1s">
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Modelos MIP independientes<br>Costes · Impacto en talleres</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">420.6K</div>
+        <div class="stat-lbl">Variables de decisión generadas<br>en el test de estrés (600 buses)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">1.301</div>
+        <div class="stat-lbl">Restricciones instanciadas<br>en ese mismo caso de prueba</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">3×</div>
+        <div class="stat-lbl">Reintentos con backoff<br>exponencial ante fallos de glpsol</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-note fade-in" style="transition-delay:.2s">
+    <div class="tn-title">Punto de partida: la formulación manual</div>
+    <p>Antes de escribir una línea de Python, la primera fase del proyecto (5 autobuses × 5 talleres)
+    se planteó a mano como un grafo bipartito y se validó en una hoja de cálculo, definiendo
+    parámetros, variables binarias <code>x[i,j]</code> y restricciones de asignación única.
+    Ese modelo mínimo es la base conceptual que después se generaliza y automatiza en los dos
+    scripts de <code>parte-2/</code>.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ ARCHITECTURE ════════════════════════════════════════════ -->
+<section id="architecture">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Arquitectura</span>
+    <h2>Python como orquestador, GLPK como motor de resolución</h2>
+    <p>Ambos scripts siguen el mismo flujo de tipo pipeline: la lógica de negocio vive en Python,
+    pero el cómputo matemático pesado ocurre por completo dentro de GLPK.</p>
+  </div>
+
+  <div class="arch-container fade-in">
+    <div class="arch-title">Pipeline compartido por gen-1.py y gen-2.py</div>
+    <svg viewBox="0 0 880 170" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrG" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#34d399" opacity=".9"/>
+        </marker>
+      </defs>
+      <line class="fl" x1="165" y1="85" x2="215" y2="85" stroke="#34d399" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrG)"/>
+      <line class="fl" x1="380" y1="85" x2="430" y2="85" stroke="#34d399" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrG)"/>
+      <line class="fl" x1="595" y1="85" x2="645" y2="85" stroke="#34d399" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrG)"/>
+
+      <rect x="15" y="45" width="150" height="80" rx="10" fill="#0f1512" stroke="#34d399" stroke-width="1.6"/>
+      <text x="90" y="80" fill="#34d399" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Space Grotesk,sans-serif">ENTRADA .TXT</text>
+      <text x="90" y="98" fill="#93a39a" font-size="8.3" text-anchor="middle" font-family="'IBM Plex Mono',monospace">n, m, kd, kp / d[] p[]</text>
+
+      <rect x="215" y="35" width="165" height="100" rx="10" fill="#0f1512" stroke="#34d399" stroke-width="1.6"/>
+      <text x="297" y="68" fill="#34d399" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Space Grotesk,sans-serif">GENERADOR</text>
+      <text x="297" y="86" fill="#93a39a" font-size="8.3" text-anchor="middle" font-family="'IBM Plex Mono',monospace">gen-1.py / gen-2.py</text>
+      <text x="297" y="100" fill="#5f7268" font-size="7.6" text-anchor="middle" font-family="'IBM Plex Mono',monospace">valida formato + tipos</text>
+      <text x="297" y="113" fill="#5f7268" font-size="7.6" text-anchor="middle" font-family="'IBM Plex Mono',monospace">escribe sets y params</text>
+
+      <rect x="430" y="25" width="165" height="120" rx="10" fill="#0f1512" stroke="#f0b429" stroke-width="2"/>
+      <text x="512" y="58" fill="#f0b429" font-size="13" font-weight="700" text-anchor="middle" font-family="Space Grotesk,sans-serif">GLPK · glpsol</text>
+      <text x="512" y="76" fill="#93a39a" font-size="8.3" text-anchor="middle" font-family="'IBM Plex Mono',monospace">--min -m modelo.mod</text>
+      <text x="512" y="89" fill="#93a39a" font-size="8.3" text-anchor="middle" font-family="'IBM Plex Mono',monospace">-d datos.dat -o sol.txt</text>
+      <text x="512" y="107" fill="#5f7268" font-size="7.6" text-anchor="middle" font-family="'IBM Plex Mono',monospace">branch &amp; bound (MIP)</text>
+      <text x="512" y="120" fill="#5f7268" font-size="7.6" text-anchor="middle" font-family="'IBM Plex Mono',monospace">reintentos con backoff</text>
+
+      <rect x="645" y="45" width="220" height="80" rx="10" fill="#0f1512" stroke="#34d399" stroke-width="1.6"/>
+      <text x="755" y="78" fill="#34d399" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Space Grotesk,sans-serif">PARSER + LIMPIEZA</text>
+      <text x="755" y="96" fill="#93a39a" font-size="8.3" text-anchor="middle" font-family="'IBM Plex Mono',monospace">regex sobre stdout / sol.txt</text>
+      <text x="755" y="109" fill="#5f7268" font-size="7.6" text-anchor="middle" font-family="'IBM Plex Mono',monospace">os.remove(temporal) → stdout</text>
+    </svg>
+
+    <div class="arch-steps">
+      <div class="arch-step"><div class="as-n">CAPA 01</div><div class="as-t">Entrada</div><div class="as-d">Fichero de texto plano con parámetros del problema, separados por espacios y validados línea a línea.</div></div>
+      <div class="arch-step"><div class="as-n">CAPA 02</div><div class="as-t">Procesamiento</div><div class="as-d">El script Python traduce los valores leídos a la sintaxis de sets y params de GNU MathProg (<code>.dat</code>).</div></div>
+      <div class="arch-step"><div class="as-n">CAPA 03</div><div class="as-t">Resolución</div><div class="as-d">Se invoca <code>glpsol</code> como subproceso, combinando el modelo estático (<code>.mod</code>) con el <code>.dat</code> generado.</div></div>
+      <div class="arch-step"><div class="as-n">CAPA 04</div><div class="as-t">Salida</div><div class="as-d">Regex extrae el valor objetivo, variables y restricciones; el fichero temporal se elimina tras leerlo.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ TECH STACK ══════════════════════════════════════════════ -->
+<section id="stack">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Stack tecnológico</span>
+    <h2>Solo librería estándar, un solver externo</h2>
+    <p>El proyecto evita deliberadamente dependencias de terceros en Python: toda la lógica de
+    orquestación se apoya en la librería estándar.</p>
+  </div>
+  <div class="stack-grid fade-in">
+    <div class="stack-card">
+      <div class="stack-cat">Lenguaje</div>
+      <div class="stack-name">Python 3.6+</div>
+      <div class="stack-desc">Orquesta lectura de entrada, generación de datos, invocación del solver y presentación de resultados.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-cat">Solver matemático</div>
+      <div class="stack-name">GLPK (glpsol)</div>
+      <div class="stack-desc">GNU Linear Programming Kit. Resuelve los modelos MIP mediante branch and bound, invocado como binario externo.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-cat">Lenguaje de modelado</div>
+      <div class="stack-name">GNU MathProg</div>
+      <div class="stack-desc">Subconjunto de AMPL usado en los ficheros <code>.mod</code> para declarar sets, parámetros, variables y restricciones.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-cat">Librería estándar</div>
+      <div class="stack-name">re · subprocess</div>
+      <div class="stack-desc">Parseo de la salida de texto de GLPK y ejecución controlada del proceso externo con captura de stdout/stderr.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-cat">Librería estándar</div>
+      <div class="stack-name">os · sys · time</div>
+      <div class="stack-desc">Gestión de argumentos CLI, limpieza de ficheros temporales y espera exponencial entre reintentos.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-cat">Interfaz</div>
+      <div class="stack-name">CLI puro</div>
+      <div class="stack-desc">Sin dependencias de interfaz: el sistema se opera íntegramente con dos argumentos posicionales por terminal.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ MATH MODELS ══════════════════════════════════════════════ -->
+<section id="models">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Modelado matemático</span>
+    <h2>Dos formulaciones de programación entera binaria</h2>
+    <p>Cada script resuelve un modelo MIP distinto. Ambos comparten la misma estrategia: variables
+    binarias que representan decisiones de asignación, sujetas a restricciones de unicidad.</p>
+  </div>
+
+  <div class="module-grid fade-in">
+    <div class="formula-card">
+      <span class="model-tag">MODELO 1 · parte-2-1.mod</span>
+      <h3>Asignación por costes</h3>
+      <div class="f-sub">Parámetros</div>
+      <ul>
+        <li><code>d[j]</code> — distancia en km del autobús j</li>
+        <li><code>p[j]</code> — pasajeros del autobús j</li>
+        <li><code>kd</code>, <code>kp</code> — coste por km y penalización por pasajero</li>
+      </ul>
+      <div class="f-sub">Variables</div>
+      <ul>
+        <li><code>S[i,j]</code> ∈ {0,1} — autobús j asignado a franja i</li>
+        <li><code>Y[j]</code> ∈ {0,1} — autobús j no asignado (penalizado)</li>
+      </ul>
+      <div class="f-sub">Función objetivo</div>
+      <div class="f-math">min Z = Σⱼ kd·d[j]·(Σᵢ S[i,j])
+        + Σⱼ kp·p[j]·Y[j]</div>
+      <div class="f-sub">Restricciones clave</div>
+      <div class="f-math">Σⱼ S[i,j] ≤ 1        ∀ i  (franja)
+Σᵢ S[i,j] + Y[j] = 1  ∀ j  (autobús)</div>
+    </div>
+
+    <div class="formula-card">
+      <span class="model-tag v2">MODELO 2 · parte-2-2.mod</span>
+      <h3>Asignación por impacto en talleres</h3>
+      <div class="f-sub">Parámetros</div>
+      <ul>
+        <li><code>c[i,l]</code> — penalización si los buses i y l coinciden</li>
+        <li><code>o[j,k]</code> ∈ {0,1} — disponibilidad del taller k en franja j</li>
+      </ul>
+      <div class="f-sub">Variables</div>
+      <ul>
+        <li><code>x[i,j,k]</code> ∈ {0,1} — bus i asignado a franja j, taller k</li>
+        <li><code>y[i,j,l]</code> ∈ {0,1} — auxiliar: buses i y l coinciden en franja j</li>
+      </ul>
+      <div class="f-sub">Función objetivo</div>
+      <div class="f-math">min Impacto =
+  Σⱼ Σ(i&lt;l) c[i,l]·y[i,j,l]</div>
+      <div class="f-sub">Restricciones clave</div>
+      <div class="f-math">Σⱼₖ x[i,j,k] = 1        (cada bus, 1 vez)
+Σᵢ x[i,j,k] ≤ 1        (1 bus / franja-taller)
+x[i,j,k] ≤ o[j,k]      (taller disponible)</div>
+    </div>
+  </div>
+
+  <div class="insight-box fade-in">
+    <span class="ib-label">Decisión técnica destacada</span>
+    <h4>Simular una condición "AND" sin multiplicar variables binarias</h4>
+    <p>
+      El Modelo 2 necesita saber si dos autobuses coinciden en la misma franja, lo que
+      naturalmente se expresaría como <code>x[i,j,k] · x[l,j,k]</code>. Ese producto es un término
+      cuadrático y rompe la linealidad exigida por un solver MIP estándar. La solución del
+      proyecto introduce una variable auxiliar <code>y[i,j,l]</code> que se comporta como una
+      puerta lógica AND gracias a tres restricciones lineales combinadas: la primera fuerza
+      <code>y=1</code> cuando ambas asignaciones están activas, y las otras dos impiden que
+      <code>y</code> valga 1 si cualquiera de las dos falta. Como el objetivo minimiza, el propio
+      solver descarta <code>y=1</code> en cualquier caso que no sea un conflicto real.
+    </p>
+    <div class="code-block"><span class="cm"># parte-2-2.mod — la variable auxiliar como detector de conflicto</span>
+s.t. CoincidenBuses {i in BUS, j in FRAN, l in BUS: i &lt; l}:
+    <span class="kw">sum</span>{k in TALL} x[i,j,k] + <span class="kw">sum</span>{k in TALL} x[l,j,k] - y[i,j,l] &lt;= 1;
+
+s.t. AuxVariable1 {i in BUS, j in FRAN, l in BUS: i &lt; l}:
+    y[i,j,l] &lt;= <span class="kw">sum</span>{k in TALL} x[i,j,k];
+
+s.t. AuxVariable2 {i in BUS, j in FRAN, l in BUS: i &lt; l}:
+    y[i,j,l] &lt;= <span class="kw">sum</span>{k in TALL} x[l,j,k];</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ CHALLENGES ═══════════════════════════════════════════════ -->
+<section id="challenges">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Retos técnicos</span>
+    <h2>Dónde estuvo realmente la dificultad</h2>
+    <p>El reto no fue escribir el modelo matemático, sino conectar de forma robusta un lenguaje
+    de propósito general con un solver externo que solo habla texto plano.</p>
+  </div>
+  <div class="challenges-grid fade-in">
+
+    <div class="ch-card">
+      <div class="ch-header"><div class="ch-num">RETO 01</div><div class="ch-title">Modelar "no asignar" como decisión válida</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">El Modelo 1 no puede limitarse a decidir dónde va cada autobús: también debe decidir
+        si se queda sin asignar. Se resuelve con una variable binaria <code>Y[j]</code> ligada a la
+        asignación mediante una única restricción de igualdad.</div>
+        <div class="code-block"><span class="cm"># Si S[i,j] suma 0, la restricción obliga a Y[j] = 1</span>
+s.t. Asignacion {j in BUSES}:
+    <span class="kw">sum</span>{i in FRANJAS} S[i,j] + Y[j] = 1;</div>
+      </div>
+    </div>
+
+    <div class="ch-card">
+      <div class="ch-header"><div class="ch-num">RETO 02</div><div class="ch-title">Parsear texto no estructurado con regex</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">GLPK no expone una API: escribe un informe de texto libre. El script busca patrones
+        concretos para extraer el objetivo, el número de columnas/filas y cada variable activa
+        en la solución detallada.</div>
+        <div class="code-block"><span class="fn">re</span>.search(<span class="st">r'S\[(F\d+),(B\d+)\]\s+\*\s+1'</span>, line)
+<span class="fn">re</span>.search(<span class="st">r'(\d+)\s+columns'</span>, glpk_output)</div>
+      </div>
+    </div>
+
+    <div class="ch-card">
+      <div class="ch-header"><div class="ch-num">RETO 03</div><div class="ch-title">Tolerar fallos intermitentes del solver</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">En <code>gen-2.py</code>, la llamada a <code>glpsol</code> está envuelta en un bucle de
+        hasta 3 reintentos con espera exponencial, para absorber fallos puntuales del subproceso
+        sin abortar la ejecución completa.</div>
+        <div class="code-block"><span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(MAX_RETRIES):
+    <span class="kw">try</span>:
+        result = subprocess.run(glpsol_command, ...)
+        <span class="kw">break</span>
+    <span class="kw">except</span> subprocess.CalledProcessError:
+        time.sleep(<span class="nm">2</span> ** attempt)</div>
+      </div>
+    </div>
+
+    <div class="ch-card">
+      <div class="ch-header"><div class="ch-num">RETO 04</div><div class="ch-title">Detectar infactibilidad sin excepción explícita</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Un modelo sin solución no siempre lanza un error de proceso: puede simplemente no
+        generar asignaciones. El script distingue ese caso comprobando si el diccionario de
+        asignaciones quedó vacío y si el objetivo no pudo parsearse.</div>
+        <div class="code-block"><span class="kw">if</span> <span class="kw">not</span> assignments:
+    <span class="fn">print</span>(<span class="st">"No se encontró asignación válida..."</span>)
+    <span class="kw">if</span> valor_objetivo == <span class="st">"N/A"</span>:
+        <span class="fn">print</span>(<span class="st">"El problema puede ser infactible..."</span>)</div>
+      </div>
+    </div>
+
+    <div class="ch-card">
+      <div class="ch-header"><div class="ch-num">RETO 05</div><div class="ch-title">Validar matrices de entrada antes de llegar a GLPK</div></div>
+      <div class="ch-body">
+        <div class="ch-desc"><code>gen-2.py</code> comprueba que la matriz de disponibilidad de talleres tenga
+        exactamente las dimensiones <code>n × u</code> declaradas y que todos sus valores sean
+        estrictamente binarios, antes de escribir un solo byte del fichero <code>.dat</code>.</div>
+        <div class="code-block"><span class="kw">if</span> <span class="kw">not</span> <span class="fn">all</span>(val <span class="kw">in</span> (<span class="nm">0</span>, <span class="nm">1</span>) <span class="kw">for</span> val <span class="kw">in</span> row_int):
+    <span class="kw">raise</span> ValueError(<span class="st">"deben ser binarios (0 o 1)"</span>)</div>
+      </div>
+    </div>
+
+    <div class="ch-card">
+      <div class="ch-header"><div class="ch-num">RETO 06</div><div class="ch-title">Separar la generación de datos de la resolución</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">El modelo matemático (<code>.mod</code>) es estático y nunca cambia; los datos
+        (<code>.dat</code>) se regeneran en cada ejecución. Esta separación es la que permite lanzar
+        el mismo modelo contra entradas de 4 autobuses o de 600 sin tocar una línea de MathProg.</div>
+        <div class="code-block">glpsol --min -m parte-2-1.mod -d salida.dat -o glpk_sol.txt</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ USAGE ═══════════════════════════════════════════════════ -->
+<section id="usage">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Instalación y uso</span>
+    <h2>Todo se opera desde la terminal</h2>
+    <p>El sistema no expone interfaz gráfica ni servidor: cada ejecución resuelve una instancia
+    del problema a partir de un fichero de texto y termina.</p>
+  </div>
+
+  <div class="usage-grid fade-in">
+    <div class="usage-card">
+      <h3>Requisitos e instalación</h3>
+      <ul>
+        <li>Python <code>3.6+</code> — solo librería estándar, sin <code>pip install</code>.</li>
+        <li>GLPK instalado y <code>glpsol</code> accesible en el <code>PATH</code>.</li>
+        <li>Debian/Ubuntu: <code>sudo apt-get install glpk-utils</code></li>
+        <li>macOS: <code>brew install glpk</code></li>
+        <li>Verificar con: <code>glpsol --version</code></li>
+      </ul>
+    </div>
+    <div class="usage-card">
+      <h3>Comandos</h3>
+      <ul>
+        <li>Modelo 1 (costes):<br><code>python parte-2/gen-1.py entrada.txt salida.dat</code></li>
+        <li>Modelo 2 (talleres):<br><code>python parte-2/gen-2.py entrada.txt salida.dat</code></li>
+        <li>Los ficheros <code>.mod</code> deben estar en el mismo directorio de ejecución.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="io-grid fade-in">
+    <div class="io-card">
+      <div class="io-label">Entrada · Modelo 1</div>
+      <div class="code-block">3 4
+1.5 10
+50 120 75 40
+20 45 30 15</div>
+    </div>
+    <div class="io-card">
+      <div class="io-label">Salida · Modelo 1</div>
+      <div class="code-block">Valor óptimo de la función objetivo: 250.0
+Variables de decisión: 16, Restricciones: 7
+
+Autobús a1 asignado a la franja s1
+Autobús a3 asignado a la franja s2
+Autobús a4 asignado a la franja s3
+Autobús a2 sin asignar</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ RESULTS / BENCHMARKS ═════════════════════════════════════ -->
+<section id="results">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Resultados</span>
+    <h2>De 7 restricciones a más de mil</h2>
+    <p>El propio proyecto incluye pruebas de estrés documentadas para observar cómo escala cada
+    modelo al aumentar el tamaño de la instancia.</p>
+  </div>
+
+  <div class="bench-tabs fade-in">
+    <div class="bench-tab active" data-target="a">Test A · Modelo 1 a escala</div>
+    <div class="bench-tab" data-target="b">Test B · Modelo 2 con talleres</div>
+  </div>
+
+  <div class="bench-panel active fade-in" id="panel-a">
+    <div class="bench-table-wrap">
+      <table class="bench">
+        <thead><tr><th>Parámetro</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td class="muted">Franjas horarias</td><td>700</td></tr>
+          <tr><td class="muted">Autobuses</td><td>600</td></tr>
+          <tr><td class="muted">Coste por km (kd)</td><td>5 €</td></tr>
+          <tr><td class="muted">Penalización por pasajero (kp)</td><td>8 €</td></tr>
+          <tr><td class="muted">Valor óptimo de la función objetivo</td><td>251.399</td></tr>
+          <tr><td class="muted">Variables de decisión</td><td>420.600</td></tr>
+          <tr><td class="muted">Restricciones</td><td>1.301</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="finding-grid">
+      <div class="finding-card"><div class="fc-icon">▲ kd</div><p>Al aumentar el coste por kilómetro, el modelo asigna menos autobuses: sale más barato
+      pagar la penalización por pasajero que enviarlos al taller.</p></div>
+      <div class="finding-card"><div class="fc-icon">▲ kp</div><p>Al aumentar la penalización por pasajero, ocurre lo contrario: el modelo prioriza asignar
+      más autobuses aunque el coste por kilómetro sea alto.</p></div>
+    </div>
+  </div>
+
+  <div class="bench-panel fade-in" id="panel-b">
+    <div class="bench-table-wrap">
+      <table class="bench">
+        <thead><tr><th>Parámetro</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td class="muted">Franjas horarias</td><td>5</td></tr>
+          <tr><td class="muted">Autobuses</td><td>8</td></tr>
+          <tr><td class="muted">Talleres</td><td>5</td></tr>
+          <tr><td class="muted">Valor óptimo (Impacto)</td><td>15,0</td></tr>
+          <tr><td class="muted">Variables de decisión</td><td>340</td></tr>
+          <tr><td class="muted">Restricciones</td><td>654</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="finding-grid">
+      <div class="finding-card"><div class="fc-icon">▲ buses</div><p>Aumentar el número de autobuses dispara de forma exponencial el valor de la función
+      objetivo: más pares de buses compitiendo por las mismas franjas.</p></div>
+      <div class="finding-card"><div class="fc-icon">▼ franjas / talleres</div><p>Más franjas o más talleres reducen el objetivo al dar más margen para evitar
+      coincidencias; el efecto de las franjas es mayor que el de los talleres.</p></div>
+      <div class="finding-card"><div class="fc-icon">⚡ talleres = buses</div><p>Cuando el número de talleres disponibles en una franja iguala al número de autobuses,
+      el solver converge notablemente más rápido.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ LIMITACIONES ════════════════════════════════════════════ -->
+<section id="limitations">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Limitaciones</span>
+    <h2>Dónde se rompe el diseño</h2>
+  </div>
+  <div class="future-grid fade-in">
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Rutas de modelo hardcodeadas</div>
+      <div class="f-desc">Los ficheros <code>parte-2-1.mod</code> y <code>parte-2-2.mod</code> están fijados en el
+      código Python; deben residir en el directorio desde el que se ejecuta el script para que GLPK los localice.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Solver monohilo frente a un problema NP-Hard</div>
+      <div class="f-desc"><code>glpsol</code> resuelve en un único hilo. Al ser programación entera (MIP), instancias
+      con muchos autobuses pueden disparar el tiempo de resolución de forma no lineal.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Formato de entrada estricto</div>
+      <div class="f-desc">Los valores deben ir separados por espacios en un orden de líneas exacto; no se aceptan
+      comas, tabuladores ni columnas fuera de orden.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Sin persistencia de resultados</div>
+      <div class="f-desc">La solución se imprime únicamente por <code>stdout</code>; los ficheros temporales de GLPK
+      se eliminan tras cada ejecución, por lo que no queda un histórico de corridas.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ APRENDIZAJES Y MEJORAS FUTURAS ═══════════════════════════ -->
+<section id="future">
+  <div class="section-header fade-in">
+    <span class="eyebrow">Aprendizajes y mejoras futuras</span>
+    <h2>De formular un modelo a hacerlo operable</h2>
+  </div>
+  <div class="future-grid fade-in">
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">La linealización es una herramienta, no un truco puntual</div>
+      <div class="f-desc">Convertir una condición lógica AND en tres restricciones lineales es un patrón reutilizable
+      en cualquier problema de asignación con conflictos por pares, más allá de este caso concreto.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Separar el modelo del dato paga dividendos</div>
+      <div class="f-desc">Mantener el <code>.mod</code> fijo y regenerar solo el <code>.dat</code> permitió probar
+      instancias de 4 a 600 autobuses sin tocar la formulación matemática.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Fichero de modelo como argumento, no constante</div>
+      <div class="f-desc">Añadir la ruta del <code>.mod</code> como tercer argumento opcional de CLI permitiría
+      ejecutar los scripts desde cualquier directorio de trabajo.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Validación de entrada más flexible</div>
+      <div class="f-desc">Aceptar comas o tabuladores como delimitadores haría el parser de entrada más tolerante
+      a ficheros generados por otras herramientas.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Exportar resultados en formato estructurado</div>
+      <div class="f-desc">Emitir la solución también en JSON o CSV facilitaría integrar el solver en un pipeline
+      de datos más amplio, en lugar de depender solo de la salida por terminal.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Diseñar el experimento, no solo el modelo</div>
+      <div class="f-desc">Las pruebas de sensibilidad sobre <code>kd</code>, <code>kp</code> y el tamaño de las
+      matrices fueron tan reveladoras del comportamiento real del sistema como la propia formulación matemática.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-brand">OPTIMIZACIÓN DE FLOTAS DE AUTOBUSES · GLPK</div>
+  <div class="footer-stack">
+    <span class="badge">Python 3</span>
+    <span class="badge">GLPK</span>
+    <span class="badge">GNU MathProg</span>
+    <span class="badge">MIP</span>
+  </div>
+  <p>Investigación Operativa · Jorge Condado Carballo &amp; Mario Agúndez Díaz ·
+  <a href="https://github.com/jorgee-cc/Linear-Programming-Bus-Scheduling" target="_blank" rel="noopener">Ver en GitHub</a></p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+  document.querySelectorAll('.bench-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.bench-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bench-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.target).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

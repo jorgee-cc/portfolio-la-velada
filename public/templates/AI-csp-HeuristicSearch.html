@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binairo CSP &amp; A* Search Engine — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #0a0e16;
+  --surface:      #131a2b;
+  --surface-2:    #101526;
+  --surface-3:    #0b0f1a;
+  --accent:       #38bdf8;
+  --accent-dim:   rgba(56,189,248,.11);
+  --accent-glow:  rgba(56,189,248,.22);
+  --accent2:      #a78bfa;
+  --accent2-dim:  rgba(167,139,250,.12);
+  --ok:           #22c55e;
+  --ok-dim:       rgba(34,197,94,.11);
+  --warning:      #f59e0b;
+  --warn-dim:     rgba(245,158,11,.11);
+  --danger:       #ef4444;
+  --danger-dim:   rgba(239,68,68,.11);
+  --text:         #edf1f7;
+  --muted:        #93a1b8;
+  --border:       #2a3550;
+  --radius:       12px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+h1,h2,h3,h4,.label { font-family: 'Rajdhani', sans-serif; letter-spacing:.03em; }
+code, .mono        { font-family: 'IBM Plex Mono', monospace; }
+
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .5rem;
+  display: block;
+}
+.section-label.v2 { color: var(--accent2); }
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.site-header {
+  position: fixed; top:0; left:0; right:0; z-index: 200;
+  border-bottom: 1px solid rgba(56,189,248,.12);
+  background: rgba(10,14,22,.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.site-header-inner {
+  max-width: 1280px; margin: 0 auto; padding: .95rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative;
+}
+@media (min-width: 640px) { .site-header-inner { padding: .95rem 3rem; } }
+.site-header-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at right, rgba(56,189,248,.16), #000, #000);
+  opacity: .6; pointer-events: none;
+}
+.site-header-left { position: relative; z-index: 10; flex: 1; display:flex; align-items:center; gap:2rem; }
+.site-brand { display:flex; align-items:center; gap:.5rem; text-decoration:none; }
+.site-brand-j, .site-brand-c { font-family:'Rajdhani',sans-serif; font-size:1.25rem; font-weight:900; text-transform:uppercase; letter-spacing:-.025em; }
+.site-brand-j { color:#ffffff; }
+.site-brand-c { background:linear-gradient(to right,#7dd3fc,#38bdf8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.template-nav { display:flex; align-items:center; gap:1rem; margin-left:1.5rem; }
+.template-nav a { color:var(--muted); font-family:'Rajdhani',sans-serif; font-size:.82rem; font-weight:600; text-decoration:none; transition:color .2s; }
+.template-nav a:hover { color:var(--text); }
+
+.site-header-right { position: relative; z-index: 10; display:flex; align-items:center; gap:.5rem; }
+.github-btn {
+  display:flex; align-items:center; gap:.5rem; border-radius:9999px;
+  border:1px solid rgba(56,189,248,.28); background: rgba(56,189,248,.1);
+  padding:.5rem 1rem; font-family:'Rajdhani',sans-serif; font-weight:700; color:#7dd3fc;
+  box-shadow: 0 0 15px rgba(56,189,248,.16); transition: all .3s; text-decoration:none;
+}
+.github-btn:hover { border-color: rgba(56,189,248,.5); background: rgba(56,189,248,.18); box-shadow: 0 0 30px rgba(56,189,248,.3); transform: scale(1.03); }
+.github-btn svg { width:1rem; height:1rem; }
+.github-text { display:none; }
+.linkedin-text { display:inline; }
+@media (min-width: 640px) { .github-text { display:inline; } }
+@media (max-width: 900px) { .template-nav { display:none; } }
+
+section { padding: 5.5rem 2rem; max-width: 1180px; margin: 0 auto; }
+.section-header { margin-bottom: 2.75rem; }
+.section-header h2 { font-size: clamp(1.9rem,3.8vw,2.8rem); font-weight:700; line-height:1.1; }
+.section-header p { font-size: 1.05rem; color: var(--muted); margin-top:.7rem; max-width:66ch; }
+
+.fade-in { opacity:0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+.fade-in.visible { opacity:1; transform: translateY(0); }
+
+/* ── HERO ─────────────────────────────────────────────────────────── */
+#hero {
+  min-height: 100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding: 8rem 2rem 5rem; max-width:none; margin:0; position:relative; overflow:hidden; background: var(--bg);
+}
+#hero::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(51,65,85,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(51,65,85,.14) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events:none;
+}
+#hero::after {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 75% 55% at 50% 40%, rgba(56,189,248,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-content { position:relative; z-index:1; max-width:920px; margin:0 auto; }
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  padding:.32rem 1rem; border:1px solid rgba(56,189,248,.28); border-radius:20px; background: rgba(56,189,248,.06);
+  margin-bottom:1.6rem;
+}
+.hero-eyebrow-dot { width:7px; height:7px; border-radius:50%; background: var(--ok); animation: blink-dot 1.8s ease-in-out infinite; }
+@keyframes blink-dot { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+
+h1.hero-title {
+  font-size: clamp(2.3rem,6.4vw,4.9rem); font-weight:700; line-height:1.04; letter-spacing:.04em; margin-bottom:.6rem;
+  background: linear-gradient(135deg, #fff 0%, #38bdf8 46%, #a78bfa 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-sub { font-size: clamp(.95rem,2.2vw,1.2rem); color:var(--muted); font-weight:300; max-width:62ch; margin:.9rem auto 2rem; line-height:1.7; }
+.hero-badges { display:flex; flex-wrap:wrap; gap:.45rem; justify-content:center; margin-bottom:2.5rem; }
+.badge {
+  font-family:'IBM Plex Mono',monospace; font-size:.7rem; padding:.28rem .7rem; border-radius:6px;
+  border:1px solid var(--border); background: var(--surface-2); color:var(--muted); transition: border-color .2s, color .2s;
+}
+.badge:hover { border-color: var(--accent); color: var(--text); }
+.badge.hi { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.badge.hi2 { border-color: var(--accent2); color: var(--accent2); background: var(--accent2-dim); }
+
+.hero-cta {
+  display:inline-flex; align-items:center; gap:.5rem; font-family:'Rajdhani',sans-serif; font-weight:700;
+  font-size:1rem; letter-spacing:.1em; text-transform:uppercase; color:#00131c; background: var(--accent);
+  padding:.85rem 2.25rem; border-radius:8px; text-decoration:none; transition: opacity .18s, transform .18s;
+}
+.hero-cta:hover { opacity:.9; transform: translateY(-2px); }
+
+.hero-screens { display:flex; gap:1.5rem; justify-content:center; margin-top:4.5rem; flex-wrap:wrap; }
+.screen-wrap { display:flex; flex-direction:column; align-items:center; gap:.65rem; }
+.mini-screen {
+  width:198px; background: var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5); transition: transform .25s, box-shadow .25s;
+}
+.mini-screen:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(56,189,248,.15); }
+.ms-header {
+  display:flex; align-items:center; justify-content:space-between; padding:.45rem .6rem; background: var(--surface-2);
+  border-bottom:1px solid var(--border); font-family:'Rajdhani',sans-serif; font-size:.62rem; font-weight:700;
+  letter-spacing:.1em; color: var(--accent);
+}
+.ms-header.v2 { color: var(--accent2); }
+.ms-dot { width:5px; height:5px; border-radius:50%; background: var(--ok); }
+.ms-badge-ok { font-family:'IBM Plex Mono',monospace; font-size:.5rem; background:var(--ok); color:#000; padding:.08rem .3rem; border-radius:3px; font-weight:600; }
+.ms-body { padding:.6rem .65rem; }
+.ms-row { display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--muted); padding:.16rem 0; border-bottom:1px solid rgba(51,65,85,.4); }
+.ms-row .v { color: var(--ok); font-weight:500; }
+.ms-row .v.accent { color: var(--accent); }
+.screen-label { font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+
+/* mini binairo board */
+.ms-board { display:grid; grid-template-columns:repeat(6,1fr); gap:2px; margin-bottom:.5rem; }
+.ms-cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:.62rem; border-radius:2px; }
+.ms-cell.x { background: rgba(167,139,250,.16); color:#c4b5fd; }
+.ms-cell.o { background: rgba(56,189,248,.14); color:#7dd3fc; }
+
+/* ═══════ OVERVIEW ═══════════════════════════════════════════════ */
+.overview-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:3rem; align-items:start; }
+.overview-text h2 { font-size: clamp(1.7rem,3.2vw,2.4rem); font-weight:700; line-height:1.15; margin-bottom:1.1rem; }
+.overview-text p { color: var(--muted); font-size:1.02rem; margin-bottom:.8rem; }
+.hl { color: var(--accent); }
+.hl2 { color: var(--accent2); }
+.overview-stats { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
+.stat-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.25rem; transition: border-color .2s, transform .2s; }
+.stat-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.stat-val { font-family:'Rajdhani',sans-serif; font-size:2.15rem; font-weight:800; color:var(--accent); line-height:1; }
+.stat-lbl { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--muted); margin-top:.35rem; text-transform:uppercase; letter-spacing:.05em; }
+
+/* ═══════ ARCHITECTURE ═══════════════════════════════════════════ */
+.arch-container { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:2rem; margin-top:1.5rem; overflow:hidden; }
+.arch-container + .arch-container { margin-top: 1.5rem; }
+.arch-container svg { width:100%; height:auto; }
+@keyframes dash-flow { to { stroke-dashoffset: -24; } }
+.fl { animation: dash-flow 2s linear infinite; }
+.arch-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text); margin-bottom:1rem; letter-spacing:.02em; }
+
+/* ═══════ TECH STACK ══════════════════════════════════════════════ */
+.stack-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1rem; }
+.stack-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.25rem; position:relative; overflow:hidden; transition: border-color .2s, transform .2s; }
+.stack-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--accent); opacity:0; transition: opacity .2s; }
+.stack-card:hover { border-color: rgba(56,189,248,.4); transform: translateY(-4px); }
+.stack-card:hover::before { opacity:1; }
+.stack-cat { font-family:'IBM Plex Mono',monospace; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:.55rem; }
+.stack-name { font-family:'Rajdhani',sans-serif; font-size:1.22rem; font-weight:700; color:var(--text); margin-bottom:.4rem; }
+.stack-desc { font-size:.875rem; color:var(--muted); line-height:1.5; }
+
+/* ═══════ MODULE (parte 1 / parte 2) ══════════════════════════════ */
+.module-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+.formula-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.4rem; }
+.formula-card .f-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; color:var(--text); margin-bottom:.5rem; }
+.formula-card .f-math { font-family:'IBM Plex Mono',monospace; font-size:.82rem; color: var(--accent2); background: var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:.7rem .85rem; margin:.5rem 0; line-height:1.8; overflow-x:auto; }
+.formula-card p { font-size:.875rem; color: var(--muted); line-height:1.55; }
+
+.binairo-board { display:grid; grid-template-columns:repeat(6,1fr); gap:4px; max-width:260px; margin: 1rem auto 0; }
+.bb-cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1rem; border-radius:4px; border:1px solid var(--border); }
+.bb-cell.x { background: rgba(167,139,250,.16); color:#c4b5fd; border-color: rgba(167,139,250,.3); }
+.bb-cell.o { background: rgba(56,189,248,.14); color:#7dd3fc; border-color: rgba(56,189,248,.3); }
+.bb-caption { text-align:center; font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--muted); margin-top:.7rem; }
+
+.result-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.75rem; margin-top:1.2rem; }
+.rs-card { background: var(--surface-3); border:1px solid var(--border); border-radius:8px; padding:.85rem 1rem; }
+.rs-card .rs-n { font-family:'Rajdhani',sans-serif; font-size:1.5rem; font-weight:800; color:var(--accent2); }
+.rs-card .rs-l { font-family:'IBM Plex Mono',monospace; font-size:.63rem; color:var(--muted); margin-top:.2rem; }
+
+/* ═══════ CODE BLOCK / CHALLENGES ═════════════════════════════════ */
+.challenges-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+.ch-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; transition: border-color .2s; }
+.ch-card:hover { border-color: rgba(56,189,248,.35); }
+.ch-header { padding:1.1rem 1.25rem .8rem; border-bottom:1px solid var(--border); }
+.ch-num { font-family:'IBM Plex Mono',monospace; font-size:.63rem; color:var(--accent); letter-spacing:.1em; margin-bottom:.25rem; }
+.ch-title { font-family:'Rajdhani',sans-serif; font-size:1.08rem; font-weight:700; color:var(--text); }
+.ch-body { padding:1rem 1.25rem; }
+.ch-desc { font-size:.875rem; color:var(--muted); margin-bottom:.8rem; line-height:1.55; }
+.code-block { background: var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:.85rem; font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:#cbd5e1; overflow-x:auto; line-height:1.7; white-space:pre; }
+.kw { color:#f472b6; } .fn { color:#60a5fa; } .nm { color:#34d399; } .cm { color:#5b6b85; font-style:italic; } .st { color:#fbbf24; }
+
+/* ═══════ RESULTS / BENCHMARKS ═════════════════════════════════════ */
+.bench-tabs { display:flex; gap:.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.bench-tab {
+  font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.85rem; letter-spacing:.06em; text-transform:uppercase;
+  padding:.55rem 1.1rem; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--muted);
+  cursor:pointer; transition: all .18s;
+}
+.bench-tab.active, .bench-tab:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.bench-panel { display:none; }
+.bench-panel.active { display:block; }
+.bench-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius: var(--radius); }
+table.bench { width:100%; border-collapse: collapse; font-family:'IBM Plex Mono',monospace; font-size:.74rem; min-width: 720px; }
+table.bench th { background: var(--surface-2); color: var(--accent); text-align:left; padding:.7rem .8rem; font-weight:600; letter-spacing:.03em; border-bottom:1px solid var(--border); white-space:nowrap; }
+table.bench td { padding:.65rem .8rem; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
+table.bench tr:last-child td { border-bottom:none; }
+table.bench td.muted { color: var(--muted); }
+table.bench tr:hover td { background: rgba(56,189,248,.04); }
+
+.ratio-group { margin-top:1.5rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.2rem; }
+.ratio-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:1.25rem; }
+.ratio-card .rc-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; margin-bottom:.9rem; }
+.ratio-row { display:flex; align-items:center; gap:.7rem; margin-bottom:.55rem; }
+.ratio-row .rr-label { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--muted); width:72px; flex-shrink:0; }
+.ratio-row .rr-bar-wrap { flex:1; background: var(--surface-3); border-radius:4px; height:10px; overflow:hidden; }
+.ratio-row .rr-bar { height:100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius:4px; }
+.ratio-row .rr-val { font-family:'IBM Plex Mono',monospace; font-size:.7rem; color: var(--text); width:44px; text-align:right; flex-shrink:0; }
+
+.memory-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-top:1.5rem; }
+.mem-card { background: var(--surface); border:1px solid var(--border); border-left:4px solid var(--accent2); border-radius: var(--radius); padding:1.2rem; }
+.mem-card .mc-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.02rem; margin-bottom:.6rem; }
+.mem-card .mc-row { display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); padding:.22rem 0; }
+.mem-card .mc-row span.v { color: var(--text); }
+
+/* ═══════ LIMITATIONS / FUTURE ═════════════════════════════════════ */
+.future-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.f-item { display:flex; gap:.75rem; align-items:flex-start; padding:1.2rem; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); transition: border-color .2s; }
+.f-item:hover { border-color: var(--accent); }
+.f-dot { width:10px; height:10px; border-radius:50%; border:2px solid var(--accent); flex-shrink:0; margin-top:.3rem; }
+.f-dot.warn { border-color: var(--warning); }
+.f-title { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.3rem; }
+.f-desc { font-size:.85rem; color:var(--muted); line-height:1.5; }
+
+/* ═══════ FOOTER ════════════════════════════════════════════════ */
+footer { border-top:1px solid var(--border); padding:2.5rem 2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; max-width:1180px; margin:0 auto; }
+.footer-brand { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:.12em; color:var(--accent); }
+.footer-stack { display:flex; gap:.5rem; flex-wrap:wrap; }
+footer p { font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); }
+
+.divider { height:1px; background: linear-gradient(90deg, transparent, var(--border), transparent); max-width:1180px; margin:0 auto; }
+
+@media (max-width:920px) {
+  .overview-grid, .challenges-grid, .module-grid, .future-grid { grid-template-columns:1fr; }
+}
+@media (max-width:600px) {
+  section { padding:3.5rem 1.25rem; }
+  .overview-stats { grid-template-columns:1fr 1fr; }
+  .hero-screens { gap:1rem; }
+  .mini-screen { width:150px; }
+  .stack-grid { grid-template-columns:1fr; }
+  table.bench { font-size:.68rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="site-header-bg"></div>
+    <div class="site-header-left">
+      <a class="site-brand" href="/" aria-label="Ir a la página de inicio">
+        <span class="site-brand-j">Jorge</span>
+        <span class="site-brand-c">Condado</span>
+      </a>
+      <nav class="template-nav" aria-label="Navegación del proyecto">
+        <a href="#hero">Inicio</a><a href="#overview">Resumen</a><a href="#architecture">Arquitectura</a><a href="#stack">Stack</a><a href="#results">Resultados</a><a href="#challenges">Retos</a>
+      </nav>
+    </div>
+    <div class="site-header-right">
+      <a href="https://github.com/jorgee-cc/IA-Aplicada-csp-heuristic-search" target="_blank" rel="noopener noreferrer" class="github-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        <span class="github-text">GitHub</span>
+      </a>
+      <a href="https://www.linkedin.com/in/jorge-condado-carballo-4065bb2b4/" target="_blank" rel="noopener noreferrer" class="github-btn" aria-label="Abrir perfil de LinkedIn">
+        <span class="linkedin-text">LinkedIn</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ HERO ═══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Inteligencia Artificial Aplicada · UC3M
+    </div>
+
+    <h1 class="hero-title">BINAIRO CSP<br>&amp; MOTOR DE BÚSQUEDA A*</h1>
+
+    <p class="hero-sub">
+      Suite de dos módulos independientes de IA: un solucionador de restricciones para el puzzle
+      Binairo y un motor A* en C++ que calcula rutas óptimas sobre grafos de carreteras reales
+      de hasta 24 millones de nodos, con una cola de prioridad basada en el algoritmo de Dial.
+    </p>
+
+    <div class="hero-badges">
+      <span class="badge hi">Python 3</span>
+      <span class="badge hi2">C++17</span>
+      <span class="badge hi">python-constraint</span>
+      <span class="badge">Algoritmo A*</span>
+      <span class="badge">Bucket Queue (Dial)</span>
+      <span class="badge">Heurística de Haversine</span>
+      <span class="badge">Formato DIMACS</span>
+    </div>
+
+    <a href="#overview" class="hero-cta">Explorar el proyecto ↓</a>
+  </div>
+
+  <div class="hero-screens">
+    <div class="screen-wrap fade-in">
+      <div class="mini-screen">
+        <div class="ms-header v2">
+          <div class="ms-dot"></div>
+          BINAIRO · CSP
+          <div class="ms-badge-ok">OK</div>
+        </div>
+        <div class="ms-body">
+          <div class="ms-board">
+            <div class="ms-cell x">X</div><div class="ms-cell x">X</div><div class="ms-cell o">O</div><div class="ms-cell x">X</div><div class="ms-cell o">O</div><div class="ms-cell o">O</div>
+            <div class="ms-cell x">X</div><div class="ms-cell x">X</div><div class="ms-cell o">O</div><div class="ms-cell x">X</div><div class="ms-cell o">O</div><div class="ms-cell o">O</div>
+            <div class="ms-cell o">O</div><div class="ms-cell o">O</div><div class="ms-cell x">X</div><div class="ms-cell o">O</div><div class="ms-cell x">X</div><div class="ms-cell x">X</div>
+          </div>
+          <div class="ms-row"><span>tablero</span><span class="v">6×6</span></div>
+          <div class="ms-row"><span>soluciones</span><span class="v">11.222</span></div>
+        </div>
+      </div>
+      <span class="screen-label">python-constraint</span>
+    </div>
+
+    <div class="screen-wrap fade-in" style="transition-delay:.12s">
+      <div class="mini-screen">
+        <div class="ms-header">
+          <div class="ms-dot"></div>
+          A* · NEW YORK
+          <div class="ms-badge-ok">OK</div>
+        </div>
+        <div class="ms-body">
+          <div class="ms-row"><span># vértices</span><span class="v accent">264.346</span></div>
+          <div class="ms-row"><span>coste óptimo</span><span class="v accent">162.226 m</span></div>
+          <div class="ms-row"><span>tiempo A*</span><span class="v">0.02 s</span></div>
+          <div class="ms-row"><span>expansiones</span><span class="v">22.301</span></div>
+          <div class="ms-row" style="border-bottom:none;"><span>nodos/seg</span><span class="v">1.16M</span></div>
+        </div>
+      </div>
+      <span class="screen-label">Motor de búsqueda C++</span>
+    </div>
+
+    <div class="screen-wrap fade-in" style="transition-delay:.24s">
+      <div class="mini-screen">
+        <div class="ms-header v2">
+          <div class="ms-dot"></div>
+          ANALIZADOR
+          <div class="ms-badge-ok">4Q</div>
+        </div>
+        <div class="ms-body">
+          <div class="ms-row"><span>P10 corta</span><span class="v">✓</span></div>
+          <div class="ms-row"><span>P40–P60 media</span><span class="v">✓</span></div>
+          <div class="ms-row"><span>P75–P95 larga</span><span class="v">✓</span></div>
+          <div class="ms-row" style="border-bottom:none;"><span>diagonal SW→NE</span><span class="v">✓</span></div>
+        </div>
+      </div>
+      <span class="screen-label">Generación de consultas</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ OVERVIEW ═══════════════════════════════════════════════ -->
+<section id="overview">
+  <div class="overview-grid">
+    <div class="overview-text fade-in">
+      <span class="section-label">01 · Contexto del proyecto</span>
+      <h2>Dos problemas clásicos de IA,<br>dos paradigmas de resolución</h2>
+      <p>
+        El repositorio agrupa dos trabajos independientes de la asignatura de Inteligencia
+        Artificial Aplicada. El primero modela el puzzle lógico <span class="hl2">Binairo (Takuzu)</span>
+        como un <span class="hl2">Problema de Satisfacción de Restricciones (CSP)</span> resuelto con
+        <code>python-constraint</code>. El segundo implementa un motor de búsqueda de caminos
+        más cortos en C++ que aplica <span class="hl">A*</span> sobre mapas de carreteras reales de
+        Estados Unidos en formato DIMACS, con hasta 24 millones de nodos.
+      </p>
+      <p>
+        El foco técnico del segundo módulo está en el diseño de estructuras de datos de bajo
+        nivel: una lista abierta implementada como <span class="hl">Bucket Queue (algoritmo de Dial)</span>
+        que amortiza inserciones a O(1), y una heurística de <span class="hl">Haversine</span> que
+        garantiza admisibilidad y consistencia sobre coordenadas geográficas reales.
+      </p>
+      <p>
+        El proyecto incluye además una herramienta de análisis estadístico de grafos
+        (<code>analizar_grafo.py</code>) que genera consultas de prueba por percentiles de
+        distancia, evitando el sesgo de una selección aleatoria simple a la hora de evaluar
+        el rendimiento del algoritmo.
+      </p>
+    </div>
+
+    <div class="overview-stats fade-in" style="transition-delay:.15s">
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Módulos independientes<br>CSP · Búsqueda heurística</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">23.9M</div>
+        <div class="stat-lbl">Nodos en el grafo<br>completo de EE.UU.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">O(1)</div>
+        <div class="stat-lbl">Inserción amortizada<br>en el Bucket Queue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">~1.3M</div>
+        <div class="stat-lbl">Nodos/segundo de<br>throughput estable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ ARCHITECTURE ════════════════════════════════════════════ -->
+<section id="architecture">
+  <div class="section-header fade-in">
+    <span class="section-label">02 · Arquitectura</span>
+    <h2>Un wrapper de Python,<br>un motor de C++</h2>
+    <p>Ambas partes comparten un mismo patrón: Python orquesta la entrada/salida y el flujo de
+    ejecución, mientras que el cómputo pesado ocurre en la librería (<code>python-constraint</code>)
+    o en un binario nativo compilado en tiempo de ejecución.</p>
+  </div>
+
+  <div class="arch-container fade-in">
+    <div class="arch-title">Parte 1 · Pipeline del solucionador Binairo</div>
+    <svg viewBox="0 0 860 190" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrB" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#a78bfa" opacity=".9"/>
+        </marker>
+      </defs>
+      <line class="fl" x1="150" y1="95" x2="210" y2="95" stroke="#a78bfa" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrB)"/>
+      <line class="fl" x1="360" y1="95" x2="420" y2="95" stroke="#a78bfa" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrB)"/>
+      <line class="fl" x1="580" y1="95" x2="640" y2="95" stroke="#a78bfa" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrB)"/>
+
+      <rect x="10" y="55" width="140" height="80" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.6"/>
+      <text x="80" y="90" fill="#a78bfa" font-size="12" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">FICHERO N×N</text>
+      <text x="80" y="108" fill="#93a1b8" font-size="8.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">x / o / .</text>
+
+      <rect x="210" y="55" width="150" height="80" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.6"/>
+      <text x="285" y="85" fill="#a78bfa" font-size="12" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">MODELO CSP</text>
+      <text x="285" y="102" fill="#93a1b8" font-size="8.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Variables (r,c) · D={0,1}</text>
+      <text x="285" y="115" fill="#5f6f8a" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">4 FunctionConstraint</text>
+
+      <rect x="420" y="45" width="160" height="100" rx="10" fill="#101526" stroke="#22c55e" stroke-width="2"/>
+      <text x="500" y="75" fill="#22c55e" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">python-constraint</text>
+      <text x="500" y="93" fill="#93a1b8" font-size="8.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Backtracking + GAC</text>
+      <text x="500" y="106" fill="#5f6f8a" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">balance + no-consecutivos</text>
+      <text x="500" y="119" fill="#5f6f8a" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">getSolutions()</text>
+
+      <rect x="640" y="55" width="210" height="80" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.6"/>
+      <text x="745" y="85" fill="#a78bfa" font-size="12" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">SALIDA</text>
+      <text x="745" y="102" fill="#93a1b8" font-size="8.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">tablero inicial + solución</text>
+      <text x="745" y="115" fill="#5f6f8a" font-size="7.5" text-anchor="middle" font-family="'IBM Plex Mono',monospace">nº total de soluciones</text>
+    </svg>
+  </div>
+
+  <div class="arch-container fade-in" style="transition-delay:.1s">
+    <div class="arch-title">Parte 2 · Compilación, carga y búsqueda A*</div>
+    <svg viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrC" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#38bdf8" opacity=".9"/>
+        </marker>
+      </defs>
+
+      <!-- top row: python wrapper -> compile -> binary -->
+      <line class="fl" x1="185" y1="55" x2="255" y2="55" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+      <line class="fl" x1="445" y1="55" x2="515" y2="55" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+      <line class="fl" x1="750" y1="90" x2="750" y2="150" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+      <line class="fl" x1="670" y1="55" x2="785" y2="150" stroke="#5f6f8a" stroke-width="1.2" stroke-dasharray="5,5" marker-end="url(#arrC)" opacity=".6"/>
+      <line class="fl" x1="630" y1="90" x2="630" y2="150" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+
+      <rect x="15" y="15" width="170" height="80" rx="10" fill="#101526" stroke="#38bdf8" stroke-width="1.6"/>
+      <text x="100" y="45" fill="#38bdf8" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">parte-2.py</text>
+      <text x="100" y="63" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">wrapper Python</text>
+      <text x="100" y="76" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">subprocess.run()</text>
+
+      <rect x="255" y="15" width="190" height="80" rx="10" fill="#101526" stroke="#38bdf8" stroke-width="1.6"/>
+      <text x="350" y="45" fill="#38bdf8" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">g++ -O3 -std=c++17</text>
+      <text x="350" y="63" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">grafo · algoritmo · main</text>
+      <text x="350" y="76" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">compila en tiempo de ejecución</text>
+
+      <rect x="515" y="15" width="240" height="80" rx="10" fill="#101526" stroke="#22c55e" stroke-width="2"/>
+      <text x="635" y="45" fill="#22c55e" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">dijkstra_solver</text>
+      <text x="635" y="63" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">binario nativo C++17</text>
+      <text x="635" y="76" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">inicio fin mapa salida</text>
+
+      <!-- DIMACS files box -->
+      <rect x="770" y="15" width="120" height="80" rx="10" fill="#101526" stroke="#f59e0b" stroke-width="1.6"/>
+      <text x="830" y="42" fill="#f59e0b" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">DIMACS</text>
+      <text x="830" y="58" fill="#93a1b8" font-size="7.8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">.gr / .co</text>
+      <text x="830" y="72" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">aristas + coords</text>
+
+      <!-- Grafo and Algoritmo boxes -->
+      <rect x="530" y="150" width="220" height="90" rx="10" fill="#101526" stroke="#38bdf8" stroke-width="1.6"/>
+      <text x="640" y="180" fill="#38bdf8" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">Grafo</text>
+      <text x="640" y="198" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">vector de adyacencia</text>
+      <text x="640" y="211" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">carga en 2 pasadas · O(|V|+|E|)</text>
+      <text x="640" y="224" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">crecimiento exponencial de capacidad</text>
+
+      <line class="fl" x1="530" y1="145" x2="480" y2="145" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+
+      <rect x="130" y="150" width="345" height="90" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.6"/>
+      <text x="302" y="180" fill="#a78bfa" font-size="12.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif" letter-spacing="1">Algoritmo::dijkstra()</text>
+      <text x="302" y="198" fill="#93a1b8" font-size="8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">f(n) = g(n) + h(n)</text>
+      <text x="302" y="211" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">expande el nodo de menor f</text>
+      <text x="302" y="224" fill="#5f6f8a" font-size="7.2" text-anchor="middle" font-family="'IBM Plex Mono',monospace">reconstruye camino vía padres[]</text>
+
+      <line class="fl" x1="302" y1="240" x2="302" y2="300" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+      <line class="fl" x1="302" y1="240" x2="130" y2="300" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+      <line class="fl" x1="302" y1="240" x2="480" y2="300" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="8,5" marker-end="url(#arrC)"/>
+
+      <!-- three helper structures -->
+      <rect x="20" y="310" width="220" height="80" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.4"/>
+      <text x="130" y="336" fill="#a78bfa" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">ListaAbierta</text>
+      <text x="130" y="352" fill="#93a1b8" font-size="7.8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">Bucket Queue (Dial)</text>
+      <text x="130" y="365" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">insertar O(1) · sacarMejor O(C)</text>
+      <text x="130" y="378" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">C = peso máximo de arista</text>
+
+      <rect x="260" y="310" width="220" height="80" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.4"/>
+      <text x="370" y="336" fill="#a78bfa" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">ListaCerrada</text>
+      <text x="370" y="352" fill="#93a1b8" font-size="7.8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">vector&lt;bool&gt; de visitados</text>
+      <text x="370" y="365" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">contiene() / agregar() O(1)</text>
+      <text x="370" y="378" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">~1 bit por nodo</text>
+
+      <rect x="500" y="310" width="240" height="80" rx="10" fill="#101526" stroke="#a78bfa" stroke-width="1.4"/>
+      <text x="620" y="336" fill="#a78bfa" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Rajdhani,sans-serif">calcularHeuristica()</text>
+      <text x="620" y="352" fill="#93a1b8" font-size="7.8" text-anchor="middle" font-family="'IBM Plex Mono',monospace">distancia de Haversine</text>
+      <text x="620" y="365" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">admisible + consistente</text>
+      <text x="620" y="378" fill="#5f6f8a" font-size="7" text-anchor="middle" font-family="'IBM Plex Mono',monospace">microgrados → radianes</text>
+    </svg>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ TECH STACK ══════════════════════════════════════════════ -->
+<section id="stack">
+  <div class="section-header fade-in">
+    <span class="section-label">03 · Stack tecnológico</span>
+    <h2>Un lenguaje de alto nivel<br>para orquestar, C++ para lo crítico</h2>
+  </div>
+  <div class="stack-grid">
+    <div class="stack-card fade-in">
+      <div class="stack-cat">Lenguaje · Orquestación</div>
+      <div class="stack-name">Python 3</div>
+      <div class="stack-desc">Lectura y escritura de ficheros, wrappers de ejecución (<code>subprocess</code>), parsing de argumentos y todo el análisis estadístico de grafos.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.07s">
+      <div class="stack-cat">CSP</div>
+      <div class="stack-name">python-constraint</div>
+      <div class="stack-desc">Librería de programación con restricciones. Aporta <code>Problem</code>, <code>addVariable</code> y <code>FunctionConstraint</code> con arco-consistencia generalizada (GAC).</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.14s">
+      <div class="stack-cat">Lenguaje · Rendimiento</div>
+      <div class="stack-name">C++17</div>
+      <div class="stack-desc">Motor de búsqueda compilado con <code>-O3 -Wall -Wextra</code>. Gestión manual de memoria mediante vectores de adyacencia y estructuras a medida.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.21s">
+      <div class="stack-cat">Toolchain</div>
+      <div class="stack-name">g++</div>
+      <div class="stack-desc">Invocado dinámicamente desde Python en cada ejecución (<code>parte-2.py</code> compila, ejecuta y limpia el binario resultante).</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.28s">
+      <div class="stack-cat">Formato de datos</div>
+      <div class="stack-name">9th DIMACS Challenge</div>
+      <div class="stack-desc">Ficheros <code>.gr</code> (aristas: <code>a origen destino coste</code>) y <code>.co</code> (coordenadas en microgrados: <code>v id lon lat</code>) de mapas reales de EE.UU.</div>
+    </div>
+    <div class="stack-card fade-in" style="transition-delay:.35s">
+      <div class="stack-cat">Medición</div>
+      <div class="stack-name">std::chrono</div>
+      <div class="stack-desc"><code>high_resolution_clock</code> para medir el tiempo de ejecución del algoritmo de forma aislada del resto del programa.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ PARTE 1 — CSP BINAIRO ═══════════════════════════════════ -->
+<section id="part1">
+  <div class="section-header fade-in">
+    <span class="section-label v2">04 · Parte 1 — Binairo como CSP</span>
+    <h2>Balance, no-consecutividad<br>y arco-consistencia generalizada</h2>
+    <p>El tablero se modela con una variable de decisión por casilla vacía, dominio binario
+    {0,1} y cuatro restricciones aplicadas a cada fila y columna.</p>
+  </div>
+
+  <div class="module-grid">
+    <div class="formula-card fade-in">
+      <div class="f-title">Modelado (X, D, C)</div>
+      <div class="f-math">X = {x₁ … xₘ} → casillas vacías (m variables)
+D = {0, 1} → dominio de cada variable
+C → 4 restricciones por fila/columna:
+
+  Σ yᵢ,ⱼ = n/2         (balance, fila i)
+  Σ yᵢ,ⱼ = n/2         (balance, columna j)
+  0 &lt; yᵢ,ⱼ+yᵢ,ⱼ₊₁+yᵢ,ⱼ₊₂ &lt; 3   (fila)
+  0 &lt; yᵢ,ⱼ+yᵢ₊₁,ⱼ+yᵢ₊₂,ⱼ &lt; 3   (columna)</div>
+      <p>Las restricciones ternarias se implementan con <code>FunctionConstraint</code> de
+      <code>python-constraint</code>, aplicando <strong>GAC (Generalized Arc Consistency)</strong>:
+      la arco-consistencia clásica solo maneja restricciones binarias, por lo que fue necesario
+      generalizarla a restricciones de n variables.</p>
+    </div>
+
+    <div class="formula-card fade-in" style="transition-delay:.1s">
+      <div class="f-title">Solución de ejemplo (generada con el solver real)</div>
+      <div class="binairo-board">
+        <div class="bb-cell x">X</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell o">O</div>
+        <div class="bb-cell x">X</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell o">O</div>
+        <div class="bb-cell o">O</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell x">X</div>
+        <div class="bb-cell x">X</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell o">O</div>
+        <div class="bb-cell o">O</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell x">X</div>
+        <div class="bb-cell o">O</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell o">O</div><div class="bb-cell x">X</div><div class="bb-cell x">X</div>
+      </div>
+      <div class="bb-caption">Tablero 6×6 vacío → 11.222 soluciones válidas (primera solución mostrada)</div>
+    </div>
+  </div>
+
+  <div class="result-strip fade-in" style="transition-delay:.2s">
+    <div class="rs-card"><div class="rs-n">6×6 · 25 vacías</div><div class="rs-l">instantáneo · 9 soluciones</div></div>
+    <div class="rs-card"><div class="rs-n">8×8 · 44 vacías</div><div class="rs-l">0.3 s · 15 soluciones</div></div>
+    <div class="rs-card"><div class="rs-n">10×10 · 70 vacías</div><div class="rs-l">≈40 min · 87 soluciones</div></div>
+    <div class="rs-card"><div class="rs-n">8×8 · 56 vacías (caso A)</div><div class="rs-l">11 min · 23.101 soluciones</div></div>
+    <div class="rs-card"><div class="rs-n">8×8 · 56 vacías (caso B)</div><div class="rs-l">65 min · 177.767 soluciones</div></div>
+  </div>
+  <p class="fade-in" style="color:var(--muted); font-size:.875rem; margin-top:1rem; max-width:70ch;" style="transition-delay:.25s">
+    El dato relevante: dos tableros 8×8 con el <em>mismo número</em> de variables de decisión
+    (56 vacías) tardaron 11 y 65 minutos respectivamente. El tiempo de resolución no depende
+    solo de cuántas variables hay, sino de cómo se distribuyen los discos iniciales en el tablero.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ PARTE 2 — A* ═════════════════════════════════════════════ -->
+<section id="part2">
+  <div class="section-header fade-in">
+    <span class="section-label">05 · Parte 2 — Búsqueda A* sobre carreteras reales</span>
+    <h2>Espacio de estados, heurística<br>admisible y consistente</h2>
+    <p>El agente se mueve por un grafo dirigido ponderado G=(V,E,w). Cada estado es,
+    simplemente, el vértice donde se encuentra el agente.</p>
+  </div>
+
+  <div class="module-grid">
+    <div class="formula-card fade-in">
+      <div class="f-title">Espacio de estados</div>
+      <div class="f-math">S = V = {0, 1, …, N-1}
+S₀ = v_inicio
+Meta(s) ⟺ s = v_fin
+
+Operador Mover(s, v):
+  Precondición:   (s, v) ∈ E
+  Postcondición:  s ← v
+  Coste:          w(s, v) ∈ ℝ⁺</div>
+      <p>El espacio de estados es isomorfo al conjunto de vértices del grafo: la única
+      variable que cambia durante la búsqueda es la posición del agente.</p>
+    </div>
+
+    <div class="formula-card fade-in" style="transition-delay:.1s">
+      <div class="f-title">Heurística de Haversine — admisible y consistente</div>
+      <div class="f-math">a = sin²(Δφ/2) + cos(φₙ)·cos(φ_fin)·sin²(Δλ/2)
+h(n) = 2R · atan2(√a, √(1-a))
+R ≈ 6.371.000 m</div>
+      <p>Al asumir desplazamiento en línea recta sobre la esfera terrestre —ignorando que el
+      agente solo puede moverse por carreteras—, el coste estimado nunca supera al real:
+      h(n) ≤ h*(n). Esto garantiza que A* no reabra nodos ya cerrados.</p>
+    </div>
+  </div>
+
+  <div class="module-grid" style="margin-top:1.4rem;">
+    <div class="formula-card fade-in">
+      <div class="f-title">Bucket Queue (algoritmo de Dial)</div>
+      <p>En lugar de un heap binario, la lista abierta usa un <strong>vector circular de
+      tamaño C+1</strong> (C = peso máximo de arista), donde cada posición es una lista de
+      nodos con el mismo valor f = g + h.</p>
+      <div class="f-math">indice = f % (C + 1)
+insertar():   O(1)
+sacarMejor(): O(C) amortizado</div>
+      <p>Un mapa hash (<code>mejorF</code>) evita insertar duplicados con peor coste que el ya
+      conocido para un nodo.</p>
+    </div>
+
+    <div class="formula-card fade-in" style="transition-delay:.1s">
+      <div class="f-title">¿Por qué A* y no otras alternativas?</div>
+      <p>Se descartaron búsquedas voraces y DFS por no garantizar optimalidad. También se
+      descartó <strong>IDA*</strong>: al tener costes continuos (metros reales, no una escala
+      pequeña de enteros), regeneraría el árbol de búsqueda de forma ineficiente en cada
+      iteración de profundización.</p>
+      <p>La propia implementación permite desactivar la heurística (h(n)=0), degradando A*
+      a <strong>Dijkstra puro</strong> (búsqueda de coste uniforme) — así es como se generaron
+      todos los datos comparativos de la siguiente sección.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ RESULTADOS EXPERIMENTALES ════════════════════════════════ -->
+<section id="results">
+  <div class="section-header fade-in">
+    <span class="section-label">06 · Resultados experimentales</span>
+    <h2>A* frente a Dijkstra en tres<br>escalas: NY, California y EE.UU.</h2>
+    <p>Consultas generadas por <code>analizar_grafo.py</code> según percentiles de distancia
+    (CORTA · MEDIA · LARGA) más un caso adversarial DIAGONAL diseñado para forzar el peor
+    comportamiento posible de la heurística.</p>
+  </div>
+
+  <div class="bench-tabs fade-in">
+    <button class="bench-tab active" data-target="ny">New York · 264K nodos</button>
+    <button class="bench-tab" data-target="ca">California · 1.9M nodos</button>
+    <button class="bench-tab" data-target="usa">EE.UU. · 23.9M nodos</button>
+  </div>
+
+  <div class="bench-panel active fade-in" id="panel-ny">
+    <div class="bench-table-wrap">
+      <table class="bench">
+        <thead><tr><th>Consulta</th><th>Tiempo Dijkstra</th><th>Tiempo A*</th><th>Ratio</th><th>Nodos Dijkstra</th><th>Nodos A*</th><th>Ratio</th><th>Coste óptimo (m)</th></tr></thead>
+        <tbody>
+          <tr><td>CORTA</td><td class="muted">0.01 s</td><td>0.02 s</td><td class="muted">0.50×</td><td class="muted">25.059</td><td>22.301</td><td>1.12×</td><td>162.226</td></tr>
+          <tr><td>MEDIA</td><td class="muted">0.07 s</td><td>0.09 s</td><td class="muted">0.78×</td><td class="muted">128.751</td><td>108.541</td><td>1.19×</td><td>437.456</td></tr>
+          <tr><td>LARGA</td><td class="muted">0.09 s</td><td>0.06 s</td><td>1.50×</td><td class="muted">113.051</td><td>100.935</td><td>1.12×</td><td>790.321</td></tr>
+          <tr><td>DIAGONAL</td><td class="muted">0.17 s</td><td>0.14 s</td><td>1.21×</td><td class="muted">264.338</td><td>264.337</td><td>1.00×</td><td>1.512.216</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bench-panel" id="panel-ca">
+    <div class="bench-table-wrap">
+      <table class="bench">
+        <thead><tr><th>Consulta</th><th>Tiempo Dijkstra</th><th>Tiempo A*</th><th>Ratio</th><th>Nodos Dijkstra</th><th>Nodos A*</th><th>Ratio</th><th>Coste óptimo (m)</th></tr></thead>
+        <tbody>
+          <tr><td>CORTA</td><td class="muted">0.45 s</td><td>0.44 s</td><td>1.02×</td><td class="muted">560.674</td><td>526.743</td><td>1.06×</td><td>1.707.739</td></tr>
+          <tr><td>MEDIA</td><td class="muted">0.37 s</td><td>0.27 s</td><td>1.37×</td><td class="muted">402.706</td><td>299.401</td><td>1.35×</td><td>6.294.062</td></tr>
+          <tr><td>LARGA</td><td class="muted">1.26 s</td><td>1.22 s</td><td>1.03×</td><td class="muted">1.342.896</td><td>1.309.230</td><td>1.03×</td><td>9.159.948</td></tr>
+          <tr><td>DIAGONAL</td><td class="muted">2.00 s</td><td>1.69 s</td><td>1.18×</td><td class="muted">1.890.312</td><td>1.890.189</td><td>1.00×</td><td>16.089.878</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bench-panel" id="panel-usa">
+    <div class="bench-table-wrap">
+      <table class="bench">
+        <thead><tr><th>Consulta</th><th>Tiempo Dijkstra</th><th>Tiempo A*</th><th>Ratio</th><th>Nodos Dijkstra</th><th>Nodos A*</th><th>Ratio</th><th>Coste óptimo (m)</th></tr></thead>
+        <tbody>
+          <tr><td>CORTA</td><td class="muted">3.96 s</td><td>3.45 s</td><td>1.15×</td><td class="muted">4.367.001</td><td>3.639.956</td><td>1.20×</td><td>5.847.418</td></tr>
+          <tr><td>MEDIA</td><td class="muted">14.67 s</td><td>13.02 s</td><td>1.13×</td><td class="muted">15.053.401</td><td>13.286.197</td><td>1.13×</td><td>14.219.060</td></tr>
+          <tr><td>LARGA</td><td class="muted">13.33 s</td><td>13.11 s</td><td>1.02×</td><td class="muted">14.722.493</td><td>14.234.628</td><td>1.03×</td><td>25.823.541</td></tr>
+          <tr><td>DIAGONAL</td><td class="muted">17.86 s</td><td>18.02 s</td><td class="muted">0.99×</td><td class="muted">23.947.272</td><td>23.947.154</td><td>1.00×</td><td>52.672.362</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="ratio-group fade-in" style="transition-delay:.1s">
+    <div class="ratio-card">
+      <div class="rc-title">Efectividad de la heurística — New York</div>
+      <div class="ratio-row"><span class="rr-label">CORTA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:80%"></div></div><span class="rr-val">1.12×</span></div>
+      <div class="ratio-row"><span class="rr-label">MEDIA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:85%"></div></div><span class="rr-val">1.19×</span></div>
+      <div class="ratio-row"><span class="rr-label">LARGA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:80%"></div></div><span class="rr-val">1.12×</span></div>
+      <div class="ratio-row"><span class="rr-label">DIAGONAL</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:71%"></div></div><span class="rr-val">1.00×</span></div>
+    </div>
+    <div class="ratio-card">
+      <div class="rc-title">Efectividad de la heurística — California</div>
+      <div class="ratio-row"><span class="rr-label">CORTA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:76%"></div></div><span class="rr-val">1.06×</span></div>
+      <div class="ratio-row"><span class="rr-label">MEDIA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:96%"></div></div><span class="rr-val">1.35×</span></div>
+      <div class="ratio-row"><span class="rr-label">LARGA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:73%"></div></div><span class="rr-val">1.03×</span></div>
+      <div class="ratio-row"><span class="rr-label">DIAGONAL</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:71%"></div></div><span class="rr-val">1.00×</span></div>
+    </div>
+    <div class="ratio-card">
+      <div class="rc-title">Efectividad de la heurística — EE.UU.</div>
+      <div class="ratio-row"><span class="rr-label">CORTA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:85%"></div></div><span class="rr-val">1.15×</span></div>
+      <div class="ratio-row"><span class="rr-label">MEDIA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:81%"></div></div><span class="rr-val">1.13×</span></div>
+      <div class="ratio-row"><span class="rr-label">LARGA</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:73%"></div></div><span class="rr-val">1.02×</span></div>
+      <div class="ratio-row"><span class="rr-label">DIAGONAL</span><div class="rr-bar-wrap"><div class="rr-bar" style="width:71%"></div></div><span class="rr-val">0.99×</span></div>
+    </div>
+  </div>
+
+  <p class="fade-in" style="color:var(--muted); font-size:.9rem; margin-top:1.4rem; max-width:75ch;">
+    El patrón es consistente en los tres mapas: la heurística de Haversine reduce
+    significativamente los nodos expandidos en consultas MEDIA (hasta 1.35× en California),
+    pero <strong style="color:var(--text)">colapsa a un ratio de ≈1.00× en las consultas DIAGONAL</strong>,
+    donde A* converge funcionalmente a Dijkstra. La red de carreteras en rejilla obliga a
+    zigzaguear en desplazamientos diagonales, y la distancia en línea recta deja de guiar la
+    búsqueda con eficacia.
+  </p>
+
+  <div class="memory-grid fade-in" style="transition-delay:.15s">
+    <div class="mem-card">
+      <div class="mc-title">New York</div>
+      <div class="mc-row"><span>Nodos</span><span class="v">264.346</span></div>
+      <div class="mc-row"><span>Memoria estática</span><span class="v">≈10.6 MB</span></div>
+      <div class="mc-row"><span>Memoria dinámica</span><span class="v">≈2.1 MB</span></div>
+    </div>
+    <div class="mem-card">
+      <div class="mc-title">California</div>
+      <div class="mc-row"><span>Nodos</span><span class="v">1.890.815</span></div>
+      <div class="mc-row"><span>Memoria estática</span><span class="v">≈71.6 MB</span></div>
+      <div class="mc-row"><span>Memoria dinámica</span><span class="v">≈15.0 MB</span></div>
+    </div>
+    <div class="mem-card">
+      <div class="mc-title">EE.UU.</div>
+      <div class="mc-row"><span>Nodos</span><span class="v">23.947.347</span></div>
+      <div class="mc-row"><span>Memoria estática</span><span class="v">≈902 MB</span></div>
+      <div class="mc-row"><span>Memoria dinámica</span><span class="v">≈190.3 MB</span></div>
+    </div>
+  </div>
+  <p class="fade-in" style="color:var(--muted); font-size:.875rem; margin-top:1rem; max-width:75ch;">
+    El crecimiento de memoria es estrictamente lineal O(|V|+|E|): California tiene ≈7× más
+    nodos que New York y consume 6.9× más memoria; EE.UU. tiene ≈90× más nodos y consume
+    84.7× más memoria. El grafo continental completo (≈1.16 GB) cabe en la RAM de un
+    ordenador estándar sin necesidad de paginar a disco.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ RETOS TÉCNICOS ════════════════════════════════════════════ -->
+<section id="challenges">
+  <div class="section-header fade-in">
+    <span class="section-label">07 · Retos técnicos</span>
+    <h2>Decisiones de bajo nivel<br>para procesar grafos masivos</h2>
+  </div>
+
+  <div class="challenges-grid">
+    <div class="ch-card fade-in">
+      <div class="ch-header"><div class="ch-num">RETO 01</div><div class="ch-title">Carga en dos pasadas para pre-asignar memoria</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Redimensionar el vector de adyacencia en cada arista provocaría realocaciones y copias masivas en grafos de millones de nodos. La solución lee el fichero <code>.gr</code> dos veces: primero para hallar el ID de nodo más alto, luego reserva el tamaño exacto antes de guardar las aristas.</div>
+        <div class="code-block"><span class="cm">// PASO 1: solo detectar el nodo máximo</span>
+<span class="kw">while</span> (getline(archivo, linea)) {
+  <span class="cm">// ... actualizar maxNodoVisto</span>
+}
+
+<span class="cm">// PASO 2: reserva exacta, una sola vez</span>
+vectorAdyacencia.resize(maxNodoVisto + <span class="nm">1</span>);
+coordenadas.resize(maxNodoVisto + <span class="nm">1</span>);
+
+<span class="cm">// PASO 3: relectura y almacenamiento real</span>
+archivo.clear(); archivo.seekg(<span class="nm">0</span>);</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.1s">
+      <div class="ch-header"><div class="ch-num">RETO 02</div><div class="ch-title">Bucket Queue circular sin árbol de prioridad</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Un heap binario clásico da O(log n) por operación. Al ser los costes enteros y acotados por el peso máximo de arista, un vector circular de tamaño C+1 permite inserción O(1) y extracción O(C) amortizada, evitando duplicados con un mapa de mejor coste conocido.</div>
+        <div class="code-block"><span class="kw">void</span> <span class="fn">insertar</span>(<span class="kw">int</span> id, <span class="kw">int</span> f) {
+  <span class="kw">auto</span> it = mejorF.find(id);
+  <span class="kw">if</span> (it == mejorF.end() || f &lt; it-&gt;second) {
+    mejorF[id] = f;
+    <span class="kw">int</span> indice = f % tamañoCircular; <span class="cm">// wrap-around</span>
+    buckets[indice].push_back(id);
+    elementos++;
+  }
+}</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.2s">
+      <div class="ch-header"><div class="ch-num">RETO 03</div><div class="ch-title">Heurística geodésica sobre coordenadas en microgrados</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Los ficheros DIMACS almacenan latitud/longitud como enteros multiplicados por 10⁶. Antes de aplicar Haversine hay que convertir microgrados → grados → radianes, y devolver la distancia como entero para que encaje en la aritmética modular del Bucket Queue.</div>
+        <div class="code-block"><span class="kw">double</span> lat1 = c1.latitud * M_PI / <span class="nm">180000000.0</span>;
+<span class="kw">double</span> a = sin(dlat/<span class="nm">2</span>)*sin(dlat/<span class="nm">2</span>) +
+           cos(lat1)*cos(lat2)*sin(dlon/<span class="nm">2</span>)*sin(dlon/<span class="nm">2</span>);
+<span class="kw">double</span> c = <span class="nm">2</span> * atan2(sqrt(a), sqrt(<span class="nm">1</span>-a));
+<span class="kw">return</span> <span class="fn">static_cast</span>&lt;<span class="kw">int</span>&gt;(RADIO_TIERRA * c);</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.3s">
+      <div class="ch-header"><div class="ch-num">RETO 04</div><div class="ch-title">GAC con restricciones ternarias en Binairo</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Las restricciones de fila/columna involucran N variables simultáneas: ni la arco-consistencia clásica (binaria) ni la camino-consistencia (rutas de longitud 2) se aplican. La solución usa <code>FunctionConstraint</code>, que evalúa la restricción como una función pura sobre N argumentos.</div>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">balance_constraint</span>(*row):
+    N = len(row)
+    <span class="kw">return</span> sum(row) == N // <span class="nm">2</span>
+
+problem.addConstraint(
+    FunctionConstraint(balance_constraint), row_vars)</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.4s">
+      <div class="ch-header"><div class="ch-num">RETO 05</div><div class="ch-title">Consultas de prueba sin sesgo aleatorio</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">Un muestreo aleatorio simple podría sobrerrepresentar rutas cortas y no exponer el peor caso de la heurística. El script analiza 1.000 pares candidatos, calcula percentiles de distancia (P10/P40-60/P75-95) y busca explícitamente la diagonal más larga entre las esquinas del bounding box del mapa.</div>
+        <div class="code-block"><span class="cm"># Q4: caso adversarial — diagonal más larga</span>
+diagonales = [(<span class="st">'SW'</span>,<span class="st">'NE'</span>), (<span class="st">'SE'</span>,<span class="st">'NW'</span>)]
+<span class="kw">for</span> esq1, esq2 <span class="kw">in</span> diagonales:
+    dist = calcular_distancia_haversine(...)
+    <span class="kw">if</span> dist &gt; mejor_dist_diagonal:
+        mejor_diagonal = (nodo1, nodo2)</div>
+      </div>
+    </div>
+
+    <div class="ch-card fade-in" style="transition-delay:.5s">
+      <div class="ch-header"><div class="ch-num">RETO 06</div><div class="ch-title">Aislar el tiempo del algoritmo del I/O de disco</div></div>
+      <div class="ch-body">
+        <div class="ch-desc">En las primeras ejecuciones, el tiempo total incluye la lectura del fichero desde disco. En ejecuciones posteriores, el <em>page cache</em> del sistema operativo mantiene los datos en memoria volátil, por lo que el tiempo medido con <code>chrono</code> refleja casi exclusivamente el coste computacional puro del algoritmo.</div>
+        <div class="code-block"><span class="kw">auto</span> t0 = chrono::high_resolution_clock::now();
+algoritmo.dijkstra(grafo, inicio, fin);
+<span class="kw">auto</span> t1 = chrono::high_resolution_clock::now();
+<span class="cm">// arranque en caliente → tiempo puro de búsqueda</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ LIMITACIONES ════════════════════════════════════════════ -->
+<section id="limitations">
+  <div class="section-header fade-in">
+    <span class="section-label">08 · Limitaciones</span>
+    <h2>Dónde se rompe el diseño</h2>
+  </div>
+  <div class="future-grid fade-in">
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Tamaño del Bucket Queue ligado al peso máximo</div>
+      <div class="f-desc">El vector circular de la lista abierta se dimensiona según el peso de arista más alto del grafo. Un grafo mal definido con una arista de coste anómalamente alto reservaría mucha más memoria de la necesaria.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Binairo exige dimensión N par</div>
+      <div class="f-desc">El solver lanza una excepción si se le pasa una matriz de dimensión impar, ya que las restricciones de balance (N/2 fichas de cada color) no están definidas para N impar.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">Crecimiento superlineal del tiempo con la profundidad</div>
+      <div class="f-desc">Aunque el throughput por nodo es estable, el tiempo total crece más rápido que el tamaño del grafo: pasar de NY a EE.UU. (90× más nodos) implica rutas con mayor profundidad d, y A* explora O(b*)^d nodos.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot warn"></div>
+      <div><div class="f-title">La heurística pierde toda su ventaja en diagonal</div>
+      <div class="f-desc">En consultas DIAGONAL, la red de carreteras en rejilla y barreras geográficas (p. ej. Sierra Nevada en California) hacen que Haversine subestime tanto el coste real que deja de discriminar entre nodos.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ APRENDIZAJES Y MEJORAS FUTURAS ═══════════════════════════ -->
+<section id="future">
+  <div class="section-header fade-in">
+    <span class="section-label v2">09 · Aprendizajes y mejoras futuras</span>
+    <h2>De la heurística admisible<br>a la búsqueda bidireccional</h2>
+  </div>
+  <div class="future-grid fade-in">
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Heurísticas ALT (A*, Landmarks, Triangle inequality)</div>
+      <div class="f-desc">Preprocesar el grafo seleccionando nodos "landmark" y precalculando distancias exactas desde y hacia ellos permitiría cotas más ajustadas que la línea recta de Haversine, especialmente en consultas diagonales.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Búsqueda bidireccional</div>
+      <div class="f-desc">Ejecutar A* simultáneamente desde el origen y desde el destino reduciría la profundidad efectiva a d/2 en cada dirección: en teoría, 2(b*)^(d/2) nodos frente a (b*)^d, una mejora relevante en rutas de larga distancia.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">La distribución de datos importa tanto como su cantidad</div>
+      <div class="f-desc">En Binairo, dos tableros con idéntico número de variables de decisión dieron tiempos de resolución muy distintos (11 min vs. 65 min): el orden en que el solver descarta combinaciones inválidas es tan determinante como el tamaño del problema.</div></div>
+    </div>
+    <div class="f-item">
+      <div class="f-dot"></div>
+      <div><div class="f-title">Diseñar el experimento, no solo el algoritmo</div>
+      <div class="f-desc">Construir <code>analizar_grafo.py</code> para generar consultas por percentiles —en vez de pares aleatorios— fue tan importante para el análisis como la propia implementación de A*: sin ello, el colapso de la heurística en diagonales podría haber pasado inadvertido.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-brand">BINAIRO CSP &amp; A* SEARCH ENGINE</div>
+  <div class="footer-stack">
+    <span class="badge">Python 3</span>
+    <span class="badge">C++17</span>
+    <span class="badge">python-constraint</span>
+    <span class="badge">A*</span>
+  </div>
+  <p>UC3M · Inteligencia Artificial Aplicada · Jorge Condado Carballo &amp; Mario Agúndez Díaz</p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+  const navLinks = document.querySelectorAll('.site-nav a');
+  const sections = document.querySelectorAll('section[id]');
+  const navIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(s => navIO.observe(s));
+
+  navLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  /* Benchmark tabs */
+  document.querySelectorAll('.bench-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.bench-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bench-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.target).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
