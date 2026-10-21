@@ -8,18 +8,14 @@
   --color-void: #07070a;
   --color-ink: #0d0d12;
   --color-panel: #14141b;
-  --color-panel-2: #1b1b24;
   --color-line: #2a2a36;
   --color-bone: #f3f1ea;
   --color-muted: #9a9aa8;
   --color-faint: #5c5c6b;
 
   --color-ring-red: #ff2d3f;
-  --color-ring-red-deep: #b31220;
   --color-ring-blue: #2f6bff;
-  --color-ring-blue-deep: #17386f;
   --color-belt-gold: #f6c343;
-  --color-belt-gold-deep: #a97d1a;
   --color-signal: #35d07f;
 
   --font-head: 'Anton', 'Arial Narrow', sans-serif;
@@ -29,11 +25,8 @@
 
   --animate-marquee: marquee 32s linear infinite;
   --animate-marquee-rev: marquee-rev 32s linear infinite;
-  --animate-spot: spot 6s ease-in-out infinite;
-  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
   --animate-float: float 7s ease-in-out infinite;
   --animate-shine: shine 3.5s linear infinite;
-  --animate-flicker: flicker 4s steps(2, end) infinite;
 }
 
 @keyframes marquee {
@@ -44,15 +37,6 @@
   from { transform: translateX(-50%); }
   to { transform: translateX(0); }
 }
-@keyframes spot {
-  0%, 100% { opacity: 0.35; transform: translateX(-8%); }
-  50% { opacity: 0.6; transform: translateX(8%); }
-}
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(255, 45, 63, 0.5); }
-  70% { box-shadow: 0 0 0 18px rgba(255, 45, 63, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 45, 63, 0); }
-}
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
@@ -60,12 +44,6 @@
 @keyframes shine {
   0% { background-position: 200% center; }
   100% { background-position: -200% center; }
-}
-@keyframes flicker {
-  0%, 92%, 100% { opacity: 1; }
-  93% { opacity: 0.4; }
-  95% { opacity: 1; }
-  96% { opacity: 0.6; }
 }
 
 @layer base {
@@ -106,8 +84,8 @@
     outline-offset: 3px;
   }
 
-  /* La intro se omite si ya se ha visto en la sesión o si el usuario prefiere
-     movimiento reducido. La landing debe quedar visible en ambos casos. */
+  /* La intro se omite si el usuario prefiere movimiento reducido y, en modo
+     `?watch=1`, la navegación entra directamente en el portfolio. */
   html.intro-skip .intro {
     display: none !important;
   }

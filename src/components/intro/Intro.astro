@@ -1,79 +1,13 @@
 ---
 /**
- * Introducción cinematográfica basada en `netflix-intro-animation-pure-css`.
+ * Introducción cinematográfica inspirada en una animación original de referencia.
  *
  * La animación original construye una letra de Netflix con cuatro columnas de
  * "pinceladas". Aquí se conservan esas pinceladas, las luces y el zoom final,
  * pero el protagonista es LogoPersonal.svg. Como el SVG original tiene relleno
  * negro, se aplica como máscara CSS y se pinta con el degradado de la marca.
  */
-const furs = [
-  [0, 3.8, 15],
-  [3.8, 2.8, 10],
-  [6.6, 4.8, 37],
-  [11.4, 4, 23],
-  [15.4, 4, 15],
-  [19.4, 2.5, 27],
-  [21.9, 4, 20],
-  [25.9, 2, 30],
-  [27.9, 4, 35],
-  [31.9, 3.5, 39],
-  [35.4, 2, 34],
-  [37.4, 2.6, 22],
-  [40, 6, 47],
-  [46, 2, 36],
-  [48, 5.5, 29],
-  [53.5, 3, 39],
-  [56.5, 4.1, 45],
-  [60.6, 2.4, 34],
-  [63, 4, 47],
-  [67, 1.5, 27],
-  [68.5, 2.8, 37],
-  [71.3, 2.3, 9],
-  [73.6, 2.2, 28],
-  [75.8, 1, 37],
-  [76.8, 2.1, 28],
-  [78.9, 4.1, 34],
-  [83, 2.5, 21],
-  [85.5, 4.5, 39],
-  [90, 2.8, 30],
-  [92.8, 3.5, 19],
-  [96.3, 3.7, 37],
-]
-
-const lamps = [
-  [0.7, 1],
-  [2.2, 1.4],
-  [5.8, 2.1],
-  [10.1, 2],
-  [12.9, 1.4],
-  [15.3, 2.8],
-  [21.2, 2.5],
-  [25, 2.5],
-  [30.5, 3],
-  [36.3, 3],
-  [41, 2.2],
-  [44.2, 2.6],
-  [51.7, 0.5],
-  [52.1, 1.8],
-  [53.8, 2.3],
-  [57.2, 2],
-  [62.3, 2.9],
-  [65.8, 1.7],
-  [72.8, 0.8],
-  [74.3, 2],
-  [79.8, 2],
-  [78.2, 2],
-  [78.5, 2],
-  [85.3, 1.1],
-  [86.9, 1.1],
-  [88.8, 2],
-  [92.4, 2.4],
-  [96.2, 2.1],
-]
-
-const lampColors = ['#f6c343', '#ff2d3f', '#2f6bff', '#f3f1ea', '#a97d1a']
-const helpers = [1, 2, 3, 4]
+import { furs, helpers, lampColors, lamps } from './intro-data'
 ---
 
 <div class="intro" data-intro>
@@ -504,76 +438,7 @@ const helpers = [1, 2, 3, 4]
 </style>
 
 <script>
-  const intro = document.querySelector<HTMLElement>('[data-intro]')
-  const root = document.documentElement
-  const landing = document.querySelector<HTMLElement>('[data-landing]')
-  const watchMode = new URLSearchParams(window.location.search).get('watch') === '1'
-  const enterPortfolio = () => window.location.replace('/portfolio')
+  import { initIntro } from '../../scripts/intro'
 
-  if (intro) {
-    if (root.classList.contains('intro-skip')) {
-      intro.remove()
-      if (watchMode) enterPortfolio()
-    } else {
-      const stage = intro.querySelector<HTMLElement>('[data-intro-stage]')
-      const skip = intro.querySelector<HTMLButtonElement>('[data-intro-skip]')
-      let finished = false
-
-      if (landing) landing.setAttribute('inert', '')
-
-      const finish = (immediate = false) => {
-        if (finished) return
-        finished = true
-
-        // Watch Now: la intro se reproduce y, al acabar, entra en el portfolio.
-        if (watchMode) {
-          if (immediate) {
-            enterPortfolio()
-            return
-          }
-
-          intro.classList.add('is-entering-portfolio')
-          intro.setAttribute('aria-hidden', 'true')
-          window.setTimeout(enterPortfolio, 480)
-          return
-        }
-
-        if (landing) landing.removeAttribute('inert')
-        root.classList.add('intro-done')
-        intro.classList.add('is-leaving')
-        intro.setAttribute('aria-hidden', 'true')
-
-        if (immediate) {
-          intro.remove()
-          return
-        }
-
-        intro.addEventListener(
-          'transitionend',
-          (event) => {
-            if (event.target === intro && (event as TransitionEvent).propertyName === 'opacity') {
-              intro.remove()
-            }
-          },
-          { once: true },
-        )
-        window.setTimeout(() => intro.remove(), 1000)
-      }
-
-      // El zoom original termina a los 4 s (0,5 s de espera + 3,5 s de animación).
-      stage?.addEventListener('animationend', (event) => {
-        if (event.target === stage) finish()
-      })
-      skip?.addEventListener('click', () => finish(watchMode))
-      window.setTimeout(() => finish(), 4800)
-
-      // Si el usuario activa "movimiento reducido" con la página abierta,
-      // la intro desaparece sin dejar la landing bloqueada por `inert`.
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-      if (reducedMotion.matches) finish(true)
-      reducedMotion.addEventListener('change', (event) => {
-        if (event.matches) finish(true)
-      })
-    }
-  }
+  initIntro()
 </script>

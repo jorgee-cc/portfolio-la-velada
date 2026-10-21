@@ -51,6 +51,15 @@ export const rounds: {
   },
 ]
 
+/** Comparativa del cartel del hero: mi baza frente a la competencia. */
+export const tape = [
+  { label: 'Experiencia real', me: 'Cliente real en producción', rival: 'Ejercicios de bootcamp' },
+  { label: 'Alcance', me: 'Front · Back · Infra · Seguridad', rival: 'Solo la parte bonita' },
+  { label: 'Bajo presión', me: 'Árbitro federado', rival: 'Nunca ha roto producción' },
+  { label: 'Tráfico', me: 'Diseñado para el pico', rival: 'Cae con 100 usuarios' },
+  { label: 'Motivo', me: 'Ganar por KO', rival: 'Participar' },
+]
+
 export const record = [
   { value: 4, suffix: 'º', label: 'Curso', sub: 'Ing. Informática · UC3M' },
   { value: 12, suffix: '+', label: 'Proyectos', sub: 'entregados y desplegados' },

@@ -32,8 +32,3 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
-
-# Repositorios de referencia (material de consulta, no forman parte del build)
-netflix-clone-react-typescript-main/
-netflix-intro-animation-pure-css/
-react-dailyui003landing-page/

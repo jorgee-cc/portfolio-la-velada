@@ -6,6 +6,8 @@ import MaxLineTypography from './ui/MaxLineTypography'
 import MetaRow from './ui/MetaRow'
 import { usePreview } from '../providers/PreviewProvider'
 import { useDetailModal } from '../providers/DetailModalProvider'
+import { getPreviewPosition } from '../lib/layout'
+import { WATCH_PATH } from '../constants'
 
 const iconSx = {
   border: '1px solid rgba(255, 255, 255, 0.45)',
@@ -23,12 +25,7 @@ export default function PreviewPortal() {
   if (!preview || typeof document === 'undefined') return null
 
   const { item, rect } = preview
-  const width = Math.min(Math.max(rect.width * 1.5, 276), 430)
-  const left = Math.min(
-    Math.max(rect.left - (width - rect.width) / 2, 12),
-    window.innerWidth - width - 12,
-  )
-  const top = Math.max(12, Math.min(rect.top - 26, window.innerHeight - 360))
+  const { width, left, top } = getPreviewPosition(rect, window.innerWidth, window.innerHeight)
 
   return createPortal(
     <div
@@ -63,7 +60,7 @@ export default function PreviewPortal() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
           <IconButton
             component="a"
-            href="/?watch=1"
+            href={WATCH_PATH}
             aria-label="Ir al portfolio"
             sx={{
               ...iconSx,

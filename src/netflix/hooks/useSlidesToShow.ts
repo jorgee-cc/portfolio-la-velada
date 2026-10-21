@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 
-const getSlidesToShow = (width: number) => {
-  if (width >= 1536) return 6
-  if (width >= 1200) return 5
-  if (width >= 900) return 4
-  if (width >= 600) return 3
-  return 2
-}
+const BREAKPOINTS = [
+  { minWidth: 1536, slides: 6 },
+  { minWidth: 1200, slides: 5 },
+  { minWidth: 900, slides: 4 },
+  { minWidth: 600, slides: 3 },
+  { minWidth: 0, slides: 2 },
+]
+
+const getSlidesToShow = (width: number) =>
+  BREAKPOINTS.find(({ minWidth }) => width >= minWidth)?.slides ?? 2
 
 export default function useSlidesToShow() {
-  const [slidesToShow, setSlidesToShow] = useState(6)
+  const [slidesToShow, setSlidesToShow] = useState(() => getSlidesToShow(1536))
 
   useEffect(() => {
     const update = () => setSlidesToShow(getSlidesToShow(window.innerWidth))

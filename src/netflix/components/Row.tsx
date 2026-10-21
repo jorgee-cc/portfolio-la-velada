@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Slider from 'react-slick'
 import type { Settings } from 'react-slick'
 import type SliderInstance from 'react-slick'
-import { ArrowBackIosNewIcon, ArrowForwardIosIcon } from '../icons'
 import Card from './Card'
+import RowArrow from './row/RowArrow'
 import useSlidesToShow from '../hooks/useSlidesToShow'
 import type { CatalogRow } from '../types'
 
@@ -20,34 +20,18 @@ export default function Row({ row }: { row: CatalogRow }) {
   const showPrevious = index > 0
   const showNext = index < row.items.length - slidesToShow
 
-  const settings: Settings = {
-    dots: false,
-    arrows: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow,
-    slidesToScroll: slidesToShow,
-    beforeChange: (_current: number, next: number) => setIndex(next),
-  }
-
-  const arrowSx = {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    zIndex: 5,
-    display: { xs: 'none', sm: 'flex' },
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: { sm: 44, md: 60 },
-    border: 0,
-    p: 0,
-    color: '#ffffff',
-    cursor: 'pointer',
-    opacity: 0,
-    transition: 'opacity 0.2s ease, background-color 0.2s ease',
-    '&:hover': { bgcolor: 'rgba(20, 20, 20, 0.55)' },
-    '&:focus-visible': { opacity: 1, outline: '2px solid #ffffff', outlineOffset: -4 },
-  } as const
+  const settings = useMemo<Settings>(
+    () => ({
+      dots: false,
+      arrows: false,
+      infinite: false,
+      speed: 500,
+      slidesToShow,
+      slidesToScroll: slidesToShow,
+      beforeChange: (_current: number, next: number) => setIndex(next),
+    }),
+    [slidesToShow],
+  )
 
   return (
     <Box component="section" className="netflix-row" sx={{ mb: { xs: 3.5, md: 4.5 } }}>
@@ -67,20 +51,11 @@ export default function Row({ row }: { row: CatalogRow }) {
 
       <Box sx={{ position: 'relative' }}>
         {showPrevious && (
-          <Box
-            component="button"
-            type="button"
-            aria-label={`Anterior en ${row.title}`}
-            className="netflix-row__arrow"
+          <RowArrow
+            direction="previous"
+            rowTitle={row.title}
             onClick={() => sliderRef.current?.slickPrev()}
-            sx={{
-              ...arrowSx,
-              left: 0,
-              backgroundImage: 'linear-gradient(to right, rgba(20, 20, 20, 0.9), transparent)',
-            }}
-          >
-            <ArrowBackIosNewIcon fontSize="small" />
-          </Box>
+          />
         )}
 
         <Box sx={{ px: { xs: 2, md: '60px' } }}>
@@ -94,20 +69,11 @@ export default function Row({ row }: { row: CatalogRow }) {
         </Box>
 
         {showNext && (
-          <Box
-            component="button"
-            type="button"
-            aria-label={`Siguiente en ${row.title}`}
-            className="netflix-row__arrow"
+          <RowArrow
+            direction="next"
+            rowTitle={row.title}
             onClick={() => sliderRef.current?.slickNext()}
-            sx={{
-              ...arrowSx,
-              right: 0,
-              backgroundImage: 'linear-gradient(to left, rgba(20, 20, 20, 0.9), transparent)',
-            }}
-          >
-            <ArrowForwardIosIcon fontSize="small" />
-          </Box>
+          />
         )}
       </Box>
     </Box>

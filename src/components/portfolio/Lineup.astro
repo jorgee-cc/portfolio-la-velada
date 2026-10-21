@@ -1,0 +1,35 @@
+---
+import Section from '../ui/Section.astro'
+import SectionHeader from '../ui/SectionHeader.astro'
+import MainEventCard from '../ui/MainEventCard.astro'
+import CoMainCard from '../ui/CoMainCard.astro'
+import ProjectCard from '../ui/ProjectCard.astro'
+import { mainEvent, coMain, undercard } from '../../data/projects'
+---
+
+<Section id="cartelera">
+  <SectionHeader kicker="La cartelera · Proyectos confirmados" class="mb-14">
+    Cada proyecto,<br /><span class="text-gold">una pelea ganada</span>
+    <span slot="subtitle">
+      No colecciono tutoriales. Cada cartel de abajo es trabajo real: desde un cliente que paga
+      hasta un compilador que traduce C a Forth. Elige el combate que quieras ver.
+    </span>
+  </SectionHeader>
+
+  <MainEventCard project={mainEvent} />
+
+  <div class="mb-6 grid gap-5 lg:grid-cols-2">
+    {coMain.map((project) => <CoMainCard project={project} />)}
+  </div>
+
+  <p
+    data-reveal
+    class="mt-12 mb-5 flex items-center gap-3 font-mono text-xs tracking-[0.3em] text-[var(--color-faint)] uppercase"
+  >
+    Undercard · Resto del cartel <span class="rule-belt flex-1 opacity-30"></span>
+  </p>
+
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {undercard.map((project) => <ProjectCard project={project} />)}
+  </div>
+</Section>

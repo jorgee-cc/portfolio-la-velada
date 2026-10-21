@@ -6,6 +6,7 @@ import 'slick-carousel/slick/slick-theme.css'
 import './styles.css'
 
 import theme from './theme'
+import { DARK_BACKGROUND } from './constants'
 import { catalogRows } from './data/catalog'
 import DetailModalProvider from './providers/DetailModalProvider'
 import PreviewProvider from './providers/PreviewProvider'
@@ -22,7 +23,7 @@ export default function NetflixApp() {
       <CssBaseline />
       <DetailModalProvider>
         <PreviewProvider>
-          <Box className="netflix-app" sx={{ minHeight: '100vh', bgcolor: '#141414' }}>
+          <Box className="netflix-app" sx={{ minHeight: '100vh', bgcolor: DARK_BACKGROUND }}>
             <Header />
             <Box component="main">
               <Hero />

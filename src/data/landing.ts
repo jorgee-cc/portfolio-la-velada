@@ -4,9 +4,14 @@ import { portfolioPath, site } from './site'
  * Ficha de la única "película" de la landing: el portfolio de Jorge.
  * Todos los datos provienen del contenido ya existente en el repositorio.
  */
+const featureTitle = 'La Velada del Código'
+const [titleLead, ...titleRest] = featureTitle.split(' del ')
+
 export const feature = {
   kicker: 'Jorge Condado presenta',
-  title: 'La Velada del Código',
+  title: featureTitle,
+  /** El hero parte el título en dos líneas sin repetir el texto en la vista. */
+  titleLines: [titleLead, `del ${titleRest.join(' del ')}`],
   year: '2027',
   candidate: site.candidate,
   genres: ['Full-Stack', 'Infraestructura', 'Seguridad'],

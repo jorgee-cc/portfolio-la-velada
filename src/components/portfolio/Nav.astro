@@ -1,6 +1,7 @@
 ---
-import Logo from './ui/Logo.astro'
-import { navLinks, site } from '../data/site'
+import Icon from '../ui/Icon.astro'
+import Logo from '../ui/Logo.astro'
+import { navLinks, site } from '../../data/site'
 ---
 
 <header
@@ -28,7 +29,7 @@ import { navLinks, site } from '../data/site'
         navLinks.map((l) => (
           <a
             href={l.href}
-            class="rounded-full px-3.5 py-2 font-cond text-sm font-medium uppercase tracking-wide text-[var(--color-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-bone)]"
+            class="rounded-full px-3.5 py-2 font-cond text-sm font-medium tracking-wide text-[var(--color-muted)] uppercase transition-colors hover:bg-white/5 hover:text-[var(--color-bone)]"
           >
             {l.label}
           </a>
@@ -37,7 +38,9 @@ import { navLinks, site } from '../data/site'
     </nav>
 
     <div class="flex items-center gap-2">
-      <a href="#contrato" class="btn btn-primary hidden !px-5 !py-2.5 !text-xs sm:inline-flex">Firmar el contrato</a>
+      <a href="#contrato" class="btn btn-primary hidden !px-5 !py-2.5 !text-xs sm:inline-flex"
+        >Firmar el contrato</a
+      >
       <button
         id="nav-toggle"
         type="button"
@@ -46,9 +49,7 @@ import { navLinks, site } from '../data/site'
         aria-expanded="false"
         aria-controls="mobile-nav"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round" />
-        </svg>
+        <Icon path="M3 6h18M3 12h18M3 18h18" size={20} strokeWidth={2} />
       </button>
     </div>
   </div>
@@ -63,7 +64,7 @@ import { navLinks, site } from '../data/site'
         navLinks.map((l) => (
           <a
             href={l.href}
-            class="rounded-lg px-3 py-3 font-cond text-sm font-medium uppercase tracking-wide text-[var(--color-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-bone)]"
+            class="rounded-lg px-3 py-3 font-cond text-sm font-medium tracking-wide text-[var(--color-muted)] uppercase transition-colors hover:bg-white/5 hover:text-[var(--color-bone)]"
           >
             {l.label}
           </a>
@@ -75,18 +76,7 @@ import { navLinks, site } from '../data/site'
 </header>
 
 <script>
-  const toggle = document.getElementById('nav-toggle')
-  const mobileNav = document.getElementById('mobile-nav')
-  if (toggle && mobileNav) {
-    toggle.addEventListener('click', () => {
-      const open = mobileNav.classList.toggle('hidden')
-      toggle.setAttribute('aria-expanded', String(!open))
-    })
-    mobileNav.querySelectorAll('a').forEach((a) => {
-      a.addEventListener('click', () => {
-        mobileNav.classList.add('hidden')
-        toggle.setAttribute('aria-expanded', 'false')
-      })
-    })
-  }
+  import { initMobileNav } from '../../scripts/mobile-nav'
+
+  initMobileNav()
 </script>

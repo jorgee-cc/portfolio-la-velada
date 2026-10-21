@@ -1,0 +1,23 @@
+---
+interface Props {
+  id: string
+  /** Ancho máximo del contenedor interior. */
+  width?: '6xl' | '7xl'
+  class?: string
+  containerClass?: string
+}
+
+const { id, width = '7xl', class: className = '', containerClass = '' } = Astro.props
+
+const maxWidth = width === '6xl' ? 'max-w-6xl' : 'max-w-7xl'
+---
+
+<section
+  id={id}
+  class:list={['relative z-10 border-t border-[var(--color-line)] py-20 sm:py-28', className]}
+>
+  <slot name="background" />
+  <div class:list={['relative mx-auto px-4 sm:px-6 lg:px-10', maxWidth, containerClass]}>
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,72 @@
+---
+import Section from '../ui/Section.astro'
+import SectionHeader from '../ui/SectionHeader.astro'
+import { record, commitments } from '../../data/content'
+---
+
+<Section id="pesaje">
+  <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+    <div>
+      <SectionHeader kicker="El pesaje · Tale of the tape" size="md" class="mb-10">
+        Peso oficial:<br /><span class="text-gold">listo para el cartel</span>
+        <span slot="subtitle">
+          Antes de subir al ring, todo se mide. Esto es lo que traigo a la báscula: formación
+          sólida, proyectos reales y un historial que no se cae cuando aprieta.
+        </span>
+      </SectionHeader>
+
+      <div class="grid grid-cols-2 gap-4">
+        {
+          record.map((item) => (
+            <div data-reveal class="card p-5">
+              <div class="flex items-baseline gap-1">
+                <span class="font-head text-5xl text-[var(--color-bone)]">{item.value}</span>
+                <span class="font-head text-3xl text-[var(--color-belt-gold)]">{item.suffix}</span>
+              </div>
+              <p class="mt-1 font-cond text-sm tracking-wide text-[var(--color-bone)] uppercase">
+                {item.label}
+              </p>
+              <p class="text-xs text-[var(--color-muted)]">{item.sub}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div data-reveal class="relative">
+      <div
+        class="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)]"
+      >
+        <div
+          class="flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4"
+        >
+          <span class="font-cond text-sm tracking-[0.2em] text-[var(--color-bone)] uppercase">
+            Compromisos técnicos
+          </span>
+          <span
+            class="rounded-full border border-[var(--color-belt-gold)]/50 bg-[var(--color-belt-gold)]/10 px-3 py-1 font-mono text-[10px] tracking-widest text-[var(--color-belt-gold)]"
+          >
+            SLAs DE CANDIDATO
+          </span>
+        </div>
+        <ul class="divide-y divide-[var(--color-line)]">
+          {
+            commitments.map((commitment) => (
+              <li class="flex items-center justify-between px-6 py-4">
+                <span class="text-sm text-[var(--color-muted)]">{commitment.k}</span>
+                <span class="font-mono text-sm font-semibold text-[var(--color-bone)]">
+                  {commitment.v}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="border-t border-[var(--color-line)] bg-[var(--color-void)]/50 px-6 py-4">
+          <p class="font-mono text-[11px] leading-relaxed text-[var(--color-faint)]">
+            * Objetivos de ingeniería que me comprometo a defender ante ti, no promesas de folleto.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Section>

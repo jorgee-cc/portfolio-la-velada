@@ -1,25 +1,44 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { contacts, navLinks, portfolioPath, site } from '../../data/site'
-
-const linkSx = {
-  color: '#8c8c8c',
-  fontSize: '0.8rem',
-  textDecoration: 'none',
-  lineHeight: 2,
-  transition: 'color 0.2s ease',
-  '&:hover': { color: '#ffffff', textDecoration: 'underline' },
-} as const
+import { DARK_BACKGROUND } from '../constants'
+import FooterColumn, { type FooterLink } from './footer/FooterColumn'
 
 export default function Footer() {
   const year = new Date().getFullYear()
+
+  const columns: Array<{ title: string; links: FooterLink[] }> = [
+    {
+      title: 'Portfolio',
+      links: navLinks.map((link) => ({
+        label: link.label,
+        href: `${portfolioPath}${link.href}`,
+      })),
+    },
+    {
+      title: 'Contacto',
+      links: contacts.map((contact) => ({
+        label: contact.label,
+        href: contact.href,
+        external: contact.href.startsWith('http'),
+      })),
+    },
+    {
+      title: 'La Velada del Código',
+      links: [
+        { label: 'Portfolio completo', href: portfolioPath },
+        { label: 'Volver arriba', href: '#inicio' },
+        { label: 'Código en GitHub', href: site.github, external: true },
+      ],
+    },
+  ]
 
   return (
     <Box
       component="footer"
       sx={{
         borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        bgcolor: '#141414',
+        bgcolor: DARK_BACKGROUND,
         px: { xs: 3, md: '60px' },
         py: { xs: 5, md: 7 },
       }}
@@ -37,60 +56,9 @@ export default function Footer() {
             mb: 4,
           }}
         >
-          <Box>
-            <Typography sx={{ color: '#ffffff', fontSize: '0.78rem', fontWeight: 700, mb: 1 }}>
-              Portfolio
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              {navLinks.map((link) => (
-                <Box
-                  key={link.href}
-                  component="a"
-                  href={`${portfolioPath}${link.href}`}
-                  sx={linkSx}
-                >
-                  {link.label}
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          <Box>
-            <Typography sx={{ color: '#ffffff', fontSize: '0.78rem', fontWeight: 700, mb: 1 }}>
-              Contacto
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              {contacts.map((contact) => (
-                <Box
-                  key={contact.label}
-                  component="a"
-                  href={contact.href}
-                  target={contact.href.startsWith('http') ? '_blank' : undefined}
-                  rel={contact.href.startsWith('http') ? 'noreferrer' : undefined}
-                  sx={linkSx}
-                >
-                  {contact.label}
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          <Box>
-            <Typography sx={{ color: '#ffffff', fontSize: '0.78rem', fontWeight: 700, mb: 1 }}>
-              La Velada del Código
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Box component="a" href="/portfolio" sx={linkSx}>
-                Portfolio completo
-              </Box>
-              <Box component="a" href="#inicio" sx={linkSx}>
-                Volver arriba
-              </Box>
-              <Box component="a" href={site.github} target="_blank" rel="noreferrer" sx={linkSx}>
-                Código en GitHub
-              </Box>
-            </Box>
-          </Box>
+          {columns.map((column) => (
+            <FooterColumn key={column.title} {...column} />
+          ))}
         </Box>
 
         <Typography sx={{ color: '#5f5f5f', fontSize: '0.72rem', lineHeight: 1.7 }}>

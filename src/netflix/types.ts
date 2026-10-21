@@ -1,4 +1,4 @@
-export type CatalogKind = 'portfolio' | 'edition'
+type CatalogKind = 'portfolio' | 'edition'
 
 export interface CatalogItem {
   id: string

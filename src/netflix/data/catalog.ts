@@ -1,5 +1,8 @@
 import { feature } from '../../data/landing'
+import { pitchHtml } from '../../data/site'
 import type { CatalogItem, CatalogRow } from '../types'
+
+const plainText = (html: string) => html.replace(/<[^>]*>/g, '')
 
 const edition = (
   data: Omit<CatalogItem, 'kind' | 'age' | 'duration' | 'tags'> & {
@@ -20,8 +23,7 @@ export const portfolioItem: CatalogItem = {
   kind: 'portfolio',
   title: feature.title,
   year: feature.year,
-  overview:
-    'Más de 30.000 candidaturas. Un solo puesto: construir y sostener la infraestructura de un evento que reúne a millones de personas en directo. No vengo a participar. Vengo a ganar por KO técnico.',
+  overview: plainText(pitchHtml),
   tagline: 'El portfolio de Jorge Condado',
   tags: [...feature.genres, `Candidatura ${feature.candidate}`],
   backdrop: '/images/Preview.webp',
@@ -125,7 +127,7 @@ const velada6 = edition({
   badge: 'Próximamente',
 })
 
-export const editions = [velada1, velada2, velada3, velada4, velada5, velada6]
+const editions = [velada1, velada2, velada3, velada4, velada5, velada6]
 
 export const catalogRows: CatalogRow[] = [
   {

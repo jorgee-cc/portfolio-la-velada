@@ -1,12 +1,13 @@
 import { createTheme } from '@mui/material/styles'
+import { DARK_BACKGROUND, GOLD, NETFLIX_RED, PANEL_BACKGROUND } from './constants'
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
-    primary: { main: '#e50914', contrastText: '#ffffff' },
-    secondary: { main: '#f6c343', contrastText: '#000000' },
+    primary: { main: NETFLIX_RED, contrastText: '#ffffff' },
+    secondary: { main: GOLD, contrastText: '#000000' },
     success: { main: '#46d369' },
-    background: { default: '#141414', paper: '#181818' },
+    background: { default: DARK_BACKGROUND, paper: PANEL_BACKGROUND },
     text: { primary: '#ffffff', secondary: '#b3b3b3' },
   },
   typography: {
@@ -18,7 +19,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: '#141414',
+          backgroundColor: DARK_BACKGROUND,
           color: '#ffffff',
         },
       },

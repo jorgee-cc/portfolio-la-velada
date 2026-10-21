@@ -73,48 +73,59 @@ El flujo actual es:
   ediciones de La Velada (2021–2026). Define las filas: “Veladas anteriores”,
   “Los main events”, “Clásicos del ring”, “Próximamente” y “Archivo completo”.
 - `types.ts`: `CatalogItem` y `CatalogRow`.
-- `components/Hero.tsx`: hero a pantalla completa con el logo como marca de
-  agua, badge de candidatura, sinopsis y botones Watch Now / Más información.
-- `components/Row.tsx`: fila de carátulas con `react-slick`, flechas propias y
-  scroll por página. `hooks/useSlidesToShow.ts` decide 2/3/4/5/6 tarjetas según
-  el ancho.
+- `components/Hero.tsx`: composición del hero. El badge, el título y los
+  metadatos viven en `components/hero/`; los botones, en `ui/ActionButtons.tsx`.
+- `components/Row.tsx`: fila de carátulas con `react-slick` y scroll por página.
+  La flecha es `components/row/RowArrow.tsx` y `hooks/useSlidesToShow.ts` decide
+  2/3/4/5/6 tarjetas según el ancho.
 - `components/Card.tsx`: tarjeta; al pasar el ratón abre la vista rápida y al
   pulsar abre la ficha.
 - `components/PreviewPortal.tsx`: vista rápida flotante renderizada con
-  `createPortal`; calcula posición y tamaño a partir del rect de la tarjeta.
+  `createPortal`. La posición se calcula en `lib/layout.ts`.
 - `providers/PreviewProvider.tsx`: estado de la vista rápida, con retardo de
   apertura y de cierre.
 - `providers/DetailModalProvider.tsx`: estado de la ficha seleccionada.
-- `components/DetailModal.tsx`: ficha modal. Para el portfolio muestra el logo;
-  para las veladas, su imagen. Incluye metadatos, sinopsis, capítulos del
-  portfolio y CTA a `/portfolio`. Enlaza a `https://www.infolavelada.com/`.
+- `components/DetailModal.tsx`: armazón de la ficha modal. `components/detail/`
+  separa la cabecera (`DetailHero`), el contenido del portfolio
+  (`PortfolioDetails`), el de las veladas (`EditionDetails`) y los estilos
+  compartidos (`styles.ts`). Enlaza a `https://www.infolavelada.com/`.
 - `components/Header.tsx`: cabecera fija que cambia al hacer scroll
-  (`hooks/useScrolled.ts`), navegación y menú de usuario.
+  (`hooks/useScrolled.ts`). La navegación y el menú de usuario están en
+  `components/header/`, y los enlaces en `data/navigation.ts`.
 - `components/Footer.tsx`: enlaces de sitio y contacto desde `src/data/site.ts`.
 - `styles.css`: estilos propios de la isla, todos prefijados con `.netflix-`.
+- `constants.ts`: alturas, rutas y colores compartidos por la isla.
 - `icons.ts`: barrel propio de iconos de `@mui/icons-material` con
   normalización del interop CJS que aplica Vite 8 a estos módulos.
 
 ### 3.3. Portfolio (`src/pages/portfolio.astro`)
 
-- Conserva el portfolio Astro original completo: componentes, secciones,
-  estilos y enlaces internos.
+- Conserva el portfolio Astro original completo: secciones, estilos y enlaces
+  internos, ahora en `src/components/portfolio/`.
+- Las secciones comparten `ui/Section.astro`; las tarjetas de proyectos están
+  separadas en `ui/MainEventCard.astro`, `ui/CoMainCard.astro`,
+  `ui/ProjectCard.astro` y `ui/ApplicationCard.astro`.
 - No ejecuta la intro; solo la landing de `/`.
 
 ### 3.4. Separación de responsabilidades
 
-- `src/components/intro/Intro.astro`: animación, tiempos, logo, skip, modo
-  `?watch=1` y lógica de finalización.
+- `src/components/intro/Intro.astro`: markup y CSS de la animación.
+  `intro-data.ts` contiene pinceladas y lámparas; `src/scripts/intro.ts`,
+  tiempos, skip, modo `?watch=1` y lógica de finalización.
 - `src/netflix/*`: toda la landing tipo Netflix. No se importa desde el
   portfolio ni desde la intro.
+- `src/components/ui/*`: primitivas compartidas del portfolio (`Section`,
+  `SectionHeader`, `Tag`, `Logo`, `Icon`, `Ticker`, `Atmosphere`).
+- `src/scripts/*`: comportamiento de navegador sin framework: intro, cuenta
+  atrás, menú móvil, reveal on scroll y año del footer.
+- `src/lib/tones.ts`: clases de color por tono, compartidas por las secciones.
 - `src/data/landing.ts`: `feature`, `featureDetails` y `featureChapters` de la
   “película” del portfolio. Lo consume la isla React.
-- `src/data/site.ts`: datos globales (`site`, `portfolioPath`, `navLinks`,
-  `contacts`, `pitchHtml`, candidatura).
+- `src/data/site.ts`: datos globales (`site`, `portfolioPath`, `eventDate`,
+  `navLinks`, `contacts`, `pitchHtml`, candidatura).
 - `src/data/content.ts` y `src/data/projects.ts`: contenido del portfolio Astro.
 - `src/styles/global.css`: tokens, utilidades compartidas, transición de
   landing, placeholder de arranque, foco visible y movimiento reducido.
-- `src/components/ui/Logo.astro`: logo reutilizable en el portfolio.
 
 ## 4. Archivos creados o modificados
 
@@ -141,12 +152,28 @@ El flujo actual es:
 - `package.json` — `@astrojs/react`, React 18, MUI 5, Emotion, `react-slick`,
   `slick-carousel` y `oxc-transform-react` (peer de `@astrojs/react`).
 - `astro.config.mjs` — integración `@astrojs/react`.
-- `tsconfig.json` — `jsx`, `baseUrl`, alias `@/*` y exclusiones de carpetas de
-  referencia.
+- `tsconfig.json` — `jsx`, `baseUrl`, alias `@/*` y exclusión de `dist`.
 - `pnpm-workspace.yaml` — override de `@types/react` a 18.3.31 para evitar
   duplicados de tipos entre MUI y `@types/react-slick`.
-- `eslint.config.js` — ignora las carpetas de referencia de CodePen.
+- `eslint.config.js` — ignora `dist/` y `.vercel/`.
 - `README.md` — recorrido y rutas.
+
+### Refactor de limpieza (21/10/2026)
+
+- `src/components/portfolio/` agrupa las secciones del portfolio; `Card.astro`
+  pasa a llamarse `Lineup.astro`.
+- `src/components/ui/` agrupa primitivas y tarjetas reutilizables.
+- `src/scripts/` y `src/lib/` extraen comportamiento y utilidades que antes
+  vivían dentro de componentes.
+- `src/netflix/components/detail/`, `header/`, `hero/` y `row/` dividen los
+  componentes React que concentraban markup y estilos.
+- `src/netflix/constants.ts` y `src/netflix/data/navigation.ts` centralizan
+  valores y enlaces de la isla.
+- `src/netflix/lib/layout.ts` aísla el cálculo de posición de la vista rápida.
+- `src/data/content.ts`, `landing.ts` y `site.ts` absorben datos que estaban
+  incrustados en `Hero.astro`, `Hero.tsx` y el catálogo.
+- Se eliminaron exports internos, tokens/keyframes CSS sin uso y assets no
+  referenciados (`LaVeladaN.*` y vídeos generados sueltos).
 
 ### Recursos
 
@@ -158,8 +185,8 @@ El flujo actual es:
 - `public/images/Preview.webp` sigue siendo la imagen del portfolio.
 - Las veladas usan las portadas SVG propias `public/images/veladas/velada-1.svg`
   … `velada-6.svg`. No hay carteles externos en el catálogo.
-- En esa misma carpeta conviven las imágenes fuente `LaVeladaN.*`; el catálogo
-  actual no las referencia, pero se conservan como material de referencia.
+- Las imágenes fuente `LaVeladaN.*` se eliminaron en la limpieza por no estar
+  referenciadas ni formar parte del build.
 
 ## 5. Decisiones técnicas
 
@@ -181,11 +208,8 @@ El flujo actual es:
   directo o namespace con `default`).
 - No se añadieron routers, librerías de animación ni gestores de estado
   globales. El estado de la isla vive en providers de React.
-- Las carpetas `netflix-intro-animation-pure-css`, `react-dailyui003landing-page`
-  y `netflix-clone-react-typescript-main` son material de referencia. No forman
-  parte del build, no se importan desde la aplicación y están excluidas del
-  repositorio Git.
-- Se añadieron esas carpetas a `globalIgnores` de ESLint.
+- Las carpetas de referencia originales se eliminaron tras integrar la intro.
+  No formaban parte del build ni se importaban desde la aplicación.
 
 ### 5.2. Introducción
 
@@ -321,8 +345,8 @@ capas que se mueven. Cualquier cambio futuro debe respetar estas reglas:
    de `/`. Evitar dependencias nuevas sin justificación.
 7. Conservar atrás/adelante del navegador.
 8. No romper las secciones ni los enlaces internos del portfolio.
-9. No modificar las carpetas de referencia de CodePen como si fueran parte de la
-   aplicación.
+9. No reintroducir carpetas de referencia ni copiar código externo sin
+   justificación.
 10. Respetar `prefers-reduced-motion`, el foco visible y la navegación por
     teclado.
 11. **No reintroducir efectos caros en la intro**: solo `transform`/`opacity` en
@@ -361,6 +385,9 @@ Resultados de la última iteración (21/10/2026):
   iteraciones anteriores), sin overflow horizontal.
 - `/portfolio` sigue funcionando sin la intro y sin regresiones visuales.
 - Consola sin errores ni peticiones fallidas.
+- Refactor de limpieza verificado con `tsc`, ESLint, build y Chrome headless:
+  `/` hidrata la landing, `/?watch=1` acaba en `/portfolio`, `/portfolio`
+  ejecuta cuenta atrás, reveal y año, y `prefers-reduced-motion` omite la intro.
 
 Verificación de la intro (iteraciones anteriores):
 
@@ -393,8 +420,8 @@ Verificación de la intro (iteraciones anteriores):
 - Watch Now reproduce la intro otra vez antes de entrar en `/portfolio`
   (`/?watch=1`). Es el comportamiento actual; si se quiere entrada directa, hay
   que cambiar el `href` y el modo watch de la intro a la vez.
-- Las carpetas de referencia siguen en el working tree local como material de
-  consulta, pero están excluidas de Git y del build.
+- Las carpetas de referencia locales se eliminaron; el material necesario ya
+  está integrado en el proyecto.
 - No hay pruebas automatizadas de regresión visual.
 
 ## 9. Guía para futuros agentes
@@ -422,8 +449,8 @@ Verificación de la intro (iteraciones anteriores):
 - Ejecuta como mínimo `corepack pnpm exec tsc --noEmit --ignoreDeprecations 6.0`,
   `corepack pnpm build` y `corepack pnpm lint`; si es posible, verifica la
   experiencia en navegador y en móvil.
-- No añadas al commit las carpetas de referencia ni archivos generados; revisa
-  `git status --short` antes de publicar.
+- No añadas al commit archivos generados; revisa `git status --short` antes de
+  publicar.
 - Para inspeccionar la intro, usa el método de pausa de la Web Animations API
   descrito en 5.3; no te fíes de capturas con tiempo virtual.
 - No reformatees masivamente archivos existentes ni hagas refactorizaciones
@@ -435,10 +462,6 @@ Verificación de la intro (iteraciones anteriores):
 - Rama principal: `main`. Remoto `origin` por SSH:
   `git@github.com:jorgee-cc/portfolio-la-velada.git`.
 - Publicado el 21/10/2026. No hay CI ni despliegue automático configurado.
-- Carpetas excluidas del repositorio (solo referencia local):
-  - `netflix-clone-react-typescript-main/`
-  - `netflix-intro-animation-pure-css/`
-  - `react-dailyui003landing-page/`
 - Antes de publicar:
 
   ```bash

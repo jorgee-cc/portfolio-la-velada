@@ -10,6 +10,9 @@ export const site = {
 
 export const portfolioPath = '/portfolio'
 
+/** Fecha objetivo de la cuenta atrás del hero (próximo gran cartel). */
+export const eventDate = '2027-07-24T22:00:00+02:00'
+
 // Texto de presentación compartido por la ficha cinematográfica y el hero del portfolio.
 export const pitchHtml =
   'Más de <strong class="text-[var(--color-bone)]">30.000 candidaturas</strong>. Un solo puesto: construir y sostener la infraestructura de un evento que reúne a millones de personas en directo. No vengo a participar. Vengo a <strong class="text-[var(--color-belt-gold)]">ganar por KO técnico</strong>.'

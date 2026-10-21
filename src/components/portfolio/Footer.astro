@@ -1,7 +1,7 @@
 ---
-import Logo from './ui/Logo.astro'
-import Ticker from './Ticker.astro'
-import { footerTicker, site } from '../data/site'
+import Logo from '../ui/Logo.astro'
+import Ticker from '../ui/Ticker.astro'
+import { footerTicker, site } from '../../data/site'
 ---
 
 <Ticker items={footerTicker} tone="red" reverse />
@@ -18,7 +18,9 @@ import { footerTicker, site } from '../data/site'
         <Logo class="h-6 w-6 text-[var(--color-belt-gold)]" />
       </span>
       <div>
-        <p class="font-head text-sm tracking-wide text-[var(--color-bone)]">JORGE CONDADO CARBALLO</p>
+        <p class="font-head text-sm tracking-wide text-[var(--color-bone)]">
+          JORGE CONDADO CARBALLO
+        </p>
         <p class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-muted)]">
           Full-Stack · Infraestructura · Seguridad
         </p>
@@ -29,10 +31,22 @@ import { footerTicker, site } from '../data/site'
       Candidatura a programador oficial de La Velada del Año · © <span data-year>2027</span>
     </p>
 
-    <div class="flex items-center gap-4 font-cond text-sm uppercase tracking-wide text-[var(--color-muted)]">
+    <div
+      class="flex items-center gap-4 font-cond text-sm tracking-wide text-[var(--color-muted)] uppercase"
+    >
       <a href="/" class="transition-colors hover:text-[var(--color-bone)]">La ficha</a>
-      <a href={site.github} target="_blank" rel="noreferrer" class="transition-colors hover:text-[var(--color-bone)]">GitHub</a>
-      <a href={site.linkedin} target="_blank" rel="noreferrer" class="transition-colors hover:text-[var(--color-bone)]">LinkedIn</a>
+      <a
+        href={site.github}
+        target="_blank"
+        rel="noreferrer"
+        class="transition-colors hover:text-[var(--color-bone)]">GitHub</a
+      >
+      <a
+        href={site.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        class="transition-colors hover:text-[var(--color-bone)]">LinkedIn</a
+      >
       <a href="#contrato" class="transition-colors hover:text-[var(--color-bone)]">Contacto</a>
     </div>
   </div>

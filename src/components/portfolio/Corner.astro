@@ -1,0 +1,39 @@
+---
+import Section from '../ui/Section.astro'
+import SectionHeader from '../ui/SectionHeader.astro'
+import Tag from '../ui/Tag.astro'
+import Icon from '../ui/Icon.astro'
+import { corner } from '../../data/content'
+---
+
+<Section id="rincon">
+  <SectionHeader kicker="Mi rincón · El equipo del campeón" class="mb-14">
+    Nadie pelea solo:<br /><span class="text-fire">esta es mi esquina</span>
+    <span slot="subtitle">
+      Ningún programador gana un main event sin su equipo. Estas son las herramientas que tengo en
+      la esquina, agrupadas por lo que resuelven — no por moda.
+    </span>
+  </SectionHeader>
+
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      corner.map((item) => (
+        <div data-reveal class="card p-6">
+          <div class="flex items-center gap-3">
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-void)]">
+              <Icon path={item.icon} size={22} class="text-[var(--color-belt-gold)]" />
+            </span>
+            <h3 class="font-cond text-lg font-semibold tracking-wide text-[var(--color-bone)] uppercase">
+              {item.role}
+            </h3>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            {item.team.map((technology) => (
+              <Tag>{technology}</Tag>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</Section>
