@@ -1,6 +1,6 @@
 ---
 import Ticker from './Ticker.astro'
-import { heroTicker } from '../data/site'
+import { heroTicker, pitchHtml } from '../data/site'
 
 // Fecha objetivo de la cuenta atrás (editable): próximo gran cartel
 const EVENT_DATE = '2027-07-24T22:00:00+02:00'
@@ -29,9 +29,7 @@ const tale = [
       </h1>
 
       <p data-reveal class="mx-auto mt-7 max-w-xl text-base leading-relaxed text-[var(--color-muted)] sm:text-lg lg:mx-0">
-        Más de <strong class="text-[var(--color-bone)]">30.000 candidaturas</strong>. Un solo puesto:
-        construir y sostener la infraestructura de un evento que reúne a millones de personas en
-        directo. No vengo a participar. Vengo a <strong class="text-[var(--color-belt-gold)]">ganar por KO técnico</strong>.
+        <Fragment set:html={pitchHtml} />
       </p>
 
       <div data-reveal class="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">

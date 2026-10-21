@@ -1,0 +1,265 @@
+/* ============================================================
+   Landing tipo Netflix — estilos propios de la isla React.
+   Todo va prefijado con .netflix- para no tocar el resto del sitio.
+   ============================================================ */
+
+.netflix-app {
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden;
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: #ffffff;
+  background-color: #141414;
+}
+
+/* ------------------------------ Hero ------------------------------ */
+
+.netflix-hero__backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 90% at 78% 38%, rgba(255, 45, 63, 0.2), transparent 62%),
+    radial-gradient(55% 75% at 92% 12%, rgba(246, 195, 67, 0.14), transparent 68%), #141414;
+}
+
+.netflix-hero__mark {
+  position: absolute;
+  top: 50%;
+  right: 2%;
+  width: min(54vw, 640px);
+  transform: translateY(-50%);
+  background: linear-gradient(155deg, #ffffff 0%, #f6c343 46%, #ff2d3f 100%);
+  opacity: 0.92;
+  filter: drop-shadow(0 0 90px rgba(255, 45, 63, 0.28));
+  animation: netflix-mark-float 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+.netflix-hero__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(closest-side at 74% 46%, rgba(255, 255, 255, 0.08), transparent 70%),
+    linear-gradient(120deg, transparent 40%, rgba(246, 195, 67, 0.05) 60%, transparent 80%);
+  pointer-events: none;
+}
+
+.netflix-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(20, 20, 20, 0.94) 0%,
+      rgba(20, 20, 20, 0.72) 40%,
+      rgba(20, 20, 20, 0.15) 74%,
+      rgba(20, 20, 20, 0.55) 100%
+    ),
+    linear-gradient(0deg, #141414 0%, rgba(20, 20, 20, 0.82) 10%, rgba(20, 20, 20, 0) 42%);
+  pointer-events: none;
+}
+
+@keyframes netflix-mark-float {
+  0%,
+  100% {
+    transform: translateY(-50%) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-52%) translateX(-16px) rotate(-1deg);
+  }
+}
+
+/* ------------------------------ Filas ------------------------------ */
+
+.netflix-row .slick-list {
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+.netflix-row .slick-track {
+  display: flex;
+  align-items: stretch;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.netflix-row .slick-slide {
+  height: auto;
+}
+
+.netflix-row .slick-slide > div {
+  height: 100%;
+}
+
+.netflix-row:hover .netflix-row__arrow {
+  opacity: 1;
+}
+
+/* ------------------------------ Tarjetas ------------------------------ */
+
+.netflix-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #2a2a2a;
+  cursor: pointer;
+  transform-origin: center center;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.netflix-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 0.35s ease,
+    filter 0.25s ease;
+}
+
+.netflix-card:hover {
+  transform: scale(1.045);
+  box-shadow: 0 16px 34px -14px rgba(0, 0, 0, 0.95);
+  z-index: 3;
+}
+
+.netflix-card:hover img {
+  transform: scale(1.04);
+  filter: brightness(1.05);
+}
+
+.netflix-card:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.netflix-card__badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(229, 9, 20, 0.94);
+  color: #ffffff;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------ Hover preview ------------------------------ */
+
+.netflix-preview {
+  position: fixed;
+  z-index: 1300;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #181818;
+  box-shadow:
+    0 24px 60px -14px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: netflix-preview-in 0.18s ease-out both;
+}
+
+.netflix-preview__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.netflix-preview__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.netflix-preview__fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(24, 24, 24, 0.96) 0%,
+    rgba(24, 24, 24, 0.32) 42%,
+    rgba(24, 24, 24, 0) 100%
+  );
+}
+
+@keyframes netflix-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ------------------------------ Modal ------------------------------ */
+
+.netflix-modal__mark-wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(80% 130% at 72% 28%, rgba(255, 45, 63, 0.22), transparent 62%),
+    radial-gradient(60% 100% at 18% 80%, rgba(246, 195, 67, 0.12), transparent 70%), #0b0b0b;
+}
+
+.netflix-modal__mark {
+  width: 40%;
+  max-width: 300px;
+  background: linear-gradient(155deg, #ffffff 0%, #f6c343 46%, #ff2d3f 100%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 70px rgba(255, 45, 63, 0.3));
+}
+
+.netflix-modal__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #181818 0%, rgba(24, 24, 24, 0.86) 12%, rgba(24, 24, 24, 0) 58%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 68%);
+  pointer-events: none;
+}
+
+/* ------------------------------ Responsive ------------------------------ */
+
+@media (max-width: 900px) {
+  .netflix-hero__mark {
+    right: -14%;
+    width: min(78vw, 430px);
+    opacity: 0.32;
+  }
+}
+
+@media (max-width: 600px) {
+  .netflix-hero__mark {
+    right: -24%;
+    width: 86vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .netflix-hero__mark,
+  .netflix-preview {
+    animation: none;
+  }
+
+  .netflix-card,
+  .netflix-card img {
+    transition: none;
+  }
+}

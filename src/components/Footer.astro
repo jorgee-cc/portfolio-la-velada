@@ -1,4 +1,5 @@
 ---
+import Logo from './ui/Logo.astro'
 import Ticker from './Ticker.astro'
 import { footerTicker, site } from '../data/site'
 ---
@@ -11,9 +12,11 @@ import { footerTicker, site } from '../data/site'
   >
     <div class="flex items-center gap-3">
       <span
-        class="flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-belt-gold)]/60 bg-[var(--color-belt-gold)]/10 font-head text-lg leading-none text-[var(--color-belt-gold)]"
-        aria-hidden="true">JC</span
+        class="flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-belt-gold)]/60 bg-[var(--color-belt-gold)]/10"
+        aria-hidden="true"
       >
+        <Logo class="h-6 w-6 text-[var(--color-belt-gold)]" />
+      </span>
       <div>
         <p class="font-head text-sm tracking-wide text-[var(--color-bone)]">JORGE CONDADO CARBALLO</p>
         <p class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-muted)]">
@@ -27,6 +30,7 @@ import { footerTicker, site } from '../data/site'
     </p>
 
     <div class="flex items-center gap-4 font-cond text-sm uppercase tracking-wide text-[var(--color-muted)]">
+      <a href="/" class="transition-colors hover:text-[var(--color-bone)]">La ficha</a>
       <a href={site.github} target="_blank" rel="noreferrer" class="transition-colors hover:text-[var(--color-bone)]">GitHub</a>
       <a href={site.linkedin} target="_blank" rel="noreferrer" class="transition-colors hover:text-[var(--color-bone)]">LinkedIn</a>
       <a href="#contrato" class="transition-colors hover:text-[var(--color-bone)]">Contacto</a>

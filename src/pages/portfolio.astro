@@ -1,0 +1,33 @@
+---
+import Layout from '../layouts/Layout.astro'
+import Nav from '../components/Nav.astro'
+import Hero from '../components/Hero.astro'
+import TheFight from '../components/TheFight.astro'
+import WeighIn from '../components/WeighIn.astro'
+import Applications from '../components/Applications.astro'
+import Card from '../components/Card.astro'
+import Corner from '../components/Corner.astro'
+import Palmares from '../components/Palmares.astro'
+import PressConference from '../components/PressConference.astro'
+import Contract from '../components/Contract.astro'
+import Footer from '../components/Footer.astro'
+---
+
+<Layout
+  title="Jorge Condado — Candidato a Programador Oficial de La Velada del Año"
+  description="Portfolio-candidatura de Jorge Condado Carballo: más de 30.000 candidaturas, una sola infraestructura. Proyectos, trayectoria y perfil técnico para el puesto de programador oficial de La Velada del Año."
+>
+  <Nav />
+  <main class="relative z-10">
+    <Hero />
+    <TheFight />
+    <WeighIn />
+    <Applications />
+    <Card />
+    <Corner />
+    <Palmares />
+    <PressConference />
+    <Contract />
+  </main>
+  <Footer />
+</Layout>

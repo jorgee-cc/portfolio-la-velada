@@ -1,9 +1,16 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"],
+  "exclude": [
+    "dist",
+    "netflix-clone-react-typescript-main",
+    "netflix-intro-animation-pure-css",
+    "react-dailyui003landing-page"
+  ],
   "compilerOptions": {
     "baseUrl": "./",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "paths": {
       "@/*": ["src/*"]
     }

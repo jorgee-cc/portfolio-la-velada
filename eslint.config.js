@@ -12,5 +12,12 @@ export default defineConfig([
       'comma-dangle': ['error', 'always-multiline'],
     },
   },
-  globalIgnores(['.vercel/', 'dist/']),
+  // Carpetas de referencia originales (exportaciones de CodePen): no forman
+  // parte del código Astro que se compila ni se mantiene en este proyecto.
+  globalIgnores([
+    '.vercel/',
+    'dist/',
+    'netflix-intro-animation-pure-css/',
+    'react-dailyui003landing-page/',
+  ]),
 ])

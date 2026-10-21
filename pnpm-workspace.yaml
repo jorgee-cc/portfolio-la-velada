@@ -15,6 +15,7 @@ onlyBuiltDependencies:
 
 overrides:
   path-to-regexp@>=4.0.0 <6.3.0: ^6.3.0
+  '@types/react': 18.3.31
 
 peerDependencyRules:
   allowedVersions:

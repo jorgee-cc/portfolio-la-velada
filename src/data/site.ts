@@ -8,6 +8,12 @@ export const site = {
   linkedin: 'https://www.linkedin.com/in/jorge-condado-carballo-4065bb2b4/',
 }
 
+export const portfolioPath = '/portfolio'
+
+// Texto de presentación compartido por la ficha cinematográfica y el hero del portfolio.
+export const pitchHtml =
+  'Más de <strong class="text-[var(--color-bone)]">30.000 candidaturas</strong>. Un solo puesto: construir y sostener la infraestructura de un evento que reúne a millones de personas en directo. No vengo a participar. Vengo a <strong class="text-[var(--color-belt-gold)]">ganar por KO técnico</strong>.'
+
 export const navLinks = [
   { href: '#cartel', label: 'El Cartel' },
   { href: '#reto', label: 'El Reto' },
