@@ -32,18 +32,11 @@ export default function Header() {
         sx={{ minHeight: `${APP_BAR_HEIGHT}px !important`, gap: { xs: 1, md: 3 } }}
       >
         <Box
-          component="a"
-          href="#inicio"
-          aria-label="Inicio"
-          sx={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
-        >
-          <Box
-            component="img"
-            src="/assets/netflix-logo.png"
-            alt="Netflix"
-            sx={{ width: { xs: 74, md: 92 }, height: 'auto', display: 'block' }}
-          />
-        </Box>
+          component="img"
+          src="/assets/netflix-logo.png"
+          alt="Netflix"
+          sx={{ width: { xs: 74, md: 92 }, height: 'auto', display: 'block', flexShrink: 0 }}
+        />
 
         <HeaderNav items={headerNavItems} />
         <UserMenu items={userMenuItems} />

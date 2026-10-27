@@ -43,7 +43,7 @@ const velada1 = edition({
   city: 'Barcelona',
   overview:
     'La primera Velada abrió la puerta: tres combates, un formato que nadie había probado y más de un millón y medio de personas mirando a la vez. El punto de partida de un fenómeno que ya es historia de Twitch.',
-  backdrop: '/images/veladas/velada-1.svg',
+  backdrop: '/images/veladas/Velada1.webp',
   match: 96,
   badge: 'El origen',
 })
@@ -58,7 +58,7 @@ const velada2 = edition({
   city: 'Badalona',
   overview:
     'Badalona, 12.760 personas en la grada y el récord de espectadores simultáneos de Twitch: 3,3 millones. La Velada dejó de ser un experimento y se convirtió en el evento del año.',
-  backdrop: '/images/veladas/velada-2.svg',
+  backdrop: '/images/veladas/Velada2.webp',
   match: 98,
   badge: 'Récord',
 })
@@ -73,7 +73,7 @@ const velada3 = edition({
   city: 'Madrid',
   overview:
     'El Metropolitano, 70.000 personas y el primer gran salto a un estadio. Coscu, Fernanfloo, Quevedo y una noche que reventó todos los registros de la plataforma.',
-  backdrop: '/images/veladas/velada-3.svg',
+  backdrop: '/images/veladas/Velada3.webp',
   match: 97,
   duration: '3 h 10 min',
   badge: 'Main event',
@@ -89,7 +89,7 @@ const velada4 = edition({
   city: 'Madrid',
   overview:
     'El Bernabéu se rindió al fenómeno: 78.297 personas, el primer combate dual y el primer Rey de la Pista. La edición que llevó La Velada al siguiente nivel.',
-  backdrop: '/images/veladas/velada-4.svg',
+  backdrop: '/images/veladas/Velada4.webp',
   match: 99,
   duration: '3 h 25 min',
   badge: 'Top 10',
@@ -105,7 +105,7 @@ const velada5 = edition({
   city: 'Sevilla',
   overview:
     'Sevilla acogió la quinta edición con La Cartuja como escenario. Otra noche de récord, otra demostración de que La Velada ya es mucho más que boxeo.',
-  backdrop: '/images/veladas/velada-5.svg',
+  backdrop: '/images/veladas/Velada5.webp',
   match: 95,
   duration: '3 h 15 min',
   badge: 'Nuevo',
@@ -121,9 +121,25 @@ const velada6 = edition({
   city: 'Madrid',
   overview:
     'La sexta edición llega en 2026. Nuevos combates, nuevas historias y el mismo reto: sostener en directo a millones de personas sin que nada falle.',
-  backdrop: '/images/veladas/velada-6.svg',
+  backdrop: '/images/veladas/Velada6.webp',
   match: 100,
   duration: 'Por confirmar',
+})
+
+const velada7 = edition({
+  id: 'velada-7',
+  title: 'La Velada del Año VII',
+  roman: 'VII',
+  year: '2027',
+  date: 'Por confirmar',
+  venue: 'Por confirmar',
+  city: 'Por confirmar',
+  overview:
+    'La séptima edición ya está en marcha. Cartel, recinto y fecha todavía por confirmar, pero la promesa no cambia: reunir a millones de personas frente al mismo ring y que nada falle en directo.',
+  backdrop: '/images/veladas/velada-7.svg',
+  match: 100,
+  duration: 'Por confirmar',
+  tags: ['Boxeo', 'Evento en directo'],
   badge: 'Próximamente',
 })
 
@@ -133,26 +149,11 @@ export const catalogRows: CatalogRow[] = [
   {
     id: 'veladas-anteriores',
     title: 'Veladas anteriores',
-    items: [velada1, velada2, velada3, velada4, velada5],
-  },
-  {
-    id: 'main-events',
-    title: 'Los main events',
-    items: [velada3, velada4, velada5],
-  },
-  {
-    id: 'clasicos',
-    title: 'Clásicos del ring',
-    items: [velada1, velada2],
+    items: editions,
   },
   {
     id: 'proximamente',
-    title: 'Próximamente',
-    items: [velada6],
-  },
-  {
-    id: 'archivo',
-    title: 'Archivo completo',
-    items: editions,
+    title: 'Próximas veladas',
+    items: [velada7],
   },
 ]

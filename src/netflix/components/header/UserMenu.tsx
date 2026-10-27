@@ -18,7 +18,7 @@ export default function UserMenu({ items }: UserMenuProps) {
       <IconButton onClick={open} sx={{ p: 0, ml: 1 }} aria-label="Abrir perfil">
         <Avatar
           alt={site.name}
-          src="/images/LogoPersonal.jpg"
+          src="/images/LogoPersonalGold.png"
           variant="rounded"
           sx={{ width: 34, height: 34, border: '1px solid rgba(255, 255, 255, 0.25)' }}
         />

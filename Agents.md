@@ -1,6 +1,6 @@
 # Agents.md — Contexto del proyecto
 
-> Revisado el 26 de octubre de 2026 contra el estado real del repositorio.
+> Revisado el 27 de octubre de 2026 contra el estado real del repositorio.
 > Este documento es contexto para agentes, no una garantía: antes de editar,
 > lee los archivos implicados. Si algo no coincide, prevalece el código.
 
@@ -33,7 +33,7 @@ El flujo actual es:
 | `/?watch=1` | Reproduce la intro y después entra en `/portfolio`. |
 | `/portfolio` | Portfolio completo (Astro). |
 | `/portfolio#cartel` | Sección “El cartel”. |
-| `/portfolio#reto` | Sección “El reto”. |
+| `/portfolio#candidaturas` | Sección “Candidaturas”. |
 | `/portfolio#cartelera` | Sección “La cartelera”. |
 | `/portfolio#rueda` | Sección de contacto. |
 | `/portfolio#palmares` | Sección “El palmarés”. |
@@ -43,7 +43,9 @@ El flujo actual es:
   navegación MPA normal: no hay router cliente.
 - “Más información” abre la ficha modal del portfolio dentro de `/`.
 - La cabecera de la landing enlaza a `#inicio`, `/portfolio`,
-  `/portfolio#cartelera` y `/portfolio#rueda`.
+  `/portfolio#cartelera` y `/portfolio#rueda` solo con los textos de
+  navegación: el logo de Netflix es una imagen plana, sin enlace ni
+  comportamiento de botón.
 - El footer de la landing enlaza al portfolio, a `#inicio`, GitHub y LinkedIn.
 - Desde el footer de `/portfolio` se puede volver a `/`.
 
@@ -69,9 +71,9 @@ El flujo actual es:
   `ThemeProvider` + `CssBaseline`, y en los providers de ficha y vista rápida.
 - `theme.ts`: tema MUI oscuro (`#141414`), rojo Netflix `#e50914`, oro
   `#f6c343`, tipografía Roboto.
-- `data/catalog.ts`: catálogo temático. Contiene el ítem del portfolio y seis
-  ediciones de La Velada (2021–2026). Define las filas: “Veladas anteriores”,
-  “Los main events”, “Clásicos del ring”, “Próximamente” y “Archivo completo”.
+- `data/catalog.ts`: catálogo temático. Contiene el ítem del portfolio y siete
+  ediciones de La Velada (I–VII, 2021–2027). Define dos filas: “Veladas
+  anteriores” (ediciones I–VI) y “Próximas veladas” (la VII, por confirmar).
 - `types.ts`: `CatalogItem` y `CatalogRow`.
 - `components/Hero.tsx`: composición del hero. El badge, el título y los
   metadatos viven en `components/hero/`; los botones, en `ui/ActionButtons.tsx`.
@@ -91,7 +93,8 @@ El flujo actual es:
   (`PortfolioDetails`), el de las veladas (`EditionDetails`) y los estilos
   compartidos (`styles.ts`). Enlaza a `https://www.infolavelada.com/`.
 - `components/Header.tsx`: cabecera fija que cambia al hacer scroll
-  (`hooks/useScrolled.ts`). La navegación y el menú de usuario están en
+  (`hooks/useScrolled.ts`). El logo de Netflix es una imagen plana, no un
+  enlace a `#inicio`. La navegación y el menú de usuario están en
   `components/header/`, y los enlaces en `data/navigation.ts`.
 - `components/Footer.tsx`: enlaces de sitio y contacto desde `src/data/site.ts`.
 - `styles.css`: estilos propios de la isla, todos prefijados con `.netflix-`.
@@ -145,7 +148,8 @@ El flujo actual es:
 - `src/pages/index.astro` — intro + landing React; se eliminaron los
   componentes `Landing*` anteriores.
 - `src/layouts/Layout.astro` — props `overlays` y `pageClass`, theme-color
-  condicional, Roboto, favicon y precarga de `LogoPersonal.svg` en la landing.
+  condicional, Roboto, favicon dorado (`LogoPersonalGold.png`) y precarga de
+  `LogoPersonal.svg` en la landing.
 - `src/styles/global.css` — `logo-mark`, transición de landing, foco, skip de
   intro, movimiento reducido y placeholder `.netflix-boot`.
 - `src/data/landing.ts` — ficha compartida con la isla React.
@@ -176,16 +180,35 @@ El flujo actual es:
 - Se eliminaron exports internos, tokens/keyframes CSS sin uso y assets no
   referenciados (`LaVeladaN.*` y vídeos generados sueltos).
 
+### Iteración de branding y catálogo (27/10/2026)
+
+- `public/images/LogoPersonalGold.png` — versión dorada del logo personal
+  (recoloreado del JPG rojo `#E60515` al oro `#f6c343` de la paleta, misma
+  forma y anti-aliasing).
+- `src/netflix/components/header/UserMenu.tsx` — el avatar de la esquina
+  superior derecha muestra el logo dorado.
+- `src/layouts/Layout.astro` — el favicon de la pestaña apunta al logo dorado.
+- `src/netflix/components/Header.tsx` — el logo de Netflix deja de ser un
+  enlace a `#inicio`; pasa a imagen plana sin interacción.
+- `src/netflix/data/catalog.ts` — se añade la edición VII, se usan las fotos
+  reales `Velada1-6.webp` y las filas quedan en “Veladas anteriores” y
+  “Próximas veladas”.
+- `public/images/veladas/` — se eliminan `velada-1.svg`…`velada-6.svg` y se
+  añaden `Velada1.webp`…`Velada6.webp` (la VII usa `velada-7.svg`).
+- `TODO.md` — estado de tareas.
+
 ### Recursos
 
 - `public/images/LogoPersonal.svg` y `LogoPersonal.jpg` fueron aportados por el
-  usuario; no se rediseñaron.
+  usuario; no se rediseñaron. `LogoPersonalGold.png` se deriva del JPG
+  (recoloreado) y es el logo que se muestra: avatar de la cabecera de Netflix y
+  favicon de la pestaña. El JPG rojo ya no se referencia desde el código.
 - El SVG tiene relleno negro, así que se usa como **máscara CSS**
   (`mask-image`) y se pinta con color o degradado. No se usa como `<img>` directo
   sobre fondo oscuro.
 - `public/images/Preview.webp` sigue siendo la imagen del portfolio.
-- Las veladas usan las portadas SVG propias `public/images/veladas/velada-1.svg`
-  … `velada-6.svg`. No hay carteles externos en el catálogo.
+- Las veladas I–VI usan fotos reales `public/images/veladas/Velada1.webp` …
+  `Velada6.webp`; la VII usa `velada-7.svg` mientras no exista cartel oficial.
 - Las imágenes fuente `LaVeladaN.*` se eliminaron en la limpieza por no estar
   referenciadas ni formar parte del build.
 - `public/videos/CreacionLogo.webm` es el tráiler del hero y
@@ -434,6 +457,9 @@ forma fiable. Tampoco lo son los FPS medidos en headless: una página estática 
     5.3). Un ancestro que se escala no debe tener hijos animándose.
 14. El tráiler se reproduce **una sola vez y silenciado**, con “Activar sonido”
     en la esquina; no añadir `loop` ni autoplay con sonido (ver 5.8).
+15. El logo personal visible (avatar de la cabecera de Netflix y favicon de la
+    pestaña) es el dorado `LogoPersonalGold.png`; no volver al JPG rojo. El logo
+    de Netflix de la cabecera no es un botón ni un enlace a `#inicio`.
 
 ## 7. Verificación realizada
 
@@ -500,6 +526,15 @@ Verificación de la iteración del 26/10/2026 (intro fluida + tráiler):
 - Póster verificado antes de la reproducción; sin él el marco quedaba negro.
 - `corepack pnpm build`, Prettier y ESLint sin errores.
 
+Resultados de la iteración del 27/10/2026 (branding y catálogo):
+
+- Build: 2 páginas generadas (`/` y `/portfolio`), sin errores.
+- `tsc --noEmit` y ESLint sin errores.
+- Favicon y avatar usan `LogoPersonalGold.png`; el logo de la cabecera es una
+  imagen plana sin enlace ni cursor de botón.
+- Catálogo: 2 filas y 7 ediciones, con fotos reales `Velada1-6.webp` y la VII
+  con `velada-7.svg`.
+
 ## 8. Limitaciones y pendientes conocidos
 
 - La landing es `client:only="react"`: no hay SSR de su contenido. Hasta que
@@ -549,6 +584,9 @@ Verificación de la iteración del 26/10/2026 (intro fluida + tráiler):
   y que no hay `loop` (ver 5.8).
 - Si tocas Watch Now, comprueba `/?watch=1`, la intro y la entrada final en
   `/portfolio`.
+- Si tocas la cabecera de la landing, respeta que el logo de Netflix no es un
+  enlace y que avatar y favicon usan el logo dorado `LogoPersonalGold.png`
+  (ver contrato 15).
 - Si tocas la isla React, comprueba hidratación, vista rápida, ficha modal,
   filas, cabecera con scroll y responsive.
 - Si tocas la navegación, comprueba atrás/adelante y las anclas del portfolio.
