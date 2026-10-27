@@ -1,7 +1,12 @@
 ---
 import Section from '../ui/Section.astro'
 import SectionHeader from '../ui/SectionHeader.astro'
-import { press, outlets } from '../../data/content'
+import { press, pressBlocks, outlets } from '../../data/content'
+
+const columns: Record<string, string> = {
+  personal: 'grid-cols-1',
+  tecnica: 'sm:grid-cols-2 lg:grid-cols-3',
+}
 ---
 
 <Section id="rueda">
@@ -15,9 +20,8 @@ import { press, outlets } from '../../data/content'
   <SectionHeader kicker="Rueda de prensa · Sala acreditada" class="mb-10">
     El careo final:<br /><span class="text-gold">la prensa pregunta</span>
     <span slot="subtitle">
-      Antes de firmar un cartel, hay que responder. Sin guion y sin filtros: las dudas que cualquier
-      organización tendría antes de poner su evento en mis manos. Los rounds del reto, pregunta a
-      pregunta.
+      Sin guion y sin filtros. Primero, quién se sube al ring y por qué. Después, cómo resolvería el
+      directo. La prensa no pregunta dos veces.
     </span>
   </SectionHeader>
 
@@ -45,72 +49,111 @@ import { press, outlets } from '../../data/content'
     }
   </div>
 
-  <div class="grid gap-4 lg:grid-cols-2">
+  <div class="space-y-12">
     {
-      press.map((item, index) => (
-        <details
-          data-reveal
-          open={index === 0}
-          class="card group p-0 [&_summary::-webkit-details-marker]:hidden"
-        >
-          <summary class="flex cursor-pointer list-none items-start gap-4 p-6">
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-void)] text-[var(--color-belt-gold)]">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                aria-hidden="true"
-              >
-                <rect x="9" y="3" width="6" height="11" rx="3" />
-                <path
-                  d="M6 11a6 6 0 0012 0M12 17v4M9 21h6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            <span class="flex-1">
-              <span class="flex flex-wrap items-center gap-2">
-                {
-                  item.round && (
-                    <span class="rounded-full border border-[var(--color-belt-gold)]/50 bg-[var(--color-belt-gold)]/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.25em] text-[var(--color-belt-gold)]">
-                      ROUND {item.round}
-                    </span>
-                  )
-                }
-                <span class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-faint)] uppercase">
-                  {item.outlet}
-                </span>
-              </span>
-              <span class="mt-1 block font-head text-lg leading-tight text-[var(--color-bone)]">
-                «{item.q}»
-              </span>
-            </span>
-            <span class="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-muted)] transition-transform group-open:rotate-45">
-              +
-            </span>
-          </summary>
-          <div class="border-t border-[var(--color-line)] px-6 py-5">
-            <p class="flex gap-3 text-sm leading-relaxed text-[var(--color-muted)]">
-              <span class="font-head text-[var(--color-belt-gold)]">R.</span>
-              <span>{item.a}</span>
-            </p>
+      pressBlocks.map((block) => {
+        const items = press.filter((item) => item.category === block.category)
+        return (
+          <div>
+            <div class="mb-6 flex flex-col gap-3 border-b border-[var(--color-line)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-belt-gold)] uppercase">
+                  {block.kicker}
+                </p>
+                <h3 class="mt-1 font-head text-2xl tracking-wide text-[var(--color-bone)] uppercase sm:text-3xl">
+                  {block.title}
+                </h3>
+              </div>
+              <p class="max-w-md text-sm leading-relaxed text-[var(--color-muted)] sm:text-right">
+                {block.subtitle}
+              </p>
+            </div>
+
+            <div class:list={['grid items-start gap-4', columns[block.category]]}>
+              {items.map((item, index) => {
+                const paragraphs = Array.isArray(item.a) ? item.a : [item.a]
+                return (
+                  <details
+                    data-reveal
+                    name={`prensa-${block.category}`}
+                    open={block.category === 'personal' && index === 0}
+                    class:list={[
+                      'card card-interactive group p-0 [&_summary::-webkit-details-marker]:hidden',
+                      block.category === 'personal' && 'press-ledger',
+                    ]}
+                  >
+                    <summary class="flex cursor-pointer list-none items-start gap-4 p-5 focus-visible:ring-2 focus-visible:ring-[var(--color-belt-gold)]/60 focus-visible:outline-none focus-visible:ring-inset sm:p-6">
+                      <span class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-void)] text-[var(--color-belt-gold)] sm:flex">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                          aria-hidden="true"
+                        >
+                          <rect x="9" y="3" width="6" height="11" rx="3" />
+                          <path
+                            d="M6 11a6 6 0 0012 0M12 17v4M9 21h6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </span>
+                      <span class="flex-1">
+                        <span class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-faint)] uppercase">
+                          {item.outlet}
+                        </span>
+                        <span class="mt-1 block font-head text-lg leading-tight text-[var(--color-bone)]">
+                          «{item.q}»
+                        </span>
+                      </span>
+                      <span
+                        class="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-muted)] transition-transform group-open:rotate-45"
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <div class="press-answer border-t border-[var(--color-line)] px-5 py-5 sm:px-6">
+                      <p
+                        class:list={[
+                          'flex gap-3 text-[var(--color-muted)]',
+                          block.category === 'personal'
+                            ? 'text-[15px] leading-6 sm:leading-7'
+                            : 'text-sm leading-relaxed',
+                        ]}
+                      >
+                        <span class="hidden font-head text-[var(--color-belt-gold)] sm:block">
+                          R.
+                        </span>
+                        <span class="flex flex-col gap-4">
+                          {paragraphs.map((paragraph) => (
+                            <span class="block">{paragraph}</span>
+                          ))}
+                        </span>
+                      </p>
+                    </div>
+                  </details>
+                )
+              })}
+            </div>
           </div>
-        </details>
-      ))
+        )
+      })
     }
   </div>
 
   <div
     data-reveal
-    class="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 sm:flex-row sm:p-8"
+    class="mt-12 flex flex-col items-center justify-between gap-4 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6 sm:flex-row sm:p-8"
   >
     <p class="text-center font-head text-xl text-[var(--color-bone)] sm:text-left sm:text-2xl">
       ¿Alguna pregunta más? <span class="text-gold">La sala sigue abierta.</span>
     </p>
-    <a href="#contrato" class="btn btn-primary w-full sm:w-auto">Pasar al contrato</a>
+    <a href="#contrato" class="btn btn-primary w-full whitespace-nowrap sm:w-auto"
+      >Pasar al contrato</a
+    >
   </div>
 </Section>

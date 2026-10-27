@@ -195,6 +195,14 @@
     box-shadow: 0 26px 60px -30px rgba(0,0,0,0.9), 0 0 0 1px rgba(246,195,67,0.08);
   }
 
+  /* Tarjetas que se abren al pulsarlas: no se desplazan en hover para que el
+     objetivo no se mueva bajo el cursor. Solo cambia el borde. */
+  .card-interactive:hover {
+    transform: none;
+    border-color: rgba(246, 195, 67, 0.45);
+    box-shadow: 0 26px 60px -30px rgba(0,0,0,0.9), 0 0 0 1px rgba(246,195,67,0.08);
+  }
+
   /* Línea de cinturón */
   .rule-belt {
     height: 2px;
@@ -269,6 +277,50 @@
   [data-reveal].is-visible {
     opacity: 1;
     transform: none;
+    /* Una vez revelado, fuera la capa de composición: si no, un <details>
+       dentro puede repintarse tarde al abrirse. */
+    will-change: auto;
+  }
+
+  /* Despliegue suave de las preguntas de la rueda de prensa.
+     Navegadores sin soporte para ::details-content abren al instante. */
+  #rueda details {
+    interpolate-size: allow-keywords;
+  }
+  #rueda details::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      content-visibility 0.35s allow-discrete;
+  }
+  #rueda details[open]::details-content {
+    block-size: auto;
+  }
+
+  /* Respuestas personales en escritorio: pregunta a la izquierda, respuesta a
+     la derecha. Los textos largos mantienen una medida de lectura cómoda y la
+     tarjeta abierta no deja huecos en el grid. */
+  @media (min-width: 64rem) {
+    #rueda details.press-ledger[open] {
+      display: grid;
+      grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr);
+      align-items: start;
+    }
+    #rueda details.press-ledger[open] > summary {
+      grid-column: 1;
+      padding-bottom: 1.75rem;
+    }
+    /* Chrome y Safari envuelven el contenido en este pseudo-elemento. */
+    #rueda details.press-ledger[open]::details-content {
+      grid-column: 2;
+    }
+    #rueda details.press-ledger[open] > .press-answer {
+      grid-column: 2;
+      border-top: 0;
+      border-left: 1px solid var(--color-line);
+      padding: 1.5rem 2rem;
+    }
   }
 }
 

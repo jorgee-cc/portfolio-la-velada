@@ -100,71 +100,101 @@ export const fights: {
   },
 ]
 
+/**
+ * Rueda de prensa. Primero lo personal (quién se sube al ring), después lo
+ * técnico (cómo lo resolvería). Lo técnico ya se demuestra en la cartelera,
+ * así que aquí pesa más el criterio y la actitud que el stack.
+ */
 export const press: {
   outlet: string
-  round?: string
+  category: 'personal' | 'tecnica'
   q: string
-  a: string
+  /** Una respuesta corta o varios párrafos, en orden. */
+  a: string | string[]
 }[] = [
   {
-    outlet: 'La Tribuna Digital',
-    q: '¿Has estado antes en un proceso como este?',
-    a: 'Sí. El año pasado pasé el filtro de más de 30.000 candidaturas a programador de La Velada. Me llamaron. Y en el evento de Capgemini hablé con midudev, que me situó como mínimo en el top 70-80. No llego de cero: llego con el ring ya pisado.',
+    outlet: 'Código Abierto',
+    category: 'personal',
+    q: '¿Por qué deberíamos elegirte a ti y no a otro de los 30.000?',
+    a: [
+      'Creo que me diferencia la combinación de experiencia técnica, iniciativa y capacidad para afrontar situaciones difíciles.',
+      'He llevado un proyecto propio a producción, responsabilizándome de todo el proceso. Además, mis experiencias laborales me han enseñado a entender al cliente, resolver conflictos y trabajar bajo presión, aportándome una perspectiva que va más allá del código.',
+      'No puedo decir que sea mejor que los otros 30.000, pero sí que soy alguien que aprende por su cuenta, pelea por las oportunidades que le ilusionan y se implica al máximo para demostrar de lo que es capaz.',
+    ],
   },
   {
-    outlet: 'Código Abierto',
-    q: '¿Por qué deberíamos elegirte a ti y no a otro de los 30.000?',
-    a: 'Porque no solo escribo código bonito: lo sostengo en producción. Tengo un cliente real funcionando, he endurecido un servidor contra ataques reales y he construido sistemas distribuidos y compiladores. Cuando el directo empieza, no hay segunda toma.',
+    outlet: 'TechPress',
+    category: 'personal',
+    q: '¿Cuál es tu motivación real?',
+    a: [
+      'Mi motivación real es aprender de los mejores, especialmente de midudev, a quien sigo desde hace mucho tiempo, y hacerlo formando parte de un proyecto tan único y real como este.',
+      'Pero también hay algo que me atrae especialmente del frontend: la posibilidad de crear algo de lo que te sientas orgulloso, cuidar cada detalle y saber que tu trabajo puede llegar a millones de personas. Me motiva pensar que algo que yo haya construido pueda estar delante de tanta gente y que cualquiera pueda verlo, utilizarlo y disfrutarlo.',
+    ],
   },
   {
     outlet: 'El Último Round',
+    category: 'personal',
     q: '¿Puedes con la presión de un evento en directo?',
     a: 'Soy árbitro federado. He tomado decisiones imparciales en milisegundos con todo el mundo mirándome y sin margen de revisión. Esa presión la llevo entrenada desde hace años.',
   },
   {
+    outlet: 'La Tribuna Digital',
+    category: 'personal',
+    q: '¿Qué aprendiste de quedarte a las puertas?',
+    a: [
+      'Aprendí que, a veces, quedarte a las puertas de algo puede ayudarte a descubrir mucho más de lo que esperabas.',
+      'Este último año ha supuesto un antes y un después en mi carrera como informático. He descubierto que disfruto de verdad con lo que hago, pero, sobre todo, he descubierto la libertad que ofrece la informática para crear por tu cuenta, aprender continuamente y especializarte en aquello que realmente te apasiona.',
+      'No hay motivación más fuerte para aprender que poder elegir qué quieres aprender y por qué. Este año he dejado de ver la informática únicamente como una carrera que estudiar y he empezado a verla como algo que quiero construir y desarrollar por iniciativa propia.',
+      'Creo que ese cambio se refleja claramente en la evolución de mi portfolio y de mi perfil profesional. Por eso, más que quedarme con lo cerca que estuve, me quedo con todo lo que he descubierto desde entonces y con las ganas que tengo de seguir creciendo.',
+    ],
+  },
+  {
+    outlet: 'FanZone',
+    category: 'personal',
+    q: '¿Cómo es trabajar contigo en equipo?',
+    a: 'Llevo toda la vida trabajando en equipo en ámbitos muy diferentes, y es algo que disfruto especialmente. Me gusta escuchar distintos puntos de vista, debatir y buscar soluciones en conjunto. Creo que los problemas se vuelven mucho más interesantes cuando se comparten ideas y se aprende de los demás. Para mí, trabajar en equipo es construir algo mejor de lo que podríamos conseguir individualmente.',
+  },
+  {
     outlet: 'Latencia Cero',
-    round: '02',
+    category: 'tecnica',
     q: '¿Cómo haces que votos y chat lleguen al instante?',
     a: 'Con WebSockets y una arquitectura orientada a eventos. Votos, chat y datos viajan en milisegundos, no en pestañas cargando. En directo, cada segundo de retraso se nota en la grada.',
   },
   {
     outlet: 'Ciberdefensa Hoy',
-    round: '03',
+    category: 'tecnica',
     q: '¿Y si atacan el evento con un DDoS el día del directo?',
     a: 'Endurecimiento real: WAF, rate limiting, OWASP Top 10 y defensa en profundidad. No me quedo en poner un certificado y rezar. Si hay datos de millones de fans en juego, la seguridad se diseña desde el primer commit.',
   },
   {
     outlet: 'Streaming Today',
-    round: '04',
-    q: '¿Cómo aguanta el sistema si un servicio se cae en máxima audiencia?',
-    a: 'Diseño para que no se caiga: colas, reintentos, patrón Outbox y recuperación automática. Si aun así algo falla, hay un plan de contingencia y alguien que responde en minutos. Ese alguien soy yo.',
-  },
-  {
-    outlet: 'La Esquina Técnica',
-    round: '05',
-    q: '¿Cómo sabrás que algo va mal antes de que lo note el público?',
-    a: 'Observabilidad total: métricas, logs y alertas en vivo. No peleo a ciegas. Si algo respira mal, lo sabemos antes que nadie y lo arreglamos fuera de cámara.',
-  },
-  {
-    outlet: 'FanZone',
-    q: '¿Qué te diferencia técnicamente?',
-    a: 'Cubro el stack completo: frontend, backend, infraestructura y seguridad. Puedo construir la experiencia y, a la vez, blindar el servidor que la aguanta. Menos manos, menos ruido, menos puntos de fallo.',
-  },
-  {
-    outlet: 'TechPress',
-    q: '¿Cuál es tu motivación real?',
-    a: 'Que millones de personas miren a la vez algo que he construido y no se den cuenta de que estoy detrás. Eso ya es ganar. El cinturón es la consecuencia.',
+    category: 'tecnica',
+    q: '¿Y si algo se cae en mitad del directo?',
+    a: 'Diseño para que no se caiga: colas, reintentos, patrón Outbox y recuperación automática. Y si aun así algo falla, no me entero por Twitter: métricas, logs y alertas en vivo me avisan antes que al público. Hay plan de contingencia y alguien que responde en minutos. Ese alguien soy yo.',
   },
 ]
 
-export const outlets = [
-  'La Tribuna Digital',
-  'Código Abierto',
-  'El Último Round',
-  'Latencia Cero',
-  'Ciberdefensa Hoy',
-  'Streaming Today',
-  'La Esquina Técnica',
-  'FanZone',
-  'TechPress',
+export const pressBlocks: {
+  category: 'personal' | 'tecnica'
+  kicker: string
+  title: string
+  subtitle: string
+}[] = [
+  {
+    category: 'personal',
+    kicker: 'Primera ronda · Quién se sube al ring',
+    title: 'El peleador',
+    subtitle:
+      'Lo que no se ve en un repositorio: de dónde vengo, por qué lo hago y cómo aguanto cuando la cosa se pone fea.',
+  },
+  {
+    category: 'tecnica',
+    kicker: 'Segunda ronda · Cómo se gana el combate',
+    title: 'La técnica',
+    subtitle:
+      'Las tres decisiones que tomaría si La Velada fuera mañana. El resto del stack ya está sobre el ring, en la cartelera.',
+  },
 ]
+
+/** Medios acreditados, derivados de las preguntas para que no se desincronicen. */
+export const outlets = [...new Set(press.map((item) => item.outlet))]
