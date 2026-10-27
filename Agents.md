@@ -43,10 +43,13 @@ El flujo actual es:
   navegación MPA normal: no hay router cliente.
 - “Más información” abre la ficha modal del portfolio dentro de `/`.
 - La cabecera de la landing enlaza a `#inicio`, `/portfolio`,
-  `/portfolio#cartelera` y `/portfolio#rueda` solo con los textos de
-  navegación: el logo de Netflix es una imagen plana, sin enlace ni
-  comportamiento de botón.
+  `/portfolio#cartelera` y `/portfolio#rueda` con los textos de navegación, y
+  añade iconos directos a GitHub y LinkedIn (visibles desde `md`) junto al
+  avatar; el logo de Netflix es una imagen plana, sin enlace ni comportamiento
+  de botón.
 - El footer de la landing enlaza al portfolio, a `#inicio`, GitHub y LinkedIn.
+- El menú móvil y la cabecera de `/portfolio` enlazan directamente a GitHub y
+  LinkedIn (ver 3.3).
 - Desde el footer de `/portfolio` se puede volver a `/`.
 
 ## 3. Arquitectura
@@ -95,7 +98,9 @@ El flujo actual es:
 - `components/Header.tsx`: cabecera fija que cambia al hacer scroll
   (`hooks/useScrolled.ts`). El logo de Netflix es una imagen plana, no un
   enlace a `#inicio`. La navegación y el menú de usuario están en
-  `components/header/`, y los enlaces en `data/navigation.ts`.
+  `components/header/`, y los enlaces en `data/navigation.ts`. Incluye iconos
+  directos a GitHub y LinkedIn (`GitHubIcon`/`LinkedInIcon` de `icons.ts`) a
+  partir de `site.github` y `site.linkedin`, visibles desde `md`.
 - `components/Footer.tsx`: enlaces de sitio y contacto desde `src/data/site.ts`.
 - `styles.css`: estilos propios de la isla, todos prefijados con `.netflix-`.
 - `constants.ts`: alturas, rutas y colores compartidos por la isla.
@@ -109,6 +114,9 @@ El flujo actual es:
 - Las secciones comparten `ui/Section.astro`; las tarjetas de proyectos están
   separadas en `ui/MainEventCard.astro`, `ui/CoMainCard.astro`,
   `ui/ProjectCard.astro` y `ui/ApplicationCard.astro`.
+- `components/portfolio/Nav.astro` muestra enlaces directos a GitHub y LinkedIn
+  con iconos (desde `sm`) y, en el menú móvil, dos botones con etiqueta. Ambos
+  salen de `socialLinks` en `src/data/site.ts`.
 - No ejecuta la intro; solo la landing de `/`.
 
 ### 3.4. Separación de responsabilidades
@@ -196,6 +204,16 @@ El flujo actual es:
 - `public/images/veladas/` — se eliminan `velada-1.svg`…`velada-6.svg` y se
   añaden `Velada1.webp`…`Velada6.webp` (la VII usa `velada-7.svg`).
 - `TODO.md` — estado de tareas.
+
+### Enlaces sociales directos (27/10/2026)
+
+- `src/data/site.ts` — nuevos `socialLinks` (GitHub y LinkedIn con su icono SVG);
+  `contacts` reutiliza los mismos paths en lugar de duplicarlos.
+- `src/components/portfolio/Nav.astro` — iconos directos a GitHub y LinkedIn en
+  la cabecera (desde `sm`) y botones con etiqueta en el menú móvil.
+- `src/netflix/icons.ts` — se añaden `GitHubIcon` y `LinkedInIcon` al barrel.
+- `src/netflix/components/Header.tsx` — iconos directos a GitHub y LinkedIn
+  junto al avatar (desde `md`); en móvil siguen en el menú de usuario.
 
 ### Recursos
 

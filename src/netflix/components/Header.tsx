@@ -1,11 +1,19 @@
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
 import useScrolled from '../hooks/useScrolled'
 import { APP_BAR_HEIGHT } from '../constants'
 import { headerNavItems, userMenuItems } from '../data/navigation'
+import { GitHubIcon, LinkedInIcon } from '../icons'
+import { site } from '../../data/site'
 import HeaderNav from './header/HeaderNav'
 import UserMenu from './header/UserMenu'
+
+const socialActions = [
+  { label: 'GitHub', href: site.github, Icon: GitHubIcon },
+  { label: 'LinkedIn', href: site.linkedin, Icon: LinkedInIcon },
+]
 
 export default function Header() {
   const scrolled = useScrolled(24)
@@ -39,6 +47,27 @@ export default function Header() {
         />
 
         <HeaderNav items={headerNavItems} />
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
+          {socialActions.map(({ label, href, Icon }) => (
+            <IconButton
+              key={label}
+              component="a"
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${label} de ${site.name}`}
+              title={label}
+              size="small"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                transition: 'color 0.2s ease',
+                '&:hover': { color: '#f6c343' },
+              }}
+            >
+              <Icon fontSize="small" />
+            </IconButton>
+          ))}
+        </Box>
         <UserMenu items={userMenuItems} />
       </Toolbar>
     </AppBar>

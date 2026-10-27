@@ -25,6 +25,17 @@ export const navLinks = [
   { href: '#palmares', label: 'Palmarés' },
 ]
 
+const githubIcon =
+  'M12 2a10 10 0 00-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 015 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0012 2z'
+
+const linkedinIcon = 'M6.5 8.5v9M6.5 5.5v.01M11 17.5v-5a2.5 2.5 0 015 0v5M11 8.5v9'
+
+/** Enlaces directos a los perfiles profesionales, usados en cabeceras y menús. */
+export const socialLinks = [
+  { label: 'GitHub', href: site.github, icon: githubIcon },
+  { label: 'LinkedIn', href: site.linkedin, icon: linkedinIcon },
+]
+
 export const contacts = [
   {
     label: 'Email',
@@ -42,13 +53,13 @@ export const contacts = [
     label: 'GitHub',
     value: 'github.com/jorgee-cc',
     href: site.github,
-    icon: 'M12 2a10 10 0 00-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 015 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0012 2z',
+    icon: githubIcon,
   },
   {
     label: 'LinkedIn',
     value: 'in/jorge-condado-carballo',
     href: site.linkedin,
-    icon: 'M6.5 8.5v9M6.5 5.5v.01M11 17.5v-5a2.5 2.5 0 015 0v5M11 8.5v9',
+    icon: linkedinIcon,
   },
 ]
 

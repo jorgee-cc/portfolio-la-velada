@@ -1,7 +1,7 @@
 ---
 import Icon from '../ui/Icon.astro'
 import Logo from '../ui/Logo.astro'
-import { navLinks, site } from '../../data/site'
+import { navLinks, site, socialLinks } from '../../data/site'
 ---
 
 <header
@@ -38,6 +38,22 @@ import { navLinks, site } from '../../data/site'
     </nav>
 
     <div class="flex items-center gap-2">
+      <div class="hidden items-center gap-1 border-l border-[var(--color-line)] pr-1 pl-3 sm:flex">
+        {
+          socialLinks.map((social) => (
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${social.label} de ${site.name}`}
+              title={social.label}
+              class="flex h-9 w-9 items-center justify-center rounded-md text-[var(--color-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-belt-gold)]"
+            >
+              <Icon path={social.icon} size={18} />
+            </a>
+          ))
+        }
+      </div>
       <a href="#contrato" class="btn btn-primary hidden !px-5 !py-2.5 !text-xs sm:inline-flex"
         >Firmar el contrato</a
       >
@@ -71,6 +87,21 @@ import { navLinks, site } from '../../data/site'
         ))
       }
       <a href="#contrato" class="btn btn-primary mt-2 w-full">Firmar el contrato</a>
+      <div class="mt-3 flex items-center gap-2 border-t border-[var(--color-line)] pt-3">
+        {
+          socialLinks.map((social) => (
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noreferrer"
+              class="flex items-center gap-2 rounded-lg border border-[var(--color-line)] px-3 py-2 font-cond text-xs tracking-wide text-[var(--color-muted)] uppercase transition-colors hover:border-[var(--color-belt-gold)]/50 hover:text-[var(--color-bone)]"
+            >
+              <Icon path={social.icon} size={16} />
+              {social.label}
+            </a>
+          ))
+        }
+      </div>
     </div>
   </nav>
 </header>
