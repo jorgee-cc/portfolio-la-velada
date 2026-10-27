@@ -1,8 +1,14 @@
 /**
- * Datos visuales de la intro. Cada pincelada es `[izquierda %, ancho %, stop %]`
- * y cada lámpara `[izquierda %, ancho %]`.
+ * Datos visuales de la intro.
+ *
+ * `furStrokes` describe el borde irregular de la pincelada: cada entrada es
+ * `[izquierda %, ancho %, intensidad %]`. Se usa para generar una única
+ * textura SVG en `Intro.astro` en lugar de pintar una etiqueta por pincelada.
+ *
+ * `beamColumns` son las cuatro columnas de luz que barren la escena:
+ * `left`/`width` en %, `delay` en segundos y `tilt` en grados.
  */
-export const furs: Array<[number, number, number]> = [
+export const furStrokes: Array<[number, number, number]> = [
   [0, 3.8, 15],
   [3.8, 2.8, 10],
   [6.6, 4.8, 37],
@@ -36,36 +42,15 @@ export const furs: Array<[number, number, number]> = [
   [96.3, 3.7, 37],
 ]
 
-export const lamps: Array<[number, number]> = [
-  [0.7, 1],
-  [2.2, 1.4],
-  [5.8, 2.1],
-  [10.1, 2],
-  [12.9, 1.4],
-  [15.3, 2.8],
-  [21.2, 2.5],
-  [25, 2.5],
-  [30.5, 3],
-  [36.3, 3],
-  [41, 2.2],
-  [44.2, 2.6],
-  [51.7, 0.5],
-  [52.1, 1.8],
-  [53.8, 2.3],
-  [57.2, 2],
-  [62.3, 2.9],
-  [65.8, 1.7],
-  [72.8, 0.8],
-  [74.3, 2],
-  [79.8, 2],
-  [78.2, 2],
-  [78.5, 2],
-  [85.3, 1.1],
-  [86.9, 1.1],
-  [88.8, 2],
-  [92.4, 2.4],
-  [96.2, 2.1],
+export const beamColumns: Array<{
+  left: number
+  width: number
+  delay: number
+  tilt: number
+  alpha: number
+}> = [
+  { left: 5, width: 17, delay: 0.16, tilt: -5, alpha: 0.95 },
+  { left: 29, width: 18, delay: 0.3, tilt: 4, alpha: 0.85 },
+  { left: 53, width: 17, delay: 0.22, tilt: -3, alpha: 0.9 },
+  { left: 77, width: 18, delay: 0.36, tilt: 5, alpha: 0.8 },
 ]
-
-export const lampColors = ['#f6c343', '#ff2d3f', '#2f6bff', '#f3f1ea', '#a97d1a']
-export const helpers = [1, 2, 3, 4]

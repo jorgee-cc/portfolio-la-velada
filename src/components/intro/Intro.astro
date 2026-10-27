@@ -1,42 +1,84 @@
 ---
 /**
- * Introducción cinematográfica inspirada en una animación original de referencia.
+ * Introducción cinematográfica inspirada en el ident de Netflix.
  *
- * La animación original construye una letra de Netflix con cuatro columnas de
- * "pinceladas". Aquí se conservan esas pinceladas, las luces y el zoom final,
- * pero el protagonista es LogoPersonal.svg. Como el SVG original tiene relleno
- * negro, se aplica como máscara CSS y se pinta con el degradado de la marca.
+ * La animación original construía la escena con ~150 nodos (una etiqueta por
+ * pincelada y por lámpara) y hacía zoom ×15 sobre todos ellos. Eso obligaba al
+ * navegador a repintar la escena completa en cada frame.
+ *
+ * Ahora la escena son una docena de nodos que solo animan `transform` y
+ * `opacity`:
+ * - Las pinceladas se generan aquí como un único SVG data-URI, así que se
+ *   rasterizan una sola vez en lugar de pintar 124 elementos.
+ * - Las lámparas son dos capas de franjas estáticas con máscara radial, no 28
+ *   nodos animados por separado.
+ * - Todas las animaciones internas (pinceles, luces, brillo) terminan antes
+ *   del zoom final: así el zoom es una única capa compuesta en la GPU.
+ * - El zoom se limita a ×7 y la escena se funde a negro al terminar, antes de
+ *   que el navegador llegue a re-rasterizar a resolución completa.
  */
-import { furs, helpers, lampColors, lamps } from './intro-data'
+import { beamColumns, furStrokes } from './intro-data'
+
+const furRects = furStrokes
+  .map(([left, width, intensity]) => {
+    const height = (16 + intensity * 0.4).toFixed(1)
+    const opacity = (0.22 + intensity * 0.016).toFixed(2)
+
+    return `<rect x="${left}" y="${(100 - Number(height)).toFixed(1)}" width="${width}" height="${height}" opacity="${opacity}"/>`
+  })
+  .join('')
+
+const beamTexture = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">',
+  '<defs>',
+  '<linearGradient id="c" x1="0" y1="0" x2="0" y2="1">',
+  '<stop offset="0" stop-color="#ff2d3f" stop-opacity="0"/>',
+  '<stop offset=".32" stop-color="#ff2d3f" stop-opacity=".55"/>',
+  '<stop offset=".72" stop-color="#ff2d3f" stop-opacity=".9"/>',
+  '<stop offset="1" stop-color="#ff2d3f" stop-opacity="0"/>',
+  '</linearGradient>',
+  '<linearGradient id="e" x1="0" y1="0" x2="1" y2="0">',
+  '<stop offset="0" stop-color="#fff" stop-opacity="0"/>',
+  '<stop offset=".14" stop-color="#fff" stop-opacity=".92"/>',
+  '<stop offset=".86" stop-color="#fff" stop-opacity=".92"/>',
+  '<stop offset="1" stop-color="#fff" stop-opacity="0"/>',
+  '</linearGradient>',
+  '<mask id="m"><rect width="100" height="100" fill="url(#e)"/></mask>',
+  '</defs>',
+  '<g mask="url(#m)" fill="#ff2d3f">',
+  '<rect width="100" height="100" fill="url(#c)"/>',
+  furRects,
+  '</g>',
+  '</svg>',
+].join('')
+
+// Sin comillas: el data-URI viaja dentro de un atributo `style` y así no hay
+// que escapar nada. Los paréntesis se codifican también porque, sin comillas,
+// romperían el token `url()` y el navegador descartaría la declaración.
+const beamImage = `url(data:image/svg+xml,${encodeURIComponent(beamTexture).replace(
+  /[()']/g,
+  (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+)})`
 ---
 
 <div class="intro" data-intro>
-  <div class="intro__stage" data-intro-stage>
+  <div class="intro__stage" data-intro-stage style={`--beam:${beamImage}`}>
     <div class="intro__aura" aria-hidden="true"></div>
 
     <div class="intro__brushes" aria-hidden="true">
       {
-        helpers.map((helper) => (
-          <div class={`helper helper-${helper}`}>
-            <div class="effect-brush">
-              {furs.map(([left, width, stop]) => (
-                <span class="fur" style={`--left:${left}%;--width:${width}%;--stop:${stop}%`} />
-              ))}
-            </div>
-          </div>
+        beamColumns.map((beam) => (
+          <span
+            class="beam"
+            style={`--x:${beam.left}%;--w:${beam.width}%;--delay:${beam.delay}s;--tilt:${beam.tilt}deg;--alpha:${beam.alpha}`}
+          />
         ))
       }
     </div>
 
     <div class="intro__lights" aria-hidden="true">
-      {
-        lamps.map(([left, width], index) => (
-          <span
-            class="lamp"
-            style={`--left:${left}%;--width:${width}%;--lamp:${lampColors[index % lampColors.length]};--i:${index}`}
-          />
-        ))
-      }
+      <span class="intro__lamp intro__lamp--warm"></span>
+      <span class="intro__lamp intro__lamp--cool"></span>
     </div>
 
     <div class="intro__mark-wrap">
@@ -62,7 +104,7 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     background: #000;
     isolation: isolate;
     contain: layout paint;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.5s ease;
   }
 
   .intro.is-leaving {
@@ -74,7 +116,7 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
      portfolio, para que la transición no muestre la landing de fondo. */
   .intro.is-entering-portfolio .intro__stage {
     opacity: 0;
-    transition: opacity 0.45s ease;
+    transition: opacity 0.4s ease;
   }
 
   .intro.is-entering-portfolio .intro__caption,
@@ -89,142 +131,106 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     place-items: center;
     width: 300px;
     height: 300px;
-    overflow: hidden;
     transform-origin: center center;
     backface-visibility: hidden;
-    contain: paint;
-    animation: intro-zoom 3.5s ease-in 0.5s forwards;
+    /* El zoom arranca cuando pinceles, luces y brillo ya han terminado. */
+    animation: intro-zoom 1.15s cubic-bezier(0.62, 0, 0.2, 1) 2.15s both;
     will-change: transform;
   }
 
   .intro__aura {
     position: absolute;
-    width: 560px;
-    height: 560px;
+    width: 620px;
+    height: 620px;
     border-radius: 9999px;
     background: radial-gradient(
       circle,
       rgba(246, 195, 67, 0.3) 0%,
-      rgba(255, 45, 63, 0.12) 42%,
-      transparent 70%
+      rgba(255, 45, 63, 0.16) 42%,
+      transparent 68%
     );
     opacity: 0;
-    animation: intro-aura 3.4s ease-in-out 0.2s forwards;
+    animation: intro-aura 1.9s ease-out 0.2s forwards;
     will-change: transform, opacity;
   }
 
+  /* Cada columna lleva su textura ya dibujada: no hay nodos hijos que pintar. */
   .intro__brushes {
     position: absolute;
     inset: 0;
-    opacity: 0;
-    animation: intro-brushes 0.9s ease 0.2s forwards;
-    will-change: opacity;
   }
 
-  .helper {
-    position: absolute;
-    top: -12%;
-    height: 124%;
-    width: 16%;
-    overflow: hidden;
-  }
-
-  .helper-1 {
-    left: 6%;
-    transform: rotate(-6deg);
-  }
-  .helper-2 {
-    left: 30%;
-    transform: rotate(4deg);
-  }
-  .helper-3 {
-    left: 54%;
-    transform: rotate(-4deg);
-  }
-  .helper-4 {
-    left: 78%;
-    transform: rotate(6deg);
-  }
-
-  .effect-brush {
+  .beam {
     position: absolute;
     top: 0;
-    width: 100%;
-    height: 300%;
-    overflow: hidden;
-    animation: intro-brush 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-    will-change: transform;
-  }
-
-  .helper-1 .effect-brush {
-    animation-delay: 0.35s;
-  }
-  .helper-2 .effect-brush {
-    animation-delay: 0.55s;
-  }
-  .helper-3 .effect-brush {
-    animation-delay: 0.45s;
-  }
-  .helper-4 .effect-brush {
-    animation-delay: 0.65s;
-  }
-
-  .effect-brush::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -30%;
-    width: 160%;
-    height: 70%;
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(255, 45, 63, 0.55) 16%,
-      #ff2d3f 34%,
-      #ff2d3f 66%,
-      rgba(255, 45, 63, 0.55) 84%,
-      transparent 100%
-    );
-  }
-
-  .fur {
-    position: absolute;
-    bottom: 10%;
-    left: var(--left);
+    left: var(--x);
     display: block;
-    width: var(--width);
-    height: 30%;
-    background: linear-gradient(to bottom, #ff2d3f 0%, #ff2d3f var(--stop), transparent 100%);
+    width: var(--w);
+    height: 100%;
+    background-image: var(--beam);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    opacity: 0;
+    transform: translate3d(0, 118%, 0) rotate(var(--tilt)) scaleY(0.92);
+    transform-origin: 50% 100%;
+    animation: intro-beam 1.15s cubic-bezier(0.22, 0.8, 0.24, 1) var(--delay) forwards;
+    will-change: transform, opacity;
+    pointer-events: none;
   }
 
   .intro__lights {
     position: absolute;
     inset: 0;
+    overflow: hidden;
     opacity: 0;
-    animation: intro-lights 2s ease 1.35s forwards;
-  }
-
-  .lamp {
-    position: absolute;
-    top: 0;
-    left: var(--left);
-    display: block;
-    width: var(--width);
-    height: 100%;
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      var(--lamp) 25%,
-      var(--lamp) 75%,
+    -webkit-mask-image: radial-gradient(
+      closest-side at 50% 46%,
+      #000 0%,
+      rgba(0, 0, 0, 0.7) 60%,
       transparent 100%
     );
-    opacity: 0.85;
-    animation: intro-lamp-left 3.2s ease-in-out calc(var(--i) * -0.19s) infinite alternate;
-    will-change: transform;
+    mask-image: radial-gradient(
+      closest-side at 50% 46%,
+      #000 0%,
+      rgba(0, 0, 0, 0.7) 60%,
+      transparent 100%
+    );
+    /* Se enciende tras los pinceles y se atenúa durante el zoom final. */
+    animation: intro-lights 2.5s ease-out 0.8s both;
+    pointer-events: none;
   }
 
-  .lamp:nth-child(even) {
-    animation-name: intro-lamp-right;
+  /* Dos capas de franjas suaves con periodos distintos; solo cambian de
+     opacidad, así que no obligan a repintar la máscara. */
+  .intro__lamp {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .intro__lamp--warm {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0 5px,
+      rgba(246, 195, 67, 0.24) 11px,
+      transparent 17px 25px,
+      rgba(255, 45, 63, 0.2) 31px,
+      transparent 37px 46px,
+      rgba(243, 241, 234, 0.14) 52px,
+      transparent 58px 67px
+    );
+  }
+
+  .intro__lamp--cool {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0 7px,
+      rgba(47, 107, 255, 0.16) 15px,
+      transparent 23px 34px,
+      rgba(246, 195, 67, 0.16) 41px,
+      transparent 48px 57px
+    );
+    animation: intro-lamp-pulse 0.8s ease-in-out 1s 2 alternate both;
   }
 
   .intro__mark-wrap {
@@ -243,7 +249,7 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     background: linear-gradient(155deg, #ffffff 0%, #f6c343 46%, #ff2d3f 100%);
     opacity: 0;
     transform: translate3d(0, 105%, 0) scale(0.97);
-    animation: intro-mark-reveal 1.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+    animation: intro-mark-reveal 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
     will-change: transform, opacity;
   }
 
@@ -263,8 +269,7 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     height: 45%;
     background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.6), transparent);
     opacity: 0;
-    animation: intro-sheen 1.4s ease-in 0.3s forwards;
-    will-change: transform, opacity;
+    animation: intro-sheen 1s ease-in 1s forwards;
   }
 
   .intro__caption {
@@ -277,7 +282,7 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     font-size: 0.6rem;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    animation: intro-caption 3.5s ease forwards;
+    animation: intro-caption 2.3s ease 0.25s both;
   }
 
   .intro__skip {
@@ -307,43 +312,45 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
   }
 
   @keyframes intro-zoom {
-    0% {
+    from {
       transform: scale(1);
     }
-    100% {
-      transform: scale(15);
+    to {
+      transform: scale(7);
     }
   }
 
-  @keyframes intro-brush {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(-100%);
-    }
-  }
-
-  @keyframes intro-brushes {
+  @keyframes intro-beam {
     0% {
       opacity: 0;
+      visibility: visible;
+      transform: translate3d(0, 118%, 0) rotate(var(--tilt)) scaleY(0.92);
+    }
+    16% {
+      opacity: var(--alpha);
+    }
+    64% {
+      opacity: var(--alpha);
     }
     100% {
-      opacity: 0.52;
+      opacity: 0;
+      visibility: hidden;
+      transform: translate3d(0, -118%, 0) rotate(var(--tilt)) scaleY(1.06);
     }
   }
 
   @keyframes intro-aura {
     0% {
       opacity: 0;
-      transform: scale(0.85);
+      transform: scale(0.82);
     }
-    40% {
-      opacity: 1;
+    45% {
+      opacity: 0.95;
+      transform: scale(1);
     }
     100% {
-      opacity: 0.85;
-      transform: scale(1.08);
+      opacity: 0.6;
+      transform: scale(1.12);
     }
   }
 
@@ -351,26 +358,23 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     0% {
       opacity: 0;
     }
-    100% {
+    26% {
       opacity: 1;
     }
-  }
-
-  @keyframes intro-lamp-left {
-    0% {
-      transform: translateX(0);
+    62% {
+      opacity: 1;
     }
     100% {
-      transform: translateX(34px) scaleX(2.4);
+      opacity: 0.35;
     }
   }
 
-  @keyframes intro-lamp-right {
-    0% {
-      transform: translateX(0);
+  @keyframes intro-lamp-pulse {
+    from {
+      opacity: 0.45;
     }
-    100% {
-      transform: translateX(-34px) scaleX(2.4);
+    to {
+      opacity: 1;
     }
   }
 
@@ -390,15 +394,15 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
 
   @keyframes intro-sheen {
     0% {
-      transform: translate3d(0, 0, 0);
       opacity: 0;
+      transform: translate3d(0, 0, 0);
     }
     15% {
       opacity: 1;
     }
     100% {
-      transform: translate3d(0, -320%, 0);
       opacity: 0;
+      transform: translate3d(0, -320%, 0);
     }
   }
 
@@ -406,10 +410,10 @@ import { furs, helpers, lampColors, lamps } from './intro-data'
     0% {
       opacity: 0;
     }
-    22% {
+    15% {
       opacity: 1;
     }
-    74% {
+    72% {
       opacity: 1;
     }
     100% {

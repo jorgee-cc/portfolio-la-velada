@@ -12,6 +12,13 @@
   background-color: #141414;
 }
 
+/* Durante el ident la landing está oculta: se pausan sus animaciones para no
+   competir por la GPU con la entrada del logo. */
+html:not(.intro-done):not(.intro-skip) .netflix-hero__mark,
+html:not(.intro-done):not(.intro-skip) .netflix-boot__mark {
+  animation-play-state: paused;
+}
+
 /* ------------------------------ Hero ------------------------------ */
 
 .netflix-hero__backdrop {
@@ -59,6 +66,96 @@
     ),
     linear-gradient(0deg, #141414 0%, rgba(20, 20, 20, 0.82) 10%, rgba(20, 20, 20, 0) 42%);
   pointer-events: none;
+}
+
+.netflix-hero__trailer {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  background: #050505;
+  box-shadow:
+    0 22px 50px -18px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(246, 195, 67, 0.08);
+}
+
+.netflix-hero__trailer video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.netflix-hero__trailer-replay {
+  position: absolute !important;
+  right: 50%;
+  bottom: 50%;
+  z-index: 2;
+  min-width: 190px;
+  padding: 10px 18px !important;
+  border-radius: 4px !important;
+  background: rgba(20, 20, 20, 0.86) !important;
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  transform: translate(50%, 50%);
+}
+
+.netflix-hero__trailer-replay:hover {
+  background: rgba(229, 9, 20, 0.92) !important;
+}
+
+.netflix-hero__trailer-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: rgba(20, 20, 20, 0.78);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* El tráiler arranca silenciado (es la única forma de autoplay permitida).
+   Este botón, en la esquina, activa el audio sin salir de la reproducción. */
+.netflix-hero__trailer-sound {
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  min-width: 0;
+  padding: 3px 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 3px !important;
+  background: rgba(20, 20, 20, 0.8) !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  text-transform: none;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.netflix-hero__trailer-sound:hover {
+  border-color: transparent !important;
+  background: rgba(229, 9, 20, 0.92) !important;
+}
+
+.netflix-hero__trailer-sound .MuiSvgIcon-root {
+  font-size: 1rem;
+}
+
+.netflix-hero__trailer {
+  position: absolute;
+  right: clamp(20px, 3vw, 52px);
+  bottom: 19%;
+  z-index: 2;
+  width: min(50vw, 760px);
 }
 
 @keyframes netflix-mark-float {
@@ -242,6 +339,14 @@
     right: -14%;
     width: min(78vw, 430px);
     opacity: 0.32;
+  }
+
+  .netflix-hero__trailer {
+    display: block;
+    right: 2.5rem;
+    bottom: 2rem;
+    left: 2.5rem;
+    width: auto;
   }
 }
 

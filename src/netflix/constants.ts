@@ -5,4 +5,6 @@ export const PANEL_BACKGROUND = '#181818'
 
 export const APP_BAR_HEIGHT = 70
 export const WATCH_PATH = '/?watch=1'
+export const TRAILER_PATH = '/videos/CreacionLogo.webm'
+export const TRAILER_POSTER = '/videos/CreacionLogo-poster.jpg'
 export const OFFICIAL_VELADA_URL = 'https://www.infolavelada.com/'

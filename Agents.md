@@ -1,6 +1,6 @@
 # Agents.md — Contexto del proyecto
 
-> Revisado el 21 de octubre de 2026 contra el estado real del repositorio.
+> Revisado el 26 de octubre de 2026 contra el estado real del repositorio.
 > Este documento es contexto para agentes, no una garantía: antes de editar,
 > lee los archivos implicados. Si algo no coincide, prevalece el código.
 
@@ -75,6 +75,7 @@ El flujo actual es:
 - `types.ts`: `CatalogItem` y `CatalogRow`.
 - `components/Hero.tsx`: composición del hero. El badge, el título y los
   metadatos viven en `components/hero/`; los botones, en `ui/ActionButtons.tsx`.
+  El tráiler, su póster y el control de sonido también viven aquí (ver 5.8).
 - `components/Row.tsx`: fila de carátulas con `react-slick` y scroll por página.
   La flecha es `components/row/RowArrow.tsx` y `hooks/useSlidesToShow.ts` decide
   2/3/4/5/6 tarjetas según el ancho.
@@ -144,7 +145,7 @@ El flujo actual es:
 - `src/pages/index.astro` — intro + landing React; se eliminaron los
   componentes `Landing*` anteriores.
 - `src/layouts/Layout.astro` — props `overlays` y `pageClass`, theme-color
-  condicional, Roboto y favicon.
+  condicional, Roboto, favicon y precarga de `LogoPersonal.svg` en la landing.
 - `src/styles/global.css` — `logo-mark`, transición de landing, foco, skip de
   intro, movimiento reducido y placeholder `.netflix-boot`.
 - `src/data/landing.ts` — ficha compartida con la isla React.
@@ -187,6 +188,10 @@ El flujo actual es:
   … `velada-6.svg`. No hay carteles externos en el catálogo.
 - Las imágenes fuente `LaVeladaN.*` se eliminaron en la limpieza por no estar
   referenciadas ni formar parte del build.
+- `public/videos/CreacionLogo.webm` es el tráiler del hero y
+  `public/videos/CreacionLogo-poster.jpg` su póster (fotograma extraído con
+  `ffmpeg`). `Logo1.mp4`, `Logo2.mp4` y `CreacionLogo.mp4` no los usa la
+  aplicación.
 
 ## 5. Decisiones técnicas
 
@@ -215,16 +220,25 @@ El flujo actual es:
 
 - Basada en la animación original: cuatro columnas de pinceladas, luces y zoom
   final.
-- Tiempos base: `0.5 s` de espera + `3.5 s` de zoom (unos `4 s`), más un
-  desvanecido de `0.6 s` hacia la landing.
-- Las pinceladas y luces se generan con arrays y variables CSS.
+- Guion actual:
+  - `0–1,5 s`: las pinceladas barren la escena y el logo sube desde su máscara.
+  - `0,8–2,1 s`: se encienden las lámparas y se atenúa el brillo del logo.
+  - `2,15–3,3 s`: zoom final (`scale(1)` → `scale(7)`).
+  - `3,3–3,8 s`: la intro se desvanece sobre la landing.
+- La escena se genera en el *frontmatter* de `Intro.astro`: las pinceladas son
+  **una única textura SVG `data-URI`** (a partir de `furStrokes`) y las lámparas
+  **dos capas de franjas estáticas** con máscara radial. No hay una etiqueta por
+  pincelada ni por lámpara.
 - El logo real se integra con `mask-image: url('/images/LogoPersonal.svg')` y un
-  degradado blanco → oro → rojo.
-- La finalización se controla con `animationend` sobre el stage y un temporizador
-  de respaldo de `4.8 s`. Al terminar:
+  degradado blanco → oro → rojo. El SVG se precarga desde `Layout.astro` cuando
+  `pageClass === 'netflix-page'` para que la máscara no llegue tarde.
+- La finalización se controla con `animationend` del zoom y un temporizador de
+  respaldo de `3,8 s`. Al terminar:
   - se elimina `inert` de la landing,
   - se añade `intro-done`,
-  - la intro se desvanece y se elimina del DOM.
+  - la intro se desvanece y se elimina del DOM,
+  - se emite `window.dispatchEvent(new Event('intro:done'))` para que el resto de
+    la página (el tráiler) arranque sin competir con el ident.
 - Botón **“Saltar introducción”** siempre disponible y accesible.
 - La landing permanece `inert` mientras la intro está activa.
 - Sin JavaScript, `<noscript>` oculta la intro y muestra la landing.
@@ -233,40 +247,78 @@ El flujo actual es:
 
 ### 5.3. Fluidez de la intro (importante)
 
-La intro se rediseñó para que **solo se animen `transform` y `opacity`** en las
-capas que se mueven. Cualquier cambio futuro debe respetar estas reglas:
+#### Causa raíz del lag (no repetirla)
 
-- **Logo**: `.intro__mark-wrap` recorta (`overflow: hidden`) y
-  `.intro__mark.logo-mark` entra con `translate3d` + `opacity`. No se usa
+La versión lenta tenía ~150 nodos dentro del escenario:
+
+- 4 ayudantes × 31 pinceladas = **124 `<span>` con degradados**.
+- **28 lámparas**, cada una con su propia animación `alternate` infinita y su
+  `will-change: transform`.
+
+El escenario completo se escalaba de golpe a `scale(15)` **mientras esas
+animaciones internas seguían corriendo**. Cuando algo dentro de un subárbol
+transformado sigue animándose, el navegador no puede cachear la superficie: tiene
+que volver a rasterizarla/recomponerla en cada frame. A ×15 esa superficie mide
+unos 4500 × 4500 px (~20 Mpx, ~80 MB de textura), así que el coste por frame se
+dispara (pintura + subida de textura + memoria). A eso se sumaban:
+
+- el aura recortada por `overflow: hidden` + `contain: paint` del escenario: se
+  repintaba dentro de la superficie ampliada y dejaba un borde cuadrado visible;
+- 30+ capas de composición por los `will-change` individuales;
+- el montaje de la isla React y un `<video preload="auto">` intentando decodificar
+  un WebM de ~9,6 MB durante el ident.
+
+**Regla maestra:** un elemento que se escala no debe tener descendientes
+animándose en ese momento. Primero termina la escena interna; luego se escala.
+
+#### Reglas vigentes
+
+- **Solo `transform` y `opacity`** en lo que se mueve.
+- **Textura única**: las pinceladas se generan como un solo SVG `data-URI`
+  (`.beam` usa `background-image: var(--beam)`), no como cientos de nodos.
+  El data-URI va sin comillas en el atributo `style`, así que **hay que
+  percent-encodear también los paréntesis** (`(` → `%28`, `)` → `%29`). Si no,
+  el token `url()` es inválido y el navegador descarta la declaración en
+  silencio (queda `background-image: none`, ya pasó).
+- **Lámparas**: dos capas estáticas con `repeating-linear-gradient` y máscara
+  radial. No volver a crear un nodo o una capa por lámpara ni animaciones
+  infinitas.
+- **Timeline sin solapes con el zoom**: pinceles, lámparas y brillo terminan
+  antes de `2,15 s`. La única animación que puede seguir durante el zoom es el
+  `opacity` global de las luces (se atenúa), nunca un `transform` de un hijo.
+- **Zoom contenido**: `scale(7)`, no ×15. El escenario lleva
+  `will-change: transform` y el logo entra dentro de `.intro__mark-wrap` con
+  `overflow: hidden` + `contain: paint`. El **escenario no recorta** (`overflow`
+  visible) para que el aura no muestre el borde cuadrado; las pinceladas también
+  van sin recortar y se ocultan con `visibility: hidden` al final de su
+  animación.
+- **Logo**: `.intro__mark.logo-mark` entra con `translate3d` + `opacity`. No usar
   `clip-path` animado ni `drop-shadow` sobre el logo.
-- **Brillo**: `.intro__sheen` es una capa hermana con la misma máscara, y
-  `.intro__sheen-bar` anima su `transform`. **Debe conservar
-  `background: none`**: `.logo-mark` define `background-color: currentColor` y,
-  si se hereda, la capa tapa el logo en blanco (regresión ya detectada).
-- **Pinceladas**: se eliminó `mix-blend-mode: screen`. El halo que antes daba un
-  `box-shadow` de 29 px es ahora un degradado con bordes suaves.
-- **Lámparas**: sin `box-shadow` y sin el `::before` que duplicaba la sombra.
-  Son gradientes con bordes transparentes y un `opacity` bajo. Su animación
-  infinita (`alternate`) solo mueve `transform`.
+- **Brillo**: `.intro__sheen` es una capa hermana con la misma máscara y
+  `.intro__sheen-bar` anima su `transform`. **Debe conservar `background: none`**:
+  `.logo-mark` define `background-color: currentColor` y, si se hereda, la capa
+  tapa el logo en blanco (regresión ya detectada).
 - **Aura**: sin `filter: blur`; el `radial-gradient` ya es suave.
-- **Stage**: `contain: paint`, `backface-visibility: hidden` y
-  `will-change: transform`. La intro usa `isolation: isolate` y
-  `contain: layout paint`.
 - **Prohibido en esta animación**: animar `box-shadow`, `filter`, `clip-path`,
   `background-position` o `width/height`; aplicar `mix-blend-mode` a subárboles
   animados; aplicar `filter` a un padre cuyos hijos animan (fuerza a repintar
-  todo el subárbol).
-- Para revisar fotogramas, pausa y posiciona las animaciones con la Web
-  Animations API:
+  todo el subárbol); poner `will-change` en nodos estáticos.
+- **Mientras la intro está activa**, la landing no debe animar ni cargar vídeo:
+  `.netflix-hero__mark` y `.netflix-boot__mark` quedan con
+  `animation-play-state: paused` y el tráiler espera al evento `intro:done`.
 
-  ```js
-  document.getAnimations().forEach((a) => a.pause())
-  document.getAnimations().forEach((a) => { a.currentTime = 1200 })
-  ```
+#### Cómo revisarla
 
-  Las capturas headless con `--virtual-time-budget` no avanzan las animaciones
-  de forma fiable. Tampoco lo son los FPS medidos en headless: una página
-  estática da ~52 fps de base con renderizado software.
+Pausa y posiciona las animaciones con la Web Animations API:
+
+```js
+document.getAnimations().forEach((a) => a.pause())
+document.getAnimations().forEach((a) => { a.currentTime = 1200 })
+```
+
+Las capturas headless con `--virtual-time-budget` no avanzan las animaciones de
+forma fiable. Tampoco lo son los FPS medidos en headless: una página estática da
+~52 fps de base con renderizado software.
 
 ### 5.4. Reproducción de la intro y modo Watch Now
 
@@ -279,9 +331,13 @@ capas que se mueven. Cualquier cambio futuro debe respetar estas reglas:
 - La única excepción es `prefers-reduced-motion`, por accesibilidad.
 - **Watch Now** navega a `/?watch=1`. La intro se reproduce y, al terminar (o al
   pulsar “Saltar”), añade `is-entering-portfolio`, desvanece el stage y llama a
-  `location.replace('/portfolio')` a los 480 ms.
+  `location.replace('/portfolio')` a los 440 ms.
 - Si `?watch=1` llega con movimiento reducido, la intro se elimina y se entra
   directamente en el portfolio.
+- Al terminar (o al omitirse) la intro emite `intro:done` en `window`. Ese
+  evento es el que usan el hero y el tráiler para no adelantar trabajo durante
+  el ident. Si se renombra, hay que actualizar `src/scripts/intro.ts` y
+  `src/netflix/components/Hero.tsx` a la vez.
 
 ### 5.5. Landing tipo Netflix
 
@@ -328,6 +384,27 @@ capas que se mueven. Cualquier cambio futuro debe respetar estas reglas:
 - Movimiento reducido soportado en intro y landing.
 - Se conservaron los estados hover, focus y active existentes.
 
+### 5.8. Tráiler del hero
+
+- Vídeo: `/videos/CreacionLogo.webm` (~9,6 MB, VP9 + Opus). Póster:
+  `/videos/CreacionLogo-poster.jpg`, un fotograma extraído del propio vídeo.
+  Se usa para que el marco no quede negro mientras no hay reproducción.
+- `preload="none"` y **sin `autoPlay` en el HTML**: la reproducción la dispara
+  `Hero.tsx` cuando la intro ha terminado (`intro:done` o `intro-done`/
+  `intro-skip` ya presentes). Así el vídeo no compite con el ident.
+- **Autoplay silenciado y una sola vez** (`autoplayed` ref). Es la única forma
+  que permiten los navegadores sin gesto. El vídeo no tiene `loop`.
+- Mientras suena silenciado, el botón **“Activar sonido”** está en la esquina
+  superior derecha (`.netflix-hero__trailer-sound`) y solo desmutea, sin
+  reiniciar.
+- Al terminar (`ended`) aparece **“Reproducir tráiler”** centrado
+  (`.netflix-hero__trailer-replay`) y solo se repite si el usuario lo pulsa; esa
+  repetición va con sonido, porque ya hay gesto.
+- Si el navegador bloquea el autoplay o hay `prefers-reduced-motion`, se muestra
+  directamente el botón de reproducir.
+- El botón de sonido se oculta al desmutear y al terminar. No añadir controles
+  nativos (`controls`) ni un segundo botón de sonido flotante.
+
 ## 6. Contrato de comportamiento (no romper)
 
 1. **La intro se reproduce en cada recarga de `/`.** No volver a usar
@@ -353,6 +430,10 @@ capas que se mueven. Cualquier cambio futuro debe respetar estas reglas:
     las capas animadas. Nada de `box-shadow`, `filter`, `clip-path` animado ni
     `mix-blend-mode` en subárboles que se mueven.
 12. La capa `.intro__sheen` debe mantener `background: none` (ver 5.3).
+13. **No volver a la intro de ~150 nodos ni al zoom ×15** (causa raíz del lag en
+    5.3). Un ancestro que se escala no debe tener hijos animándose.
+14. El tráiler se reproduce **una sola vez y silenciado**, con “Activar sonido”
+    en la esquina; no añadir `loop` ni autoplay con sonido (ver 5.8).
 
 ## 7. Verificación realizada
 
@@ -404,6 +485,21 @@ Verificación de la intro (iteraciones anteriores):
 - FPS medidos en headless: no representativos (renderizado software; una página
   estática da ~52 fps de base).
 
+Verificación de la iteración del 26/10/2026 (intro fluida + tráiler):
+
+- Causa del lag reproducida y documentada en 5.3; la escena bajó de ~150 nodos a
+  una docena y el zoom de ×15 a ×7.
+- Timeline comprobado fotograma a fotograma con la Web Animations API (300, 450,
+  620, 800, 950, 1200, 1400, 2000, 2350, 2650, 3000 y 3200 ms) en 1280 y 390 px.
+- Verificado que las pinceladas se pintan de verdad: el primer intento generaba
+  un `data-URI` con paréntesis sin codificar y el navegador descartaba la
+  declaración (`background-image: none`). Ahora los paréntesis se percent-encodean.
+- Autoplay del tráiler comprobado: arranca silenciado tras `intro:done`
+  (`paused: false`, `muted: true`), “Activar sonido” desmutea sin reiniciar y al
+  `ended` aparece “Reproducir tráiler” sin repetir solo.
+- Póster verificado antes de la reproducción; sin él el marco quedaba negro.
+- `corepack pnpm build`, Prettier y ESLint sin errores.
+
 ## 8. Limitaciones y pendientes conocidos
 
 - La landing es `client:only="react"`: no hay SSR de su contenido. Hasta que
@@ -422,7 +518,11 @@ Verificación de la intro (iteraciones anteriores):
   que cambiar el `href` y el modo watch de la intro a la vez.
 - Las carpetas de referencia locales se eliminaron; el material necesario ya
   está integrado en el proyecto.
-- No hay pruebas automatizadas de regresión visual.
+- El tráiler pesa ~9,6 MB (WebM VP9). El autoplay silenciado lo descarga entero
+  tras el ident; en conexiones lentas puede tardar en arrancar. Si se quiere
+  aligerar, hay que recomprimir el vídeo y regenerar el póster con `ffmpeg`.
+- No hay pruebas automatizadas de regresión visual. La intro se revisa a mano
+  pausando animaciones con la Web Animations API (5.3).
 
 ## 9. Guía para futuros agentes
 
@@ -440,7 +540,13 @@ Verificación de la intro (iteraciones anteriores):
   - que la landing queda interactiva,
   - que `prefers-reduced-motion` sigue funcionando,
   - que solo animas `transform`/`opacity` (ver 5.3),
+  - que no animas hijos dentro del subárbol que hace zoom (causa raíz del lag),
+  - que las pinceladas tienen textura (si `background-image: none`, revisa el
+    percent-encoding del `data-URI`),
   - que `.intro__sheen` sigue con `background: none`.
+- Si tocas el tráiler, comprueba que autoplay arranca silenciado una sola vez,
+  que “Activar sonido” no reinicia, que al terminar aparece el botón de repetir
+  y que no hay `loop` (ver 5.8).
 - Si tocas Watch Now, comprueba `/?watch=1`, la intro y la entrada final en
   `/portfolio`.
 - Si tocas la isla React, comprueba hidratación, vista rápida, ficha modal,

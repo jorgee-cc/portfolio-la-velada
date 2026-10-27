@@ -7,6 +7,7 @@ import MenuModule from '@mui/icons-material/Menu'
 import OpenInNewModule from '@mui/icons-material/OpenInNew'
 import PlayArrowModule from '@mui/icons-material/PlayArrow'
 import ThumbUpOffAltModule from '@mui/icons-material/ThumbUpOffAlt'
+import VolumeOffModule from '@mui/icons-material/VolumeOff'
 
 /**
  * @mui/icons-material se publica en CommonJS. Según cómo lo prebundle Vite,
@@ -24,3 +25,4 @@ export const MenuIcon = interop(MenuModule)
 export const OpenInNewIcon = interop(OpenInNewModule)
 export const PlayArrowIcon = interop(PlayArrowModule)
 export const ThumbUpOffAltIcon = interop(ThumbUpOffAltModule)
+export const VolumeOffIcon = interop(VolumeOffModule)

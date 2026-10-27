@@ -4,7 +4,7 @@ Portfolio personal construido con Astro y Tailwind CSS.
 
 ## Recorrido
 
-- `/` — introducción animada con el logo personal y landing cinematográfica.
+- `/` — introducción animada con el logo personal, tráiler automático y landing cinematográfica.
 - `/portfolio` — portfolio completo (la "película" que se abre con **Watch Now**).
 - `/portfolio#cartel`, `#reto`, `#cartelera`, `#palmares` — capítulos del portfolio.
 

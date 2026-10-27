@@ -26,6 +26,11 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content={pageClass === 'netflix-page' ? '#141414' : '#07070a'} />
     <link rel="icon" type="image/jpeg" href="/images/LogoPersonal.jpg" />
+    {
+      pageClass === 'netflix-page' && (
+        <link rel="preload" as="image" href="/images/LogoPersonal.svg" />
+      )
+    }
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content="Jorge Condado Carballo" />

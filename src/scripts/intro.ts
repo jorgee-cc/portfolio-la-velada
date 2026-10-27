@@ -5,6 +5,9 @@ import { portfolioPath } from '../data/site'
  * respaldo, skip, modo `?watch=1` y movimiento reducido.
  *
  * La intro se reproduce en cada carga de `/`; no hay persistencia de sesión.
+ * Dura ~3,3 s (2,15 s de escena + 1,15 s de zoom) y, al terminar, avisa con
+ * el evento `intro:done` para que el resto de la página (por ejemplo el
+ * tráiler del hero) no compita por la GPU durante el ident.
  */
 export function initIntro(): void {
   const intro = document.querySelector<HTMLElement>('[data-intro]')
@@ -25,6 +28,10 @@ export function initIntro(): void {
   const skip = intro.querySelector<HTMLButtonElement>('[data-intro-skip]')
   let finished = false
 
+  const announceIntroDone = () => {
+    window.dispatchEvent(new Event('intro:done'))
+  }
+
   if (landing) landing.setAttribute('inert', '')
 
   const finish = (immediate = false) => {
@@ -40,7 +47,7 @@ export function initIntro(): void {
 
       intro.classList.add('is-entering-portfolio')
       intro.setAttribute('aria-hidden', 'true')
-      window.setTimeout(enterPortfolio, 480)
+      window.setTimeout(enterPortfolio, 440)
       return
     }
 
@@ -48,6 +55,7 @@ export function initIntro(): void {
     root.classList.add('intro-done')
     intro.classList.add('is-leaving')
     intro.setAttribute('aria-hidden', 'true')
+    announceIntroDone()
 
     if (immediate) {
       intro.remove()
@@ -63,15 +71,15 @@ export function initIntro(): void {
       },
       { once: true },
     )
-    window.setTimeout(() => intro.remove(), 1000)
+    window.setTimeout(() => intro.remove(), 900)
   }
 
-  // El zoom original termina a los 4 s (0,5 s de espera + 3,5 s de animación).
+  // El zoom termina a los 3,3 s (2,15 s de espera + 1,15 s de animación).
   stage?.addEventListener('animationend', (event) => {
     if (event.target === stage) finish()
   })
   skip?.addEventListener('click', () => finish(watchMode))
-  window.setTimeout(() => finish(), 4800)
+  window.setTimeout(() => finish(), 3800)
 
   // Si el usuario activa "movimiento reducido" con la página abierta,
   // la intro desaparece sin dejar la landing bloqueada por `inert`.
