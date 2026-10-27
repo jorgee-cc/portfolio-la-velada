@@ -31,7 +31,7 @@ export const featureDetails = [
 
 export const featureChapters = [
   { href: `${portfolioPath}#cartel`, label: 'El cartel' },
-  { href: `${portfolioPath}#reto`, label: 'El reto' },
+  { href: `${portfolioPath}#candidaturas`, label: 'Candidaturas' },
   { href: `${portfolioPath}#cartelera`, label: 'La cartelera' },
   { href: `${portfolioPath}#palmares`, label: 'El palmarés' },
 ]

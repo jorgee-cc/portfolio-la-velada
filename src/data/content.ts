@@ -1,79 +1,12 @@
 export type Tone = 'red' | 'gold' | 'blue'
 
-export const rounds: {
-  n: string
-  name: string
-  demand: string
-  play: string
-  tone: Tone
-}[] = [
-  {
-    n: '01',
-    name: 'El peso del tráfico',
-    demand: 'Millones de personas pulsando a la vez. El pico no avisa.',
-    play: 'Diseño para la carga, no para la demo: caché agresiva, CDN, colas y pruebas de estrés antes del directo.',
-    tone: 'red',
-  },
-  {
-    n: '02',
-    name: 'El combate en tiempo real',
-    demand: 'Votos, chat y datos que tienen que llegar al instante.',
-    play: 'WebSockets y arquitectura orientada a eventos. Latencia de milisegundos, no de pestañas cargando.',
-    tone: 'gold',
-  },
-  {
-    n: '03',
-    name: 'La defensa',
-    demand: 'DDoS, bots de entradas y datos de millones de fans en juego.',
-    play: 'Endurecimiento real: WAF, rate limiting, OWASP Top 10 y defensa en profundidad — no solo un certificado.',
-    tone: 'blue',
-  },
-  {
-    n: '04',
-    name: 'El aguante',
-    demand: 'Si un servicio se cae en horario de máxima audiencia, se acabó.',
-    play: 'Tolerancia a fallos: colas, reintentos, patrón Outbox y recuperación automática. Caerse no es una opción.',
-    tone: 'red',
-  },
-  {
-    n: '05',
-    name: 'La esquina',
-    demand: 'No puedes pelear a ciegas: hay que ver el golpe venir.',
-    play: 'Observabilidad total — métricas, logs y alertas en vivo. Si algo respira mal, lo sabemos antes que nadie.',
-    tone: 'gold',
-  },
-  {
-    n: '06',
-    name: 'El KO final',
-    demand: 'El evento termina. Las ganas no.',
-    play: 'Entrega, mantenimiento y evolución. Me quedo en tu esquina más allá del directo.',
-    tone: 'blue',
-  },
-]
-
 /** Comparativa del cartel del hero: mi baza frente a la competencia. */
 export const tape = [
   { label: 'Experiencia real', me: 'Cliente real en producción', rival: 'Ejercicios de bootcamp' },
   { label: 'Alcance', me: 'Front · Back · Infra · Seguridad', rival: 'Solo la parte bonita' },
-  { label: 'Bajo presión', me: 'Árbitro federado', rival: 'Nunca ha roto producción' },
+  { label: 'Responsabilidad', me: '3+ años trabajo y estudio', rival: 'Solo estudiar' },
   { label: 'Tráfico', me: 'Diseñado para el pico', rival: 'Cae con 100 usuarios' },
   { label: 'Motivo', me: 'Ganar por KO', rival: 'Participar' },
-]
-
-export const record = [
-  { value: 4, suffix: 'º', label: 'Curso', sub: 'Ing. Informática · UC3M' },
-  { value: 12, suffix: '+', label: 'Proyectos', sub: 'entregados y desplegados' },
-  { value: 1, suffix: '', label: 'Cliente real', sub: 'en producción ahora mismo' },
-  { value: 3, suffix: '+', label: 'Años', sub: 'trabajando mientras estudio' },
-]
-
-export const commitments = [
-  { k: 'Uptime objetivo', v: '99,99%' },
-  { k: 'Latencia p95', v: '< 100 ms' },
-  { k: 'Pérdida de datos', v: '0' },
-  { k: 'Respuesta en crisis', v: '< 15 min' },
-  { k: 'Pruebas de carga', v: 'Antes del directo' },
-  { k: 'Disponibilidad en pico', v: '24/7' },
 ]
 
 export const corner = [
@@ -167,7 +100,12 @@ export const fights: {
   },
 ]
 
-export const press = [
+export const press: {
+  outlet: string
+  round?: string
+  q: string
+  a: string
+}[] = [
   {
     outlet: 'La Tribuna Digital',
     q: '¿Has estado antes en un proceso como este?',
@@ -184,14 +122,33 @@ export const press = [
     a: 'Soy árbitro federado. He tomado decisiones imparciales en milisegundos con todo el mundo mirándome y sin margen de revisión. Esa presión la llevo entrenada desde hace años.',
   },
   {
-    outlet: 'FanZone',
-    q: '¿Qué te diferencia técnicamente?',
-    a: 'Cubro el stack completo: frontend, backend, infraestructura y seguridad. Puedo construir la experiencia y, a la vez, blindar el servidor que la aguanta. Menos manos, menos ruido, menos puntos de fallo.',
+    outlet: 'Latencia Cero',
+    round: '02',
+    q: '¿Cómo haces que votos y chat lleguen al instante?',
+    a: 'Con WebSockets y una arquitectura orientada a eventos. Votos, chat y datos viajan en milisegundos, no en pestañas cargando. En directo, cada segundo de retraso se nota en la grada.',
+  },
+  {
+    outlet: 'Ciberdefensa Hoy',
+    round: '03',
+    q: '¿Y si atacan el evento con un DDoS el día del directo?',
+    a: 'Endurecimiento real: WAF, rate limiting, OWASP Top 10 y defensa en profundidad. No me quedo en poner un certificado y rezar. Si hay datos de millones de fans en juego, la seguridad se diseña desde el primer commit.',
   },
   {
     outlet: 'Streaming Today',
-    q: '¿Qué pasa si algo se cae en pleno directo?',
-    a: 'Diseño para que no se caiga: colas, reintentos, patrón Outbox y observabilidad en vivo. Y si aun así cae, hay un plan de recuperación y alguien que responde en minutos. Ese alguien soy yo.',
+    round: '04',
+    q: '¿Cómo aguanta el sistema si un servicio se cae en máxima audiencia?',
+    a: 'Diseño para que no se caiga: colas, reintentos, patrón Outbox y recuperación automática. Si aun así algo falla, hay un plan de contingencia y alguien que responde en minutos. Ese alguien soy yo.',
+  },
+  {
+    outlet: 'La Esquina Técnica',
+    round: '05',
+    q: '¿Cómo sabrás que algo va mal antes de que lo note el público?',
+    a: 'Observabilidad total: métricas, logs y alertas en vivo. No peleo a ciegas. Si algo respira mal, lo sabemos antes que nadie y lo arreglamos fuera de cámara.',
+  },
+  {
+    outlet: 'FanZone',
+    q: '¿Qué te diferencia técnicamente?',
+    a: 'Cubro el stack completo: frontend, backend, infraestructura y seguridad. Puedo construir la experiencia y, a la vez, blindar el servidor que la aguanta. Menos manos, menos ruido, menos puntos de fallo.',
   },
   {
     outlet: 'TechPress',
@@ -204,7 +161,10 @@ export const outlets = [
   'La Tribuna Digital',
   'Código Abierto',
   'El Último Round',
-  'FanZone',
+  'Latencia Cero',
+  'Ciberdefensa Hoy',
   'Streaming Today',
+  'La Esquina Técnica',
+  'FanZone',
   'TechPress',
 ]

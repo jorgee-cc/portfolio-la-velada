@@ -16,7 +16,8 @@ import { press, outlets } from '../../data/content'
     El careo final:<br /><span class="text-gold">la prensa pregunta</span>
     <span slot="subtitle">
       Antes de firmar un cartel, hay que responder. Sin guion y sin filtros: las dudas que cualquier
-      organización tendría antes de poner su evento en mis manos.
+      organización tendría antes de poner su evento en mis manos. Los rounds del reto, pregunta a
+      pregunta.
     </span>
   </SectionHeader>
 
@@ -72,8 +73,17 @@ import { press, outlets } from '../../data/content'
               </svg>
             </span>
             <span class="flex-1">
-              <span class="block font-mono text-[10px] tracking-[0.25em] text-[var(--color-faint)] uppercase">
-                {item.outlet}
+              <span class="flex flex-wrap items-center gap-2">
+                {
+                  item.round && (
+                    <span class="rounded-full border border-[var(--color-belt-gold)]/50 bg-[var(--color-belt-gold)]/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.25em] text-[var(--color-belt-gold)]">
+                      ROUND {item.round}
+                    </span>
+                  )
+                }
+                <span class="font-mono text-[10px] tracking-[0.25em] text-[var(--color-faint)] uppercase">
+                  {item.outlet}
+                </span>
               </span>
               <span class="mt-1 block font-head text-lg leading-tight text-[var(--color-bone)]">
                 «{item.q}»

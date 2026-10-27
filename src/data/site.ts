@@ -19,7 +19,6 @@ export const pitchHtml =
 
 export const navLinks = [
   { href: '#cartel', label: 'El Cartel' },
-  { href: '#reto', label: 'El Reto' },
   { href: '#candidaturas', label: 'Candidaturas' },
   { href: '#cartelera', label: 'Cartelera' },
   { href: '#rueda', label: 'Rueda de Prensa' },
