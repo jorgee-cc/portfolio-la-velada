@@ -127,7 +127,7 @@ export const press: {
     category: 'personal',
     q: '¿Cuál es tu motivación real?',
     a: [
-      'Mi motivación real es aprender de los mejores, especialmente de midudev, a quien sigo desde hace mucho tiempo, y hacerlo formando parte de un proyecto tan único y real como este.',
+      'Mi motivación real es aprender de los mejores, especialmente de Midudev, a quien sigo desde hace mucho tiempo, y hacerlo formando parte de un proyecto tan único y real como este.',
       'Pero también hay algo que me atrae especialmente del frontend: la posibilidad de crear algo de lo que te sientas orgulloso, cuidar cada detalle y saber que tu trabajo puede llegar a millones de personas. Me motiva pensar que algo que yo haya construido pueda estar delante de tanta gente y que cualquiera pueda verlo, utilizarlo y disfrutarlo.',
     ],
   },

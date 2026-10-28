@@ -15,7 +15,15 @@ interface DetailHeroProps {
 
 export default function DetailHero({ item, isPortfolio, onClose }: DetailHeroProps) {
   return (
-    <Box sx={{ position: 'relative', aspectRatio: '16 / 9', minHeight: { xs: 260, sm: 0 } }}>
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '100%',
+        aspectRatio: '16 / 9',
+        minHeight: { xs: 260, sm: 0 },
+      }}
+    >
       {isPortfolio ? (
         <Box className="netflix-modal__mark-wrap" aria-hidden="true">
           <Box className="netflix-modal__mark logo-mark" />

@@ -28,6 +28,18 @@ export default function HeroMeta() {
         ·
       </Box>
       <Box component="span">{feature.genres.join(' · ')}</Box>
+      <Box
+        component="span"
+        sx={{
+          border: '1px solid rgba(255, 255, 255, 0.35)',
+          borderRadius: 0.4,
+          px: 0.6,
+          fontSize: '0.65rem',
+          lineHeight: 1.6,
+        }}
+      >
+        16+
+      </Box>
     </Typography>
   )
 }

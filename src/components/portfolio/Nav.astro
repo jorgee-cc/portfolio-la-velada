@@ -24,7 +24,7 @@ import { navLinks, site, socialLinks } from '../../data/site'
       </span>
     </a>
 
-    <nav class="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
+    <nav class="hidden items-center gap-1 xl:flex" aria-label="Navegación principal">
       {
         navLinks.map((l) => (
           <a
@@ -54,13 +54,15 @@ import { navLinks, site, socialLinks } from '../../data/site'
           ))
         }
       </div>
-      <a href="#contrato" class="btn btn-primary hidden !px-5 !py-2.5 !text-xs sm:inline-flex"
+      <a
+        href="#contrato"
+        class="btn btn-primary hidden !px-5 !py-2.5 !text-xs whitespace-nowrap sm:inline-flex"
         >Firmar el contrato</a
       >
       <button
         id="nav-toggle"
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-md border border-[var(--color-line)] text-[var(--color-bone)] lg:hidden"
+        class="flex h-10 w-10 items-center justify-center rounded-md border border-[var(--color-line)] text-[var(--color-bone)] xl:hidden"
         aria-label="Abrir menú"
         aria-expanded="false"
         aria-controls="mobile-nav"
@@ -72,7 +74,7 @@ import { navLinks, site, socialLinks } from '../../data/site'
 
   <nav
     id="mobile-nav"
-    class="hidden border-t border-[var(--color-line)] bg-[var(--color-ink)] lg:hidden"
+    class="hidden border-t border-[var(--color-line)] bg-[var(--color-ink)] xl:hidden"
     aria-label="Navegación móvil"
   >
     <div class="mx-auto flex max-w-7xl flex-col px-4 py-3 sm:px-6">

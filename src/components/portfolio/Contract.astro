@@ -16,7 +16,7 @@ import { contacts, site } from '../../data/site'
     </div>
 
     <p class="kicker mb-5">El contrato · Última llamada</p>
-    <h2 class="headline text-5xl text-balance sm:text-7xl">
+    <h2 class="headline text-[clamp(2rem,7.5vw,4rem)] text-balance">
       <span class="text-chrome">30.000 candidaturas.</span><br />
       <span class="text-fire">Tú decides quién sube al ring.</span>
     </h2>
@@ -35,16 +35,18 @@ import { contacts, site } from '../../data/site'
             href={contact.href}
             target={contact.href.startsWith('http') ? '_blank' : undefined}
             rel={contact.href.startsWith('http') ? 'noreferrer' : undefined}
-            class="group flex items-center gap-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-void)]/60 p-4 transition-colors hover:border-[var(--color-belt-gold)]/50"
+            class="group flex min-w-0 items-center gap-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-void)]/60 p-4 transition-colors hover:border-[var(--color-belt-gold)]/50"
           >
             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--color-line)] text-[var(--color-belt-gold)] transition-colors group-hover:border-[var(--color-belt-gold)]/50">
               <Icon path={contact.icon} />
             </span>
-            <span class="min-w-0">
+            <span class="min-w-0 flex-1">
               <span class="block font-mono text-[10px] tracking-[0.25em] text-[var(--color-faint)] uppercase">
                 {contact.label}
               </span>
-              <span class="block truncate text-sm text-[var(--color-bone)]">{contact.value}</span>
+              <span class="block text-[13px] leading-snug [overflow-wrap:anywhere] break-words text-[var(--color-bone)] sm:text-sm">
+                {contact.value}
+              </span>
             </span>
           </a>
         ))

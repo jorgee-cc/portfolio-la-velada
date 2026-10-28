@@ -7,13 +7,18 @@ import { tape } from '../../data/content'
 
 <section id="cartel" class="relative z-10 overflow-hidden pt-28 pb-10 sm:pt-32">
   <div
-    class="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8 lg:px-10"
+    class="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-10 lg:px-10"
   >
     <!-- Columna izquierda: el anuncio -->
     <div class="text-center lg:text-left">
-      <p data-reveal class="kicker mb-5">Ibai · La Velada del Año — Candidatura oficial 2027</p>
+      <p data-reveal class="kicker mb-5 lg:tracking-[0.28em]">
+        Ibai · La Velada del Año — Candidatura oficial 2027
+      </p>
 
-      <h1 data-reveal class="headline text-[13vw] sm:text-[9rem] lg:text-[7.4rem]">
+      <h1
+        data-reveal
+        class="headline text-[clamp(2.9rem,12vw,7.4rem)] lg:text-[clamp(2.6rem,9vw,7.4rem)]"
+      >
         <span class="text-chrome block">El programador</span>
         <span class="relative block">
           <span class="text-gold animate-shine bg-[length:200%_auto]">que aguanta</span>
@@ -146,14 +151,14 @@ import { tape } from '../../data/content'
         <div class="mt-6 divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
           {
             tape.map((row) => (
-              <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 py-2.5">
-                <span class="text-right text-sm font-semibold text-[var(--color-bone)]">
-                  {row.me}
-                </span>
-                <span class="px-2 font-mono text-[10px] tracking-widest text-[var(--color-faint)] uppercase">
+              <div class="grid grid-cols-2 items-center gap-x-3 gap-y-1 px-5 py-2.5 sm:grid-cols-[1fr_auto_1fr] sm:gap-2">
+                <span class="col-span-2 text-center font-mono text-[10px] tracking-widest text-[var(--color-faint)] uppercase sm:order-2 sm:col-span-1 sm:px-2">
                   {row.label}
                 </span>
-                <span class="text-left text-sm text-[var(--color-muted)] line-through decoration-[var(--color-ring-red)]/50">
+                <span class="min-w-0 text-left text-sm font-semibold text-[var(--color-bone)] sm:order-1 sm:text-right">
+                  {row.me}
+                </span>
+                <span class="min-w-0 text-right text-sm text-[var(--color-muted)] line-through decoration-[var(--color-ring-red)]/50 sm:order-3 sm:text-left">
                   {row.rival}
                 </span>
               </div>

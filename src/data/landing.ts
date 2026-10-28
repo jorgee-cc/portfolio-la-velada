@@ -17,7 +17,7 @@ export const feature = {
   genres: ['Full-Stack', 'Infraestructura', 'Seguridad'],
   rank: '70-80',
   recognition: 'Top 70-80',
-  recognitionDetail: 'de más de 30.000 candidaturas · según midudev',
+  recognitionDetail: 'de más de 30.000 candidaturas · según Midudev',
 }
 
 export const featureDetails = [

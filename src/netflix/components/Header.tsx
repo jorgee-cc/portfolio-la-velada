@@ -47,7 +47,7 @@ export default function Header() {
         />
 
         <HeaderNav items={headerNavItems} />
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 0.5 }}>
           {socialActions.map(({ label, href, Icon }) => (
             <IconButton
               key={label}

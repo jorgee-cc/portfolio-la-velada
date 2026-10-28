@@ -44,7 +44,7 @@ export default function Footer() {
       }}
     >
       <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
-        <Typography sx={{ color: '#8c8c8c', fontSize: '0.85rem', mb: 3 }}>
+        <Typography sx={{ color: '#8c8c8c', fontSize: '0.85rem', mb: 3, overflowWrap: 'anywhere' }}>
           ¿Hablamos? · {site.email} · {site.phone}
         </Typography>
 

@@ -22,7 +22,7 @@ const { application } = Astro.props
     />
     {
       application.badge && (
-        <span class="absolute top-4 left-4 rounded-full bg-[var(--color-ring-red)] px-3 py-1 font-mono text-[10px] tracking-[0.2em] text-white">
+        <span class="absolute top-4 left-4 max-w-[calc(100%-2rem)] rounded-full bg-[var(--color-ring-red)] px-3 py-1 text-center font-mono text-[10px] leading-snug tracking-[0.2em] text-white">
           {application.badge}
         </span>
       )

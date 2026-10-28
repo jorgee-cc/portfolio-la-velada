@@ -20,7 +20,7 @@ export default function HeaderNav({ items }: HeaderNavProps) {
       <Stack
         direction="row"
         spacing={2.5}
-        sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 2 }}
+        sx={{ flexGrow: 1, display: { xs: 'none', lg: 'flex' }, ml: 2 }}
       >
         {items.map((item) => (
           <Typography
@@ -32,6 +32,7 @@ export default function HeaderNav({ items }: HeaderNavProps) {
               fontSize: '0.9rem',
               fontWeight: 500,
               textDecoration: 'none',
+              whiteSpace: 'nowrap',
               transition: 'color 0.2s ease',
               '&:hover': { color: '#ffffff' },
             }}
@@ -41,12 +42,12 @@ export default function HeaderNav({ items }: HeaderNavProps) {
         ))}
       </Stack>
 
-      <Box sx={{ flexGrow: { xs: 1, md: 0 } }} />
+      <Box sx={{ flexGrow: { xs: 1, lg: 0 } }} />
 
       <IconButton
         aria-label="Abrir menú"
         onClick={open}
-        sx={{ display: { md: 'none' }, color: '#ffffff' }}
+        sx={{ display: { lg: 'none' }, color: '#ffffff' }}
       >
         <MenuIcon />
       </IconButton>

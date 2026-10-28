@@ -119,7 +119,7 @@ export const applications: Project[] = [
     desc: 'Frontend de alto rendimiento diseñado para aguantar el tráfico masivo de un evento en directo y ofrecer una experiencia de streaming fluida a 60 FPS. Mi carta de presentación como programador del cartel.',
     img: '/images/Preview.webp',
     tags: ['React', 'Tailwind CSS', 'Framer Motion', '60 FPS'],
-    channels: ['InfoJobs', 'midudev'],
+    channels: ['InfoJobs', 'Midudev'],
     link: 'https://prototipo-velada-vi-jorge-condado-c.vercel.app/',
     external: true,
   },
@@ -130,7 +130,7 @@ export const applications: Project[] = [
     desc: 'Landing narrativa interactiva con animaciones ligadas al scroll y ambiente sonoro real vía Web Audio API. El proyecto con el que me postulé para construir una experiencia de marca cinematográfica.',
     img: '/images/Spiderman_BrandNewDay.webp',
     tags: ['Astro + React', 'Framer Motion', 'Web Audio API'],
-    channels: ['midudev', 'InfoJobs'],
+    channels: ['Midudev', 'InfoJobs'],
     link: 'https://spiderman-brand-new-day-gamma.vercel.app/',
     external: true,
   },
@@ -138,6 +138,6 @@ export const applications: Project[] = [
 
 export const results = [
   { value: '30.000+', label: 'candidaturas filtradas' },
-  { value: 'Top 70-80', label: 'según midudev' },
+  { value: 'Top 70-80', label: 'según Midudev' },
   { value: 'Llamada', label: 'recibida el año pasado' },
 ]

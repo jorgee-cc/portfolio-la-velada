@@ -104,129 +104,85 @@ export default function Hero() {
   }
 
   return (
-    <Box
-      component="section"
-      id="inicio"
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'flex-end',
-        minHeight: { xs: '86vh', md: '92vh' },
-        overflow: 'hidden',
-        bgcolor: '#141414',
-        pb: { xs: 29, md: 14 },
-      }}
-    >
+    <Box component="section" id="inicio" className="netflix-hero">
       <Box className="netflix-hero__backdrop" aria-hidden="true">
         <Box className="netflix-hero__mark logo-mark" />
         <Box className="netflix-hero__glow" />
       </Box>
       <Box className="netflix-hero__scrim" aria-hidden="true" />
 
-      <Box
-        sx={{
-          position: 'relative',
-          zIndex: 2,
-          width: '100%',
-          maxWidth: 820,
-          px: { xs: 2.5, sm: 4, md: '60px' },
-        }}
-      >
-        <Stack spacing={2.4}>
-          <HeroBadge />
-          <HeroTitle />
-          <HeroMeta />
+      <Box className="netflix-hero__inner">
+        <Box className="netflix-hero__content">
+          <Stack spacing={2.4}>
+            <HeroBadge />
+            <HeroTitle />
+            <HeroMeta />
 
-          <Typography
-            component="p"
-            sx={{
-              m: 0,
-              maxWidth: 600,
-              fontSize: { xs: '0.95rem', md: '1.05rem' },
-              lineHeight: 1.6,
-              color: 'rgba(255, 255, 255, 0.86)',
-              textShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
-            }}
-          >
-            {portfolioItem.overview}
-          </Typography>
+            <Typography
+              component="p"
+              sx={{
+                m: 0,
+                maxWidth: 600,
+                fontSize: { xs: '0.95rem', md: '1.05rem' },
+                lineHeight: 1.6,
+                color: 'rgba(255, 255, 255, 0.86)',
+                textShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
+              }}
+            >
+              {portfolioItem.overview}
+            </Typography>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ pt: 0.5 }}>
-            <PlayButton />
-            <MoreInfoButton onClick={() => open(portfolioItem)} />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ pt: 0.5 }}>
+              <PlayButton />
+              <MoreInfoButton onClick={() => open(portfolioItem)} />
+            </Stack>
           </Stack>
-        </Stack>
-      </Box>
-
-      <Box className="netflix-hero__trailer">
-        <Box component="span" className="netflix-hero__trailer-label">
-          Tráiler
         </Box>
-        <Box
-          component="video"
-          src={TRAILER_PATH}
-          poster={TRAILER_POSTER}
-          muted
-          playsInline
-          preload="none"
-          aria-label="Tráiler de La Velada del Código"
-          ref={trailerRef}
-          onPlay={() => setNeedsInteraction(false)}
-          onEnded={() => setTrailerEnded(true)}
-          onVolumeChange={() => setMuted(trailerRef.current?.muted ?? true)}
-        />
 
-        {muted && !trailerEnded && !needsInteraction && (
-          <Button
-            className="netflix-hero__trailer-sound"
-            onClick={enableSound}
-            startIcon={<VolumeOffIcon />}
-            size="small"
-            aria-label="Activar el sonido del tráiler"
-          >
-            Activar sonido
-          </Button>
-        )}
+        <Box className="netflix-hero__trailer">
+          <Box component="span" className="netflix-hero__trailer-label">
+            Tráiler
+          </Box>
+          <Box
+            component="video"
+            src={TRAILER_PATH}
+            poster={TRAILER_POSTER}
+            muted
+            playsInline
+            preload="none"
+            aria-label="Tráiler de La Velada del Código"
+            ref={trailerRef}
+            onPlay={() => setNeedsInteraction(false)}
+            onEnded={() => setTrailerEnded(true)}
+            onVolumeChange={() => setMuted(trailerRef.current?.muted ?? true)}
+          />
 
-        {(trailerEnded || needsInteraction) && (
-          <Button
-            className="netflix-hero__trailer-replay"
-            onClick={replayTrailer}
-            startIcon={<PlayArrowIcon />}
-            aria-label={
-              trailerEnded
-                ? 'Volver a reproducir el tráiler'
-                : 'Activar el sonido y reproducir el tráiler'
-            }
-          >
-            Reproducir tráiler
-          </Button>
-        )}
-      </Box>
+          {muted && !trailerEnded && !needsInteraction && (
+            <Button
+              className="netflix-hero__trailer-sound"
+              onClick={enableSound}
+              startIcon={<VolumeOffIcon />}
+              size="small"
+              aria-label="Activar el sonido del tráiler"
+            >
+              Activar sonido
+            </Button>
+          )}
 
-      <Box
-        aria-hidden="true"
-        sx={{
-          position: 'absolute',
-          right: { md: '60px' },
-          bottom: { md: '7%' },
-          zIndex: 2,
-          display: { xs: 'none', md: 'flex' },
-          alignItems: 'center',
-          gap: 1.5,
-        }}
-      >
-        <Box
-          sx={{
-            borderLeft: '3px solid #dcdcdc',
-            bgcolor: 'rgba(51, 51, 51, 0.6)',
-            px: 1.4,
-            py: 0.6,
-            fontSize: '0.9rem',
-            color: '#ffffff',
-          }}
-        >
-          16+
+          {(trailerEnded || needsInteraction) && (
+            <Button
+              className="netflix-hero__trailer-replay"
+              onClick={replayTrailer}
+              startIcon={<PlayArrowIcon />}
+              aria-label={
+                trailerEnded
+                  ? 'Volver a reproducir el tráiler'
+                  : 'Activar el sonido y reproducir el tráiler'
+              }
+            >
+              Reproducir tráiler
+            </Button>
+          )}
         </Box>
       </Box>
     </Box>
