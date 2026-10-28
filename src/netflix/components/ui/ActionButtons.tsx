@@ -32,6 +32,7 @@ interface PlayButtonProps {
   label?: string
   onClick?: () => void
   compact?: boolean
+  external?: boolean
 }
 
 export function PlayButton({
@@ -39,11 +40,14 @@ export function PlayButton({
   label = 'Watch Now',
   onClick,
   compact = false,
+  external = false,
 }: PlayButtonProps) {
   return (
     <Button
       component={href ? 'a' : 'button'}
       href={href || undefined}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noreferrer' : undefined}
       onClick={onClick}
       startIcon={<PlayArrowIcon />}
       sx={playButtonSx(compact)}

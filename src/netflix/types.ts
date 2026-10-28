@@ -18,6 +18,7 @@ export interface CatalogItem {
   duration: string
   badge?: string
   externalUrl?: string
+  watchUrl?: string
 }
 
 export interface CatalogRow {

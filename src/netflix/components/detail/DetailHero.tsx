@@ -78,7 +78,14 @@ export default function DetailHero({ item, isPortfolio, onClose }: DetailHeroPro
         </Typography>
 
         <Stack direction="row" spacing={1.25} flexWrap="wrap" useFlexGap>
-          <PlayButton compact label={isPortfolio ? 'Watch Now' : 'Ver portfolio'} />
+          <PlayButton
+            compact
+            href={isPortfolio ? undefined : item.watchUrl}
+            label={
+              isPortfolio ? 'Watch Now' : item.watchUrl ? 'Ver en YouTube' : 'Ver portfolio'
+            }
+            external={!isPortfolio && Boolean(item.watchUrl)}
+          />
           {!isPortfolio && (
             <SecondaryLinkButton
               href={OFFICIAL_VELADA_URL}

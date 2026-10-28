@@ -44,6 +44,7 @@ const velada1 = edition({
   overview:
     'La primera Velada abrió la puerta: tres combates, un formato que nadie había probado y más de un millón y medio de personas mirando a la vez. El punto de partida de un fenómeno que ya es historia de Twitch.',
   backdrop: '/images/veladas/Velada1.webp',
+  watchUrl: 'https://www.youtube.com/watch?v=n7Ie4zT-8zw&list=PLHCPwKwATUgCAJyQZnKN7dkpQlP9EhkYP',
   match: 96,
   badge: 'El origen',
 })
@@ -59,6 +60,7 @@ const velada2 = edition({
   overview:
     'Badalona, 12.760 personas en la grada y el récord de espectadores simultáneos de Twitch: 3,3 millones. La Velada dejó de ser un experimento y se convirtió en el evento del año.',
   backdrop: '/images/veladas/Velada2.webp',
+  watchUrl: 'https://www.youtube.com/watch?v=wbA4tWnGOp0',
   match: 98,
   badge: 'Récord',
 })
@@ -74,6 +76,7 @@ const velada3 = edition({
   overview:
     'El Metropolitano, 70.000 personas y el primer gran salto a un estadio. Coscu, Fernanfloo, Quevedo y una noche que reventó todos los registros de la plataforma.',
   backdrop: '/images/veladas/Velada3.webp',
+  watchUrl: 'https://www.youtube.com/watch?v=SUPUp2QSDDg&t=1607s',
   match: 97,
   duration: '3 h 10 min',
   badge: 'Main event',
@@ -90,6 +93,7 @@ const velada4 = edition({
   overview:
     'El Bernabéu se rindió al fenómeno: 78.297 personas, el primer combate dual y el primer Rey de la Pista. La edición que llevó La Velada al siguiente nivel.',
   backdrop: '/images/veladas/Velada4.webp',
+  watchUrl: 'https://www.youtube.com/watch?v=Y9Nrv197awA',
   match: 99,
   duration: '3 h 25 min',
   badge: 'Top 10',
@@ -106,6 +110,7 @@ const velada5 = edition({
   overview:
     'Sevilla acogió la quinta edición con La Cartuja como escenario. Otra noche de récord, otra demostración de que La Velada ya es mucho más que boxeo.',
   backdrop: '/images/veladas/Velada5.webp',
+  watchUrl: 'https://www.youtube.com/watch?v=YE2Tmktpp50',
   match: 95,
   duration: '3 h 15 min',
   badge: 'Nuevo',
@@ -122,6 +127,7 @@ const velada6 = edition({
   overview:
     'La sexta edición llega en 2026. Nuevos combates, nuevas historias y el mismo reto: sostener en directo a millones de personas sin que nada falle.',
   backdrop: '/images/veladas/Velada6.webp',
+  watchUrl: 'https://www.youtube.com/watch?v=IskkmNPJdUk',
   match: 100,
   duration: 'Por confirmar',
 })

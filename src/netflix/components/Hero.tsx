@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
@@ -20,6 +21,7 @@ export default function Hero() {
   const [muted, setMuted] = useState(true)
   const [trailerEnded, setTrailerEnded] = useState(false)
   const [needsInteraction, setNeedsInteraction] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -103,6 +105,54 @@ export default function Hero() {
     })
   }
 
+  const trailer = (
+    <Box className="netflix-hero__trailer">
+      <Box component="span" className="netflix-hero__trailer-label">
+        Tráiler
+      </Box>
+      <Box
+        component="video"
+        src={TRAILER_PATH}
+        poster={TRAILER_POSTER}
+        muted
+        playsInline
+        preload="none"
+        aria-label="Tráiler de La Velada del Código"
+        ref={trailerRef}
+        onPlay={() => setNeedsInteraction(false)}
+        onEnded={() => setTrailerEnded(true)}
+        onVolumeChange={() => setMuted(trailerRef.current?.muted ?? true)}
+      />
+
+      {muted && !trailerEnded && !needsInteraction && (
+        <Button
+          className="netflix-hero__trailer-sound"
+          onClick={enableSound}
+          startIcon={<VolumeOffIcon />}
+          size="small"
+          aria-label="Activar el sonido del tráiler"
+        >
+          Activar sonido
+        </Button>
+      )}
+
+      {(trailerEnded || needsInteraction) && (
+        <Button
+          className="netflix-hero__trailer-replay"
+          onClick={replayTrailer}
+          startIcon={<PlayArrowIcon />}
+          aria-label={
+            trailerEnded
+              ? 'Volver a reproducir el tráiler'
+              : 'Activar el sonido y reproducir el tráiler'
+          }
+        >
+          Reproducir tráiler
+        </Button>
+      )}
+    </Box>
+  )
+
   return (
     <Box component="section" id="inicio" className="netflix-hero">
       <Box className="netflix-hero__backdrop" aria-hidden="true">
@@ -116,6 +166,7 @@ export default function Hero() {
           <Stack spacing={2.4}>
             <HeroBadge />
             <HeroTitle />
+            {!isDesktop && trailer}
             <HeroMeta />
 
             <Typography
@@ -139,51 +190,7 @@ export default function Hero() {
           </Stack>
         </Box>
 
-        <Box className="netflix-hero__trailer">
-          <Box component="span" className="netflix-hero__trailer-label">
-            Tráiler
-          </Box>
-          <Box
-            component="video"
-            src={TRAILER_PATH}
-            poster={TRAILER_POSTER}
-            muted
-            playsInline
-            preload="none"
-            aria-label="Tráiler de La Velada del Código"
-            ref={trailerRef}
-            onPlay={() => setNeedsInteraction(false)}
-            onEnded={() => setTrailerEnded(true)}
-            onVolumeChange={() => setMuted(trailerRef.current?.muted ?? true)}
-          />
-
-          {muted && !trailerEnded && !needsInteraction && (
-            <Button
-              className="netflix-hero__trailer-sound"
-              onClick={enableSound}
-              startIcon={<VolumeOffIcon />}
-              size="small"
-              aria-label="Activar el sonido del tráiler"
-            >
-              Activar sonido
-            </Button>
-          )}
-
-          {(trailerEnded || needsInteraction) && (
-            <Button
-              className="netflix-hero__trailer-replay"
-              onClick={replayTrailer}
-              startIcon={<PlayArrowIcon />}
-              aria-label={
-                trailerEnded
-                  ? 'Volver a reproducir el tráiler'
-                  : 'Activar el sonido y reproducir el tráiler'
-              }
-            >
-              Reproducir tráiler
-            </Button>
-          )}
-        </Box>
+        {isDesktop && trailer}
       </Box>
     </Box>
   )

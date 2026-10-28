@@ -26,6 +26,8 @@ export default function PreviewPortal() {
 
   const { item, rect } = preview
   const { width, left, top } = getPreviewPosition(rect, window.innerWidth, window.innerHeight)
+  const watchUrl = item.kind === 'edition' ? item.watchUrl : undefined
+  const watchHref = watchUrl ?? WATCH_PATH
 
   return createPortal(
     <div
@@ -60,8 +62,10 @@ export default function PreviewPortal() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
           <IconButton
             component="a"
-            href={WATCH_PATH}
-            aria-label="Ir al portfolio"
+            href={watchHref}
+            target={watchUrl ? '_blank' : undefined}
+            rel={watchUrl ? 'noreferrer' : undefined}
+            aria-label={watchUrl ? `Ver ${item.title} en YouTube` : 'Ir al portfolio'}
             sx={{
               ...iconSx,
               bgcolor: '#ffffff',
